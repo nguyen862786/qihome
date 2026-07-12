@@ -8,7 +8,7 @@ export default function AdminDashboard() {
   const router = useRouter();
   const [profile, setProfile] = useState(null);
   const [isLive, setIsLive] = useState(false);
-  const [activeTab, setActiveTab] = useState('health'); // 'health' | 'requests' | 'vendors'
+  const [activeTab, setActiveTab] = useState('health'); // 'health' | 'requests' | 'vendors' | 'financial_report'
   
   // Dashboard real-time states
   const [financials, setFinancials] = useState({
@@ -358,22 +358,18 @@ export default function AdminDashboard() {
   if (!profile) return null;
 
   return (
-    <div className="min-h-screen text-slate-100 flex flex-col md:flex-row relative overflow-hidden bg-[#070a13]">
-      {/* Background ambient lighting glows */}
-      <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-amber-500/[0.03] rounded-full blur-[150px] pointer-events-none z-0"></div>
-      <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-indigo-500/[0.03] rounded-full blur-[150px] pointer-events-none z-0"></div>
-
+    <div className="min-h-screen text-slate-800 flex flex-col md:flex-row relative overflow-hidden bg-[#faf8f5]">
       {/* LEFT SIDEBAR PANEL (Matching the reference screenshots) */}
-      <aside className="w-full md:w-64 bg-slate-950/70 border-r border-slate-900 flex flex-col z-10 relative backdrop-blur-xl">
+      <aside className="w-full md:w-64 bg-[#14151b] border-r border-[#262832] flex flex-col z-10 relative">
         {/* Brand Header Logo */}
-        <div className="p-6 border-b border-slate-900 flex items-center space-x-3">
-          <span className="font-bold text-2xl tracking-wider text-amber-500 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-xl">Qi</span>
+        <div className="p-6 border-b border-[#262832] flex items-center space-x-3">
+          <span className="font-bold text-2xl tracking-wider text-[#c49a62] bg-[#c49a62]/10 border border-[#c49a62]/20 px-2 py-0.5 rounded-xl">Qi</span>
           <span className="font-bold text-base text-white tracking-tight">QiHome.vn</span>
         </div>
 
         {/* User profile section */}
-        <div className="px-6 py-6 border-b border-slate-900 flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center font-bold text-amber-500 text-sm">
+        <div className="px-6 py-6 border-b border-[#262832] flex items-center space-x-3 text-white">
+          <div className="w-10 h-10 rounded-full bg-[#c49a62]/20 border border-[#c49a62]/40 flex items-center justify-center font-bold text-[#c49a62] text-sm">
             QD
           </div>
           <div>
@@ -384,7 +380,7 @@ export default function AdminDashboard() {
 
         {/* Stacked Vertical Menu Navigation */}
         <nav className="flex-1 px-4 py-6 space-y-2.5">
-          <div className="text-[10px] uppercase font-bold text-slate-600 px-3 mb-2 tracking-wider">
+          <div className="text-[10px] uppercase font-bold text-slate-500 px-3 mb-2 tracking-wider">
             Quản trị & Giám sát
           </div>
           
@@ -392,8 +388,8 @@ export default function AdminDashboard() {
             onClick={() => setActiveTab('health')}
             className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-bold transition duration-200 ${
               activeTab === 'health' 
-                ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/10 gold-glow' 
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/50'
+                ? 'bg-[#c49a62] text-white shadow-lg shadow-[#c49a62]/20' 
+                : 'text-slate-400 hover:text-white hover:bg-slate-900/40'
             }`}
           >
             <span>🚦</span>
@@ -404,15 +400,15 @@ export default function AdminDashboard() {
             onClick={() => setActiveTab('requests')}
             className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-bold transition duration-200 ${
               activeTab === 'requests' 
-                ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/10 gold-glow' 
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/50'
+                ? 'bg-[#c49a62] text-white shadow-lg shadow-[#c49a62]/20' 
+                : 'text-slate-400 hover:text-white hover:bg-slate-900/40'
             }`}
           >
             <span>🔔</span>
             <span className="flex-1 text-left">Đơn Cần Duyệt</span>
             {overBudgetRequests.length > 0 && (
               <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-black ${
-                activeTab === 'requests' ? 'bg-slate-950 text-amber-500' : 'bg-red-500/20 text-red-400'
+                activeTab === 'requests' ? 'bg-[#14151b] text-[#c49a62]' : 'bg-red-500/20 text-red-400'
               }`}>
                 {overBudgetRequests.length}
               </span>
@@ -423,15 +419,15 @@ export default function AdminDashboard() {
             onClick={() => setActiveTab('vendors')}
             className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-bold transition duration-200 ${
               activeTab === 'vendors' 
-                ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/10 gold-glow' 
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/50'
+                ? 'bg-[#c49a62] text-white shadow-lg shadow-[#c49a62]/20' 
+                : 'text-slate-400 hover:text-white hover:bg-slate-900/40'
             }`}
           >
             <span>🏆</span>
             <span>Đánh Giá Đối Tác</span>
           </button>
 
-          <div className="pt-4 text-[10px] uppercase font-bold text-slate-600 px-3 mb-2 tracking-wider">
+          <div className="pt-4 text-[10px] uppercase font-bold text-slate-500 px-3 mb-2 tracking-wider">
             Báo cáo hệ thống
           </div>
 
@@ -439,8 +435,8 @@ export default function AdminDashboard() {
             onClick={() => setActiveTab('financial_report')}
             className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-bold transition duration-200 ${
               activeTab === 'financial_report' 
-                ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/10 gold-glow' 
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/50'
+                ? 'bg-[#c49a62] text-white shadow-lg shadow-[#c49a62]/20' 
+                : 'text-slate-400 hover:text-white hover:bg-slate-900/40'
             }`}
           >
             <span>📊</span>
@@ -449,10 +445,10 @@ export default function AdminDashboard() {
         </nav>
 
         {/* Logout / Exit at Bottom */}
-        <div className="p-4 border-t border-slate-900">
+        <div className="p-4 border-t border-[#262832]">
           <button
             onClick={() => router.push('/')}
-            className="w-full bg-slate-900/40 hover:bg-slate-900 border border-slate-800 rounded-xl py-2.5 text-xs font-bold text-slate-400 hover:text-white transition flex items-center justify-center space-x-2"
+            className="w-full bg-[#1c1d25] hover:bg-slate-900 border border-slate-800 rounded-xl py-2.5 text-xs font-bold text-slate-400 hover:text-white transition flex items-center justify-center space-x-2"
           >
             <span>Quay lại Storefront</span>
           </button>
@@ -462,27 +458,27 @@ export default function AdminDashboard() {
       {/* RIGHT CONTENT AREA */}
       <div className="flex-1 flex flex-col min-h-screen overflow-y-auto z-10 relative">
         {/* Top Header Search & Notifications bar */}
-        <header className="h-16 border-b border-slate-900 bg-slate-950/20 px-8 flex justify-between items-center backdrop-blur-xl sticky top-0 z-20">
-          {/* Mock Search input matching the reference screenshots */}
+        <header className="h-16 border-b border-[#ebdcb9] bg-white px-8 flex justify-between items-center sticky top-0 z-20">
+          {/* Search input matching reference */}
           <div className="relative w-80 hidden md:block">
-            <span className="absolute left-3 top-2.5 text-slate-500 text-xs">🔍</span>
+            <span className="absolute left-3 top-2.5 text-slate-400 text-xs">🔍</span>
             <input
               type="text"
               placeholder="Search projects, clients..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-slate-900/50 border border-slate-800 rounded-xl pl-9 pr-4 py-1.5 text-xs text-slate-300 placeholder-slate-600 focus:outline-none focus:border-amber-500"
+              className="w-full bg-[#faf8f5] border border-[#ebdcb9] rounded-xl pl-9 pr-4 py-1.5 text-xs text-slate-850 placeholder-slate-400 focus:outline-none focus:border-[#c49a62]"
             />
           </div>
 
           <div className="flex items-center space-x-4">
-            <span className="text-[10px] font-bold text-slate-500 uppercase flex items-center space-x-1.5 px-2.5 py-1 bg-slate-900 border border-slate-800 rounded-lg">
+            <span className="text-[10px] font-bold text-slate-500 uppercase flex items-center space-x-1.5 px-2.5 py-1 bg-[#faf8f5] border border-[#ebdcb9] rounded-lg">
               <span className={`w-2 h-2 rounded-full ${isLive ? 'bg-emerald-500 shadow-[0_0_8px_#10b981]' : 'bg-amber-500 animate-pulse'}`}></span>
               <span>{isLive ? 'Live DB Connection' : 'Sandbox Cache Mode'}</span>
             </span>
 
-            <div className="relative cursor-pointer">
-              <span className="text-slate-400 hover:text-white transition">🔔</span>
+            <div className="relative cursor-pointer text-slate-500">
+              <span className="hover:text-[#c49a62] transition">🔔</span>
               {overBudgetRequests.length > 0 && (
                 <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[8px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
                   {overBudgetRequests.length}
@@ -490,53 +486,51 @@ export default function AdminDashboard() {
               )}
             </div>
 
-            <div className="w-px h-6 bg-slate-900"></div>
+            <div className="w-px h-6 bg-[#ebdcb9]"></div>
 
-            <div className="flex items-center space-x-2 text-xs">
-              <span className="text-slate-400 font-medium">Nguyễn Duy Quang</span>
-              <span className="text-[9px] uppercase px-1.5 py-0.5 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded font-black">Admin</span>
+            <div className="flex items-center space-x-2 text-xs text-slate-700">
+              <span className="font-bold">Nguyễn Duy Quang</span>
+              <span className="text-[9px] uppercase px-1.5 py-0.5 bg-[#c49a62]/10 text-[#c49a62] border border-[#c49a62]/20 rounded font-black">Admin</span>
             </div>
           </div>
         </header>
 
         {/* Content Body */}
         <main className="p-8 space-y-6 flex-1">
-          {/* Welcome Dashboard Banner */}
-          <div className="bg-gradient-to-r from-amber-600/10 via-indigo-600/5 to-transparent border border-amber-500/10 rounded-3xl p-6 relative overflow-hidden shadow-2xl">
+          {/* Welcome Dashboard Banner - Gold background matching screen */}
+          <div className="bg-[#c49a62] text-white rounded-3xl p-6 relative overflow-hidden shadow-md flex justify-between items-center">
             <div className="relative z-10 space-y-1">
-              <h2 className="text-lg font-black text-white">Chào mừng trở lại, Chủ tịch Nguyễn Duy Quang</h2>
-              <p className="text-xs text-slate-400 leading-relaxed max-w-xl">
+              <h2 className="text-xl font-bold text-white">Welcome back, Nguyễn Duy Quang!</h2>
+              <p className="text-xs text-white/80 leading-relaxed max-w-xl">
                 Hệ thống số hóa QiHome.vn đang vận hành ổn định. Dưới đây là phân tích hiệu suất tổng quát của các công trình và nhà cung cấp.
               </p>
             </div>
-            <div className="absolute right-6 top-4 text-6xl font-black text-amber-500/[0.03] select-none pointer-events-none tracking-wider">
+            <div className="absolute right-6 top-4 text-7xl font-black text-white/5 select-none pointer-events-none tracking-wider">
               QI PRIME
             </div>
           </div>
 
           {/* KPI Financial Cards (Arranged dynamically on top) */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="glass-panel gold-glow rounded-2xl p-5 shadow-2xl relative overflow-hidden group hover:border-amber-500/30 transition duration-300">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Doanh thu lũy kế</div>
-              <div className="text-xl font-black mt-2 gold-text-gradient">{financials.totalRevenue.toLocaleString('vi-VN')}đ</div>
-              <div className="text-[9px] text-emerald-400 mt-1 flex items-center space-x-1">
-                <span>✓</span> <span>Hợp đồng ba bên</span>
-              </div>
+            <div className="bg-white border border-[#ebdcb9] rounded-2xl p-5 shadow-sm relative overflow-hidden group hover:border-[#c49a62]/60 transition duration-300">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Doanh thu lũy kế</div>
+              <div className="text-xl font-black mt-2 text-[#c49a62]">{financials.totalRevenue.toLocaleString('vi-VN')}đ</div>
+              <div className="text-[9px] text-[#c49a62] font-semibold mt-1">✓ Hợp đồng ba bên</div>
             </div>
-            <div className="glass-panel rounded-2xl p-5 shadow-2xl relative overflow-hidden group hover:border-amber-500/30 transition duration-300">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Vin tài trợ 6%</div>
-              <div className="text-xl font-black text-amber-500 mt-2">{financials.vinSubsidy.toLocaleString('vi-VN')}đ</div>
+            <div className="bg-white border border-[#ebdcb9] rounded-2xl p-5 shadow-sm relative overflow-hidden group hover:border-[#c49a62]/60 transition duration-300">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Vin tài trợ 6%</div>
+              <div className="text-xl font-black text-[#c49a62] mt-2">{financials.vinSubsidy.toLocaleString('vi-VN')}đ</div>
               <div className="text-[9px] text-slate-500 mt-1">Đã đối soát Vin Accounting</div>
             </div>
-            <div className="glass-panel rounded-2xl p-5 shadow-2xl relative overflow-hidden group hover:border-amber-500/30 transition duration-300">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Giải ngân TCB</div>
-              <div className="text-xl font-black text-blue-400 mt-2">{financials.bankDisbursed.toLocaleString('vi-VN')}đ</div>
+            <div className="bg-white border border-[#ebdcb9] rounded-2xl p-5 shadow-sm relative overflow-hidden group hover:border-[#c49a62]/60 transition duration-300">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Giải ngân TCB</div>
+              <div className="text-xl font-black text-[#c49a62] mt-2">{financials.bankDisbursed.toLocaleString('vi-VN')}đ</div>
               <div className="text-[9px] text-slate-500 mt-1">Tín chấp bảo lãnh dự án</div>
             </div>
-            <div className="glass-panel rounded-2xl p-5 shadow-2xl relative overflow-hidden group hover:border-amber-500/30 transition duration-300">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Lợi nhuận gộp</div>
-              <div className="text-xl font-black text-emerald-400 mt-2">{financials.profitGross.toLocaleString('vi-VN')}đ</div>
-              <div className="text-[9px] text-emerald-500/80 mt-1">Biên định mức 15%</div>
+            <div className="bg-white border border-[#ebdcb9] rounded-2xl p-5 shadow-sm relative overflow-hidden group hover:border-[#c49a62]/60 transition duration-300">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Lợi nhuận gộp</div>
+              <div className="text-xl font-black text-[#c49a62] mt-2">{financials.profitGross.toLocaleString('vi-VN')}đ</div>
+              <div className="text-[9px] text-slate-500 mt-1">Biên định mức 15%</div>
             </div>
           </div>
 
@@ -560,11 +554,11 @@ export default function AdminDashboard() {
                     });
 
                     return (
-                      <div className="glass-panel rounded-2xl p-6 space-y-5 shadow-2xl">
-                        <h3 className="text-sm font-bold text-white tracking-tight border-b border-slate-900 pb-3">🚦 Báo Cáo Sức Khỏe Dự Án (Global Project Health)</h3>
+                      <div className="bg-white border border-[#ebdcb9] rounded-2xl p-6 space-y-5 shadow-sm text-slate-800">
+                        <h3 className="text-sm font-bold text-slate-900 tracking-tight border-b border-slate-100 pb-3">🚦 Báo Cáo Sức Khỏe Dự Án (Global Project Health)</h3>
                         
                         {/* Search & Filters Row */}
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-3 bg-slate-950/20 p-3 rounded-xl border border-slate-900 text-xs">
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-3 bg-[#faf8f5] p-3 rounded-xl border border-[#ebdcb9] text-xs">
                           <div className="space-y-1">
                             <label className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Tìm kiếm dự án / khách</label>
                             <input
@@ -572,7 +566,7 @@ export default function AdminDashboard() {
                               placeholder="Tên khách, mã..."
                               value={searchQuery}
                               onChange={(e) => setSearchQuery(e.target.value)}
-                              className="w-full bg-slate-950 border border-slate-850 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-amber-500"
+                              className="w-full bg-white border border-[#ebdcb9] rounded-lg px-2.5 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#c49a62]"
                             />
                           </div>
 
@@ -581,7 +575,7 @@ export default function AdminDashboard() {
                             <select
                               value={filterVinhomes}
                               onChange={(e) => setFilterVinhomes(e.target.value)}
-                              className="w-full bg-slate-950 border border-slate-850 rounded-lg px-2 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500"
+                              className="w-full bg-white border border-[#ebdcb9] rounded-lg px-2 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-[#c49a62]"
                             >
                               <option value="All">Tất cả dự án</option>
                               <option value="Vinhomes Hậu Nghĩa">Vinhomes Hậu Nghĩa</option>
@@ -595,7 +589,7 @@ export default function AdminDashboard() {
                             <select
                               value={filterStage}
                               onChange={(e) => setFilterStage(e.target.value)}
-                              className="w-full bg-slate-950 border border-slate-850 rounded-lg px-2 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500"
+                              className="w-full bg-white border border-[#ebdcb9] rounded-lg px-2 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-[#c49a62]"
                             >
                               <option value="All">Tất cả giai đoạn</option>
                               <option value="pending_design">Concept phối cảnh AI</option>
@@ -610,7 +604,7 @@ export default function AdminDashboard() {
                             <select
                               value={filterType}
                               onChange={(e) => setFilterType(e.target.value)}
-                              className="w-full bg-slate-950 border border-slate-850 rounded-lg px-2 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500"
+                              className="w-full bg-white border border-[#ebdcb9] rounded-lg px-2 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-[#c49a62]"
                             >
                               <option value="All">Tất cả loại hình</option>
                               <option value="Chung cư">Chung cư</option>
@@ -620,9 +614,9 @@ export default function AdminDashboard() {
                           </div>
                         </div>
 
-                        <div className="divide-y divide-slate-900 space-y-4 max-h-[500px] overflow-y-auto pr-1">
+                        <div className="divide-y divide-slate-100 space-y-4 max-h-[500px] overflow-y-auto pr-1">
                           {filteredProjects.length === 0 ? (
-                            <div className="text-center text-xs text-slate-500 py-6">
+                            <div className="text-center text-xs text-slate-400 py-6">
                               Không tìm thấy dự án nào khớp với bộ lọc.
                             </div>
                           ) : (
@@ -632,25 +626,25 @@ export default function AdminDashboard() {
                                   <div className="flex items-center space-x-2 flex-wrap gap-y-1">
                                     <span className={`w-2.5 h-2.5 rounded-full ${
                                       proj.alert === 'green' ? 'bg-emerald-500' : proj.alert === 'yellow' ? 'bg-amber-500' : 'bg-red-500'
-                                    } shadow-[0_0_8px_rgba(16,185,129,0.4)]`}></span>
-                                    <strong className="text-xs text-white">{proj.code}</strong>
+                                    }`}></span>
+                                    <strong className="text-xs text-slate-900">{proj.code}</strong>
                                     <span className="text-[10px] text-slate-500 mr-2">Khách hàng: {proj.client}</span>
-                                    <span className="text-[9px] uppercase px-1.5 py-0.5 bg-slate-900 border border-slate-800 rounded font-semibold text-slate-400">
+                                    <span className="text-[9px] uppercase px-1.5 py-0.5 bg-slate-5 border border-slate-200 rounded font-semibold text-slate-600">
                                       {proj.vinhomes}
                                     </span>
-                                    <span className="text-[9px] uppercase px-1.5 py-0.5 bg-amber-500/10 border border-amber-500/20 rounded font-bold text-amber-500">
+                                    <span className="text-[9px] uppercase px-1.5 py-0.5 bg-[#c49a62]/10 border border-[#c49a62]/20 rounded font-bold text-[#c49a62]">
                                       {proj.type}
                                     </span>
                                   </div>
-                                  <p className="text-xs text-slate-400">{proj.desc}</p>
+                                  <p className="text-xs text-slate-500">{proj.desc}</p>
                                 </div>
 
                                 <div className="flex items-center space-x-4">
-                                  <div className="w-24 bg-slate-950 border border-slate-900 h-2 rounded-full overflow-hidden">
-                                    <div className="bg-gradient-to-r from-amber-500 to-amber-300 h-full rounded-full shadow-[0_0_8px_rgba(245,158,11,0.5)]" style={{ width: `${proj.progress}%` }}></div>
+                                  <div className="w-24 bg-slate-150 border border-slate-200 h-2 rounded-full overflow-hidden">
+                                    <div className="bg-[#c49a62] h-full rounded-full" style={{ width: `${proj.progress}%` }}></div>
                                   </div>
-                                  <span className="text-[10px] font-mono text-slate-300 font-bold">{proj.progress}%</span>
-                                  <span className="text-[9px] font-bold uppercase px-2 py-0.5 bg-slate-900 text-slate-400 border border-slate-800 rounded">
+                                  <span className="text-[10px] font-mono text-slate-600 font-bold">{proj.progress}%</span>
+                                  <span className="text-[9px] font-bold uppercase px-2 py-0.5 bg-slate-50 border border-slate-200 text-slate-600 rounded">
                                     {proj.status}
                                   </span>
                                 </div>
@@ -663,36 +657,36 @@ export default function AdminDashboard() {
                   })()}
                 </div>
 
-                {/* Right part: Vendor Scorecard ranking (col-span-4) */}
+                {/* Right part: Vendor Scorecard ranking (Matching the warm activity card layout - col-span-4) */}
                 <div className="lg:col-span-4">
-                  <div className="glass-panel gold-glow rounded-2xl p-6 space-y-4 shadow-2xl">
-                    <h3 className="text-sm font-bold text-white tracking-tight border-b border-slate-900 pb-3">🏆 Bảng Xếp Hạng Đối Tác</h3>
+                  <div className="bg-[#f4ebd9] border border-[#e2d5c3] rounded-2xl p-6 space-y-4 shadow-sm text-slate-800">
+                    <h3 className="text-sm font-bold text-slate-900 tracking-tight border-b border-[#e2d5c3] pb-3">🏆 Bảng Xếp Hạng Đối Tác</h3>
                     
                     <div className="space-y-4">
                       {scorecards.map((vendor, idx) => (
-                        <div key={idx} className="bg-slate-950/40 border border-slate-900 rounded-xl p-4 space-y-2 hover:border-amber-500/20 transition duration-300">
+                        <div key={idx} className="bg-white border border-[#e9e3d5] rounded-xl p-4 space-y-2 hover:border-[#c49a62]/50 transition duration-300">
                           <div className="flex justify-between items-start">
                             <div>
-                              <div className="text-xs font-bold text-slate-200">{vendor.name}</div>
+                              <div className="text-xs font-bold text-slate-900">{vendor.name}</div>
                               <div className="text-[10px] text-slate-500 mt-0.5">{vendor.type}</div>
                             </div>
-                            <span className="text-[10px] font-bold px-2 py-0.5 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded">
+                            <span className="text-[10px] font-bold px-2 py-0.5 bg-[#c49a62]/10 text-[#c49a62] border border-[#c49a62]/20 rounded">
                               {vendor.rating}
                             </span>
                           </div>
 
-                          <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-900 text-center">
+                          <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 text-center">
                             <div>
-                              <div className="text-[9px] text-slate-500">Chất lượng</div>
-                              <div className="text-xs font-bold text-white mt-0.5">{vendor.score}</div>
+                              <div className="text-[9px] text-slate-400">Chất lượng</div>
+                              <div className="text-xs font-bold text-[#c49a62] mt-0.5">{vendor.score}</div>
                             </div>
                             <div>
-                              <div className="text-[9px] text-slate-500">Tiến độ</div>
-                              <div className="text-xs font-bold text-white mt-0.5">{vendor.speed}</div>
+                              <div className="text-[9px] text-slate-400">Tiến độ</div>
+                              <div className="text-xs font-bold text-slate-800 mt-0.5">{vendor.speed}</div>
                             </div>
                             <div>
-                              <div className="text-[9px] text-slate-500">Rework</div>
-                              <div className="text-xs font-bold text-red-400 mt-0.5">{vendor.reworks}</div>
+                              <div className="text-[9px] text-slate-400">Rework</div>
+                              <div className="text-xs font-bold text-red-500 mt-0.5">{vendor.reworks}</div>
                             </div>
                           </div>
                         </div>
@@ -707,40 +701,40 @@ export default function AdminDashboard() {
             {activeTab === 'requests' && (
               <>
                 <div className="lg:col-span-8">
-                  <div className="glass-panel rounded-2xl p-6 space-y-4 shadow-2xl">
-                    <h3 className="text-sm font-bold text-white tracking-tight flex items-center justify-between border-b border-slate-900 pb-3">
+                  <div className="bg-white border border-[#ebdcb9] rounded-2xl p-6 space-y-4 shadow-sm text-slate-800">
+                    <h3 className="text-sm font-bold text-slate-900 tracking-tight flex items-center justify-between border-b border-slate-100 pb-3">
                       <span>🔔 Phê Duyệt Phát Sinh Ngoài Định Mức</span>
-                      <span className="text-xs font-medium px-2.5 py-0.5 bg-red-500/10 text-red-400 border border-red-500/20 rounded-full">
+                      <span className="text-xs font-medium px-2.5 py-0.5 bg-red-500/10 text-red-600 border border-red-500/20 rounded-full">
                         {overBudgetRequests.length} Đơn chờ duyệt
                       </span>
                     </h3>
 
                     {overBudgetRequests.length === 0 ? (
-                      <div className="text-center text-xs text-slate-500 py-6">
+                      <div className="text-center text-xs text-slate-400 py-6">
                         Không có yêu cầu vượt định mức nào đang chờ duyệt.
                       </div>
                     ) : (
                       <div className="space-y-4">
                         {overBudgetRequests.map((req) => (
-                          <div key={req.id} className="bg-slate-950/40 border border-slate-900 rounded-xl p-4 space-y-3">
+                          <div key={req.id} className="bg-[#faf8f5] border border-[#ebdcb9] rounded-xl p-4 space-y-3">
                             <div className="flex justify-between items-start">
                               <div>
-                                <div className="text-xs font-bold text-slate-200">{req.projectCode} - {req.contractor}</div>
+                                <div className="text-xs font-bold text-slate-900">{req.projectCode} - {req.contractor}</div>
                                 <div className="text-[10px] text-slate-500 mt-0.5">
-                                  Yêu cầu cấp thêm: <strong className="text-slate-300">{req.qty} đơn vị</strong> ({req.item})
+                                  Yêu cầu cấp thêm: <strong className="text-slate-700">{req.qty} đơn vị</strong> ({req.item})
                                 </div>
                               </div>
-                              <span className="text-[9px] uppercase font-bold tracking-wide px-2 py-0.5 bg-red-500/10 text-red-400 border border-red-500/20 rounded">
+                              <span className="text-[9px] uppercase font-bold tracking-wide px-2 py-0.5 bg-red-500/10 text-red-600 border border-red-500/20 rounded">
                                 Vượt BOM
                               </span>
                             </div>
                             
-                            <div className="text-xs bg-slate-950/60 p-2.5 rounded border border-slate-900 text-slate-400 leading-relaxed">
+                            <div className="text-xs bg-white p-2.5 rounded border border-[#ebdcb9] text-slate-600 leading-relaxed">
                               📝 {req.reason}
                             </div>
 
                             {req.image && (
-                              <div className="text-[10px] text-amber-500 font-semibold underline cursor-pointer">
+                              <div className="text-[10px] text-[#c49a62] font-semibold underline cursor-pointer">
                                 🔍 Xem ảnh bằng chứng lỗi hỏng
                               </div>
                             )}
@@ -749,14 +743,14 @@ export default function AdminDashboard() {
                               <button
                                 disabled={loading}
                                 onClick={() => handleApproveRequest(req.id, false)}
-                                className="bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 text-xs px-3.5 py-1.5 rounded-lg transition"
+                                className="bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 text-xs px-3.5 py-1.5 rounded-lg transition"
                               >
                                 Từ chối
                               </button>
                               <button
                                 disabled={loading}
                                 onClick={() => handleApproveRequest(req.id, true)}
-                                className="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs px-4 py-1.5 rounded-lg font-bold transition shadow-md shadow-amber-500/10"
+                                className="bg-[#c49a62] hover:bg-[#b08752] text-white text-xs px-4 py-1.5 rounded-lg font-bold transition shadow-sm"
                               >
                                 ✓ Duyệt Cấp Phát
                               </button>
@@ -769,12 +763,12 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="lg:col-span-4">
-                  <div className="glass-panel rounded-2xl p-6 space-y-4 shadow-2xl text-xs">
-                    <h3 className="text-sm font-bold text-white tracking-tight border-b border-slate-900 pb-3">ℹ Quyền Phê Duyệt</h3>
-                    <p className="text-slate-400 leading-relaxed">
+                  <div className="bg-[#f4ebd9] border border-[#e2d5c3] rounded-2xl p-6 space-y-4 shadow-sm text-xs text-slate-800">
+                    <h3 className="text-sm font-bold text-slate-900 border-b border-[#e2d5c3] pb-3">ℹ Quyền Phê Duyệt</h3>
+                    <p className="text-slate-600 leading-relaxed">
                       Để hạn chế thất thoát vật tư, mọi yêu cầu vượt định mức của thầu phụ hoặc thợ thi công đều phải được trình lên Chủ tịch kiểm duyệt.
                     </p>
-                    <div className="p-3 bg-amber-500/5 border border-amber-500/10 text-amber-500/90 rounded-xl space-y-1 mt-2">
+                    <div className="p-3 bg-[#c49a62]/10 border border-[#c49a62]/20 text-[#c49a62] rounded-xl space-y-1 mt-2">
                       <strong>Lưu ý:</strong> Vui lòng kiểm tra kỹ hình ảnh hiện trạng thợ gửi lên trước khi đồng ý giải ngân xuất vật tư bổ sung.
                     </div>
                   </div>
@@ -787,11 +781,11 @@ export default function AdminDashboard() {
               <>
                 <div className="lg:col-span-8 space-y-6">
                   {/* Interactive Evaluation Form */}
-                  <div className="glass-panel rounded-2xl p-6 space-y-4 shadow-2xl">
-                    <h3 className="text-sm font-bold text-white tracking-tight border-b border-slate-900 pb-3">📝 Biểu Mẫu Đánh Giá Năng Lực Đối Tác</h3>
+                  <div className="bg-white border border-[#ebdcb9] rounded-2xl p-6 space-y-4 shadow-sm text-slate-800">
+                    <h3 className="text-sm font-bold text-slate-900 border-b border-slate-100 pb-3">📝 Biểu Mẫu Đánh Giá Năng Lực Đối Tác</h3>
                     
                     {formSuccess && (
-                      <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs p-3.5 rounded-xl">
+                      <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 text-xs p-3.5 rounded-xl">
                         {formSuccess}
                       </div>
                     )}
@@ -802,7 +796,7 @@ export default function AdminDashboard() {
                         <select
                           value={selectedSubId}
                           onChange={(e) => setSelectedSubId(e.target.value)}
-                          className="w-full bg-slate-950 border border-slate-850 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500"
+                          className="w-full bg-white border border-[#ebdcb9] rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-[#c49a62]"
                         >
                           {subcontractorsList.map(sub => (
                             <option key={sub.id} value={sub.id}>{sub.full_name}</option>
@@ -817,7 +811,7 @@ export default function AdminDashboard() {
                           min="0"
                           value={formReworks}
                           onChange={(e) => setFormReworks(e.target.value)}
-                          className="w-full bg-slate-950 border border-slate-850 rounded-xl px-3 py-1.5 text-xs text-slate-205 focus:outline-none focus:border-amber-500"
+                          className="w-full bg-white border border-[#ebdcb9] rounded-xl px-3 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-[#c49a62]"
                         />
                       </div>
 
@@ -830,7 +824,7 @@ export default function AdminDashboard() {
                           max="10"
                           value={formQuality}
                           onChange={(e) => setFormQuality(Number(e.target.value))}
-                          className="w-full bg-slate-950 border border-slate-850 rounded-xl px-3 py-1.5 text-xs text-slate-205 focus:outline-none focus:border-amber-500"
+                          className="w-full bg-white border border-[#ebdcb9] rounded-xl px-3 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-[#c49a62]"
                         />
                       </div>
 
@@ -843,7 +837,7 @@ export default function AdminDashboard() {
                           max="10"
                           value={formSpeed}
                           onChange={(e) => setFormSpeed(Number(e.target.value))}
-                          className="w-full bg-slate-950 border border-slate-850 rounded-xl px-3 py-1.5 text-xs text-slate-205 focus:outline-none focus:border-amber-500"
+                          className="w-full bg-white border border-[#ebdcb9] rounded-xl px-3 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-[#c49a62]"
                         />
                       </div>
 
@@ -855,7 +849,7 @@ export default function AdminDashboard() {
                           value={formNotes}
                           onChange={(e) => setFormNotes(e.target.value)}
                           placeholder="Nhận xét chi tiết về tác phong công nghiệp, chất lượng gỗ, sơn bả của nhà thầu..."
-                          className="w-full bg-slate-950 border border-slate-850 rounded-xl p-3 text-xs text-slate-205 placeholder-slate-600 focus:outline-none focus:border-amber-500"
+                          className="w-full bg-white border border-[#ebdcb9] rounded-xl p-3 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#c49a62]"
                         ></textarea>
                       </div>
 
@@ -863,7 +857,7 @@ export default function AdminDashboard() {
                         <button
                           type="submit"
                           disabled={loading}
-                          className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-6 py-2.5 rounded-xl transition text-xs shadow-lg shadow-amber-500/10"
+                          className="bg-[#c49a62] hover:bg-[#b08752] text-white font-bold px-6 py-2.5 rounded-xl transition text-xs shadow-sm"
                         >
                           {loading ? 'Đang gửi...' : 'Gửi Đánh Giá KPI'}
                         </button>
@@ -874,18 +868,18 @@ export default function AdminDashboard() {
 
                 <div className="lg:col-span-4">
                   {/* Historical Evaluations Table */}
-                  <div className="glass-panel rounded-2xl p-6 space-y-4 shadow-2xl">
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-slate-900 pb-3">Nhật ký đánh giá năng lực</h3>
+                  <div className="bg-white border border-[#ebdcb9] rounded-2xl p-6 space-y-4 shadow-sm text-slate-850">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 border-b border-slate-100 pb-3">Nhật ký đánh giá năng lực</h3>
                     <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1">
                       {scorecards.map((vendor, idx) => (
-                        <div key={idx} className="bg-slate-950/30 border border-slate-900 p-3 rounded-xl text-xs space-y-2">
+                        <div key={idx} className="bg-[#faf8f5] border border-[#ebdcb9] p-3 rounded-xl text-xs space-y-2">
                           <div className="flex justify-between items-center">
-                            <span className="font-bold text-slate-200">{vendor.name}</span>
-                            <span className="text-[10px] bg-slate-900 border border-slate-800 px-2 py-0.5 rounded text-amber-500 font-bold">
+                            <span className="font-bold text-slate-800">{vendor.name}</span>
+                            <span className="text-[10px] bg-[#c49a62]/10 border border-[#c49a62]/20 px-2 py-0.5 rounded text-[#c49a62] font-bold">
                               {vendor.rating}
                             </span>
                           </div>
-                          <p className="text-slate-400 italic">" {vendor.notes} "</p>
+                          <p className="text-slate-500 italic">" {vendor.notes} "</p>
                         </div>
                       ))}
                     </div>
@@ -894,17 +888,17 @@ export default function AdminDashboard() {
               </>
             )}
 
-            {/* NEW TAB: Tab 4: Financial Report (Arranging details on right matching layout) */}
+            {/* Tab 4: Financial Report */}
             {activeTab === 'financial_report' && (
               <>
                 <div className="lg:col-span-8">
-                  <div className="glass-panel rounded-2xl p-6 space-y-4 shadow-2xl">
-                    <h3 className="text-sm font-bold text-white tracking-tight border-b border-slate-900 pb-3">📊 Báo Cáo Doanh Thu Chi Tiết Dự Án</h3>
+                  <div className="bg-white border border-[#ebdcb9] rounded-2xl p-6 space-y-4 shadow-sm text-slate-800">
+                    <h3 className="text-sm font-bold text-slate-900 tracking-tight border-b border-slate-100 pb-3">📊 Báo Cáo Doanh Thu Chi Tiết Dự Án</h3>
                     
                     <div className="overflow-x-auto">
                       <table className="w-full text-xs text-left border-collapse">
                         <thead>
-                          <tr className="border-b border-slate-900 text-slate-500 font-semibold uppercase">
+                          <tr className="border-b border-[#ebdcb9] text-slate-500 font-semibold uppercase">
                             <th className="py-3 px-2">Dự Án</th>
                             <th className="py-3 px-2">Khách Hàng</th>
                             <th className="py-3 px-2">Giá Trị HĐ</th>
@@ -913,7 +907,7 @@ export default function AdminDashboard() {
                             <th className="py-3 px-2">LN Định Mức</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-900">
+                        <tbody className="divide-y divide-slate-100">
                           {projectHealth.map((proj, idx) => {
                             const contractVal = proj.code.includes('HAUNGHIA-101') ? 500000000 : 
                                                proj.code.includes('HAUNGHIA-102') ? 450000000 : 
@@ -923,13 +917,13 @@ export default function AdminDashboard() {
                             const profit15 = contractVal * 0.15;
                             
                             return (
-                              <tr key={idx} className="hover:bg-slate-900/10">
-                                <td className="py-3 px-2 font-mono font-bold text-white">{proj.code}</td>
-                                <td className="py-3 px-2 text-slate-300">{proj.client}</td>
-                                <td className="py-3 px-2 text-amber-500 font-bold">{contractVal.toLocaleString('vi-VN')}đ</td>
-                                <td className="py-3 px-2 text-slate-400">{vin6.toLocaleString('vi-VN')}đ</td>
-                                <td className="py-3 px-2 text-blue-400">{tcbVal.toLocaleString('vi-VN')}đ</td>
-                                <td className="py-3 px-2 text-emerald-400">{profit15.toLocaleString('vi-VN')}đ</td>
+                              <tr key={idx} className="hover:bg-slate-50">
+                                <td className="py-3 px-2 font-mono font-bold text-slate-900">{proj.code}</td>
+                                <td className="py-3 px-2 text-slate-700">{proj.client}</td>
+                                <td className="py-3 px-2 text-[#c49a62] font-bold">{contractVal.toLocaleString('vi-VN')}đ</td>
+                                <td className="py-3 px-2 text-slate-500">{vin6.toLocaleString('vi-VN')}đ</td>
+                                <td className="py-3 px-2 text-blue-500">{tcbVal.toLocaleString('vi-VN')}đ</td>
+                                <td className="py-3 px-2 text-emerald-600">{profit15.toLocaleString('vi-VN')}đ</td>
                               </tr>
                             );
                           })}
@@ -940,36 +934,36 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="lg:col-span-4">
-                  <div className="glass-panel gold-glow rounded-2xl p-6 space-y-4 shadow-2xl text-xs">
-                    <h3 className="text-sm font-bold text-white tracking-tight border-b border-slate-900 pb-3">📈 Cơ Cấu Dòng Tiền Dự Án</h3>
+                  <div className="bg-[#f4ebd9] border border-[#e2d5c3] rounded-2xl p-6 space-y-4 shadow-sm text-xs text-slate-800">
+                    <h3 className="text-sm font-bold text-slate-900 border-b border-[#e2d5c3] pb-3">📈 Cơ Cấu Dòng Tiền Dự Án</h3>
                     <div className="space-y-3.5">
                       <div className="space-y-1">
-                        <div className="flex justify-between text-slate-400 text-[10px]">
+                        <div className="flex justify-between text-slate-600 text-[10px]">
                           <span>Tiền Cọc Thu Cư Dân (30%):</span>
-                          <span className="text-white font-bold">{(financials.totalRevenue * 0.3).toLocaleString('vi-VN')}đ</span>
+                          <span className="text-slate-900 font-bold">{(financials.totalRevenue * 0.3).toLocaleString('vi-VN')}đ</span>
                         </div>
-                        <div className="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden">
-                          <div className="bg-amber-500 h-full w-[30%]"></div>
+                        <div className="w-full bg-white border border-[#e2d5c3] h-1.5 rounded-full overflow-hidden">
+                          <div className="bg-[#c49a62] h-full" style={{ width: '30%' }}></div>
                         </div>
                       </div>
 
                       <div className="space-y-1">
-                        <div className="flex justify-between text-slate-400 text-[10px]">
+                        <div className="flex justify-between text-slate-600 text-[10px]">
                           <span>Ngân hàng TCB Giải Ngân (70%):</span>
-                          <span className="text-white font-bold">{(financials.totalRevenue * 0.7).toLocaleString('vi-VN')}đ</span>
+                          <span className="text-slate-900 font-bold">{(financials.totalRevenue * 0.7).toLocaleString('vi-VN')}đ</span>
                         </div>
-                        <div className="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden">
-                          <div className="bg-blue-500 h-full w-[70%]"></div>
+                        <div className="w-full bg-white border border-[#e2d5c3] h-1.5 rounded-full overflow-hidden">
+                          <div className="bg-blue-500 h-full" style={{ width: '70%' }}></div>
                         </div>
                       </div>
 
                       <div className="space-y-1">
-                        <div className="flex justify-between text-slate-400 text-[10px]">
+                        <div className="flex justify-between text-slate-600 text-[10px]">
                           <span>Vin Hỗ Trợ Đợt 1 (6% Căn Hộ):</span>
-                          <span className="text-white font-bold">{financials.vinSubsidy.toLocaleString('vi-VN')}đ</span>
+                          <span className="text-slate-900 font-bold">{financials.vinSubsidy.toLocaleString('vi-VN')}đ</span>
                         </div>
-                        <div className="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden">
-                          <div className="bg-emerald-500 h-full w-[60%]"></div>
+                        <div className="w-full bg-white border border-[#e2d5c3] h-1.5 rounded-full overflow-hidden">
+                          <div className="bg-emerald-500 h-full" style={{ width: '60%' }}></div>
                         </div>
                       </div>
                     </div>
@@ -985,4 +979,3 @@ export default function AdminDashboard() {
     </div>
   );
 }
-
