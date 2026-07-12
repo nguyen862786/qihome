@@ -57,11 +57,16 @@ export default function SalesDashboard() {
     { id: '5', name: 'Phạm Minh Trí', unit: 'Căn S2.01-1002 - Grand Park', boqValue: 300000000, commission: 6000000, status: 'pending', date: '2026-05-20', customerStatus: 'ĐANG TƯ VẤN' }
   ];
 
-  // Default shared commissions list for simulated backoffice
+  // Default shared commissions list split into Stage 1 (1%) and Stage 2 (1%)
   const DEFAULT_SHARED_COMMISSIONS = [
-    { id: 'COM-2026-001', projectCode: 'PRJ-HAUNGHIA-101', clientName: 'Phan Văn Trị', gross: 7000000, status: 'paid', date: '10/07/2026', expectedDate: '10/07/2026' },
-    { id: 'COM-2026-002', projectCode: 'PRJ-HAUNGHIA-102', clientName: 'Hoàng Thị Hoa', gross: 9000000, status: 'approved', date: '---', expectedDate: '18/07/2026' },
-    { id: 'COM-2026-003', projectCode: 'PRJ-GRANDPARK-201', clientName: 'Nguyễn Thị Bình', gross: 12000000, status: 'pending', date: '---', expectedDate: '' }
+    { id: 'COM-2026-001A', projectCode: 'PRJ-HAUNGHIA-101', clientName: 'Phan Văn Trị', gross: 3500000, stage: 1, title: 'Hoa hồng đợt 1 (Khách thanh toán đợt 1)', status: 'paid', date: '10/07/2026', expectedDate: '10/07/2026' },
+    { id: 'COM-2026-001B', projectCode: 'PRJ-HAUNGHIA-101', clientName: 'Phan Văn Trị', gross: 3500000, stage: 2, title: 'Hoa hồng đợt 2 (Bàn giao căn hộ)', status: 'pending', date: '---', expectedDate: '' },
+    
+    { id: 'COM-2026-002A', projectCode: 'PRJ-HAUNGHIA-102', clientName: 'Hoàng Thị Hoa', gross: 4500000, stage: 1, title: 'Hoa hồng đợt 1 (Khách thanh toán đợt 1)', status: 'approved', date: '---', expectedDate: '18/07/2026' },
+    { id: 'COM-2026-002B', projectCode: 'PRJ-HAUNGHIA-102', clientName: 'Hoàng Thị Hoa', gross: 4500000, stage: 2, title: 'Hoa hồng đợt 2 (Bàn giao căn hộ)', status: 'pending', date: '---', expectedDate: '' },
+    
+    { id: 'COM-2026-003A', projectCode: 'PRJ-GRANDPARK-201', clientName: 'Nguyễn Thị Bình', gross: 6000000, stage: 1, title: 'Hoa hồng đợt 1 (Khách thanh toán đợt 1)', status: 'pending', date: '---', expectedDate: '' },
+    { id: 'COM-2026-003B', projectCode: 'PRJ-GRANDPARK-201', clientName: 'Nguyễn Thị Bình', gross: 6000000, stage: 2, title: 'Hoa hồng đợt 2 (Bàn giao căn hộ)', status: 'pending', date: '---', expectedDate: '' }
   ];
 
   useEffect(() => {
@@ -128,11 +133,16 @@ export default function SalesDashboard() {
       let commissionsPaid = 0;
       const signedContracts = filtered.filter(c => c.customerStatus !== 'ĐANG TƯ VẤN').length;
 
+      // Calculate total stats based on active filtered clients
       filtered.forEach(c => {
         totalSalesValue += c.boqValue;
-        commissionsEarned += c.commission;
-        if (c.status === 'paid') {
-          commissionsPaid += c.commission;
+      });
+
+      // Calculate commissions based on Stage 1 (1%) and Stage 2 (1%) from the shared mock list
+      commsArray.forEach(item => {
+        commissionsEarned += item.gross;
+        if (item.status === 'paid') {
+          commissionsPaid += item.gross;
         }
       });
 
@@ -161,7 +171,6 @@ export default function SalesDashboard() {
 
       // Load Payout History from Shared commissions array (with simulated tax logic)
       const mappedHistory = commsArray.map(item => {
-        // Calculate tax based on tax ID existence
         const taxRate = user.tax_code ? 0.10 : 0.0;
         const taxAmount = Math.round(item.gross * taxRate);
         const netAmount = item.gross - taxAmount;
@@ -173,7 +182,7 @@ export default function SalesDashboard() {
 
         return {
           id: item.id,
-          title: `Hoa hồng đợt 1 - Căn hộ ${item.clientName}`,
+          title: item.title,
           gross: item.gross,
           tax: taxAmount,
           taxLabel: user.tax_code ? '10%' : 'KHÔNG KHẤU TRỪ',
@@ -220,21 +229,34 @@ export default function SalesDashboard() {
       let commissionsPaid = 0;
       const signedContracts = projects ? projects.filter(p => p.status !== 'pending_design').length : 0;
 
-      const clientList = (projects || []).map((p) => {
+      const clientList = [];
+      const parsedHistory = [];
+
+      (projects || []).forEach((p) => {
         totalSalesValue += Number(p.total_amount);
         
-        // Find corresponding commission log
-        const comm = commissions ? commissions.find(c => c.project_id === p.id) : null;
-        const commAmt = comm ? Number(comm.amount) : Math.round(p.total_amount * 0.02);
+        // Split commission into Stage 1 (1%) and Stage 2 (1%)
+        const stage1Amt = Math.round(p.total_amount * 0.01);
+        const stage2Amt = Math.round(p.total_amount * 0.01);
         
-        if (comm) {
-          commissionsEarned += commAmt;
-          if (comm.status === 'paid') {
-            commissionsPaid += commAmt;
-          }
-        } else {
-          commissionsEarned += commAmt;
-        }
+        const commsForProj = commissions ? commissions.filter(c => c.project_id === p.id) : [];
+        
+        // Stage 1 (Khách thanh toán đợt 1)
+        const c1 = commsForProj.find(c => c.stage === 1) || commsForProj[0];
+        const status1 = c1 ? c1.status : 'pending';
+        const date1 = c1 && c1.status === 'paid' ? new Date(c1.updated_at || c1.created_at).toLocaleDateString('vi-VN') : '---';
+        const expectedDate1 = c1 ? c1.expected_payment_date : '';
+        
+        // Stage 2 (Hoàn thiện bàn giao)
+        const c2 = commsForProj.find(c => c.stage === 2);
+        const status2 = c2 ? c2.status : 'pending';
+        const date2 = c2 && c2.status === 'paid' ? new Date(c2.updated_at || c2.created_at).toLocaleDateString('vi-VN') : '---';
+        const expectedDate2 = c2 ? c2.expected_payment_date : '';
+
+        // Calculate stats sum
+        commissionsEarned += (stage1Amt + stage2Amt);
+        if (status1 === 'paid') commissionsPaid += stage1Amt;
+        if (status2 === 'paid') commissionsPaid += stage2Amt;
 
         // Map status to "Tình trạng khách hàng"
         let customerStatus = 'ĐANG TƯ VẤN';
@@ -245,21 +267,48 @@ export default function SalesDashboard() {
         }
 
         // Apply guardrail blocking based on KYC and contract signing
-        let disbursementStatus = comm ? comm.status : 'pending';
-        if (!isProfileComplete && (disbursementStatus === 'pending' || disbursementStatus === 'approved')) {
+        let disbursementStatus = status1 === 'paid' && status2 === 'paid' ? 'paid' : status1 === 'paid' ? 'paid_stage1' : 'pending';
+        if (!isProfileComplete && (status1 === 'pending' || status1 === 'approved')) {
           disbursementStatus = 'YÊU CẦU BỔ SUNG HỒ SƠ PHÁP LÝ';
         }
 
-        return {
+        clientList.push({
           id: p.id,
           name: p.client_name,
           unit: `${p.vinhomes_floor_căn} - ${p.vinhomes_block}`,
           boqValue: p.total_amount,
-          commission: commAmt,
+          commission: stage1Amt + stage2Amt,
           status: disbursementStatus,
           customerStatus,
           date: new Date(p.created_at).toLocaleDateString('vi-VN')
-        };
+        });
+
+        // Add both stages to payout history
+        const taxRate = mst ? 0.10 : 0.0;
+        
+        parsedHistory.push({
+          id: `COM-${p.id.slice(0, 3).toUpperCase()}-1`,
+          title: `Hoa hồng đợt 1 (1% - Khách thanh toán đợt 1) - Căn hộ ${p.client_name}`,
+          gross: stage1Amt,
+          tax: Math.round(stage1Amt * taxRate),
+          taxLabel: mst ? '10%' : 'KHÔNG KHẤU TRỪ',
+          net: stage1Amt - Math.round(stage1Amt * taxRate),
+          date: status1 === 'paid' ? date1 : expectedDate1 ? `Dự kiến: ${new Date(expectedDate1).toLocaleDateString('vi-VN')}` : '---',
+          expectedDate: expectedDate1,
+          status: !isProfileComplete && (status1 === 'pending' || status1 === 'approved') ? 'blocked' : status1
+        });
+
+        parsedHistory.push({
+          id: `COM-${p.id.slice(0, 3).toUpperCase()}-2`,
+          title: `Hoa hồng đợt 2 (1% - Bàn giao căn hộ) - Căn hộ ${p.client_name}`,
+          gross: stage2Amt,
+          tax: Math.round(stage2Amt * taxRate),
+          taxLabel: mst ? '10%' : 'KHÔNG KHẤU TRỪ',
+          net: stage2Amt - Math.round(stage2Amt * taxRate),
+          date: status2 === 'paid' ? date2 : expectedDate2 ? `Dự kiến: ${new Date(expectedDate2).toLocaleDateString('vi-VN')}` : '---',
+          expectedDate: expectedDate2,
+          status: !isProfileComplete && (status2 === 'pending' || status2 === 'approved') ? 'blocked' : status2
+        });
       });
 
       setClients(clientList);
@@ -269,33 +318,6 @@ export default function SalesDashboard() {
         totalSalesValue,
         commissionsEarned,
         commissionsPaid
-      });
-
-      // Parse live commissions into payout history
-      const parsedHistory = (commissions || []).map(item => {
-        const matchingProj = projects?.find(p => p.id === item.project_id);
-        const clientName = matchingProj ? matchingProj.client_name : 'Cư dân';
-
-        const taxRate = mst ? 0.10 : 0.0;
-        const taxAmount = Math.round(item.amount * taxRate);
-        const netAmount = item.amount - taxAmount;
-
-        let payoutStatus = item.status;
-        if (!isProfileComplete && (item.status === 'pending' || item.status === 'approved')) {
-          payoutStatus = 'blocked';
-        }
-
-        return {
-          id: `COM-${item.id.slice(0, 5).toUpperCase()}`,
-          title: `Hoa hồng đợt 1 - Căn hộ ${clientName}`,
-          gross: item.amount,
-          tax: taxAmount,
-          taxLabel: mst ? '10%' : 'KHÔNG KHẤU TRỪ',
-          net: netAmount,
-          date: item.status === 'paid' ? new Date(item.updated_at || item.created_at).toLocaleDateString('vi-VN') : item.expected_payment_date ? `Dự kiến: ${new Date(item.expected_payment_date).toLocaleDateString('vi-VN')}` : '---',
-          expectedDate: item.expected_payment_date,
-          status: payoutStatus
-        };
       });
       setPayoutHistory(parsedHistory);
 
@@ -341,7 +363,6 @@ export default function SalesDashboard() {
   const handleSaveProfile = async (e) => {
     e.preventDefault();
     
-    // Tax code validation (10 or 13 digits)
     const mstRegex = /^[0-9]{10}$|^[0-9]{13}$/;
     if (!mstRegex.test(mst)) {
       alert('⚠️ Mã số thuế cá nhân phải gồm chính xác 10 hoặc 13 chữ số!');
@@ -458,7 +479,22 @@ export default function SalesDashboard() {
     alert('🔧 [Developer Mode] Đã chuyển đổi trạng thái KYC tài khoản sang: ĐÃ XÁC THỰC để mở khóa ký E-Contract.');
   };
 
+  const getReferralUrl = () => {
+    if (typeof window !== 'undefined') {
+      const code = profile?.affiliate_code || 'SALE-NAM86';
+      return `${window.location.origin}/?aff=${code}`;
+    }
+    return 'http://localhost:3000/?aff=SALE-NAM86';
+  };
+
+  const copyReferralUrl = () => {
+    navigator.clipboard.writeText(getReferralUrl());
+    alert('📋 Đã sao chép đường link Affiliate của bạn!');
+  };
+
   if (!profile) return null;
+
+  const isProfileComplete = kycStatus === 'verified' && isContractSigned && mst;
 
   return (
     <div className="min-h-screen text-slate-800 flex flex-col md:flex-row relative overflow-hidden bg-[#faf8f5]">
@@ -734,11 +770,11 @@ export default function SalesDashboard() {
                               </span>
                             ) : (
                               <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                                client.status === 'paid' ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' : 
-                                client.status === 'approved' ? 'bg-amber-500/10 text-amber-600 border border-amber-500/20' : 
+                                client.status === 'paid' ? 'bg-[#c49a62]/10 text-[#c49a62] border border-[#ebdcb9]' : 
+                                client.status === 'paid_stage1' ? 'bg-amber-500/10 text-amber-600 border border-amber-500/20' :
                                 'bg-slate-100 text-slate-500 border border-slate-200'
                               }`}>
-                                {client.status === 'paid' ? 'Đã thanh toán' : client.status === 'approved' ? 'Chờ chi' : 'Chờ Vin duyệt'}
+                                {client.status === 'paid' ? 'Đã chi hết 2%' : client.status === 'paid_stage1' ? 'Đã nhận đợt 1 (1%)' : 'Chờ đối soát'}
                               </span>
                             )}
                           </td>
@@ -760,13 +796,16 @@ export default function SalesDashboard() {
             </div>
           )}
 
-          {/* NEW TAB: Tab 4: Lịch Sử Thanh Toán (payout_history) */}
+          {/* Tab 4: Lịch Sử Thanh Toán (payout_history) */}
           {activeTab === 'payout_history' && (
             <div className="bg-white border border-[#ebdcb9] rounded-2xl p-6 space-y-4 shadow-sm text-slate-800 animate-fadeIn">
               <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-                <h3 className="text-sm font-bold text-slate-900">💵 Lịch Sử Thanh Toán Hoa Hồng</h3>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">💵 Lịch Sử Thanh Toán Hoa Hồng</h3>
+                  <p className="text-[10px] text-slate-500 mt-0.5">Phân bổ hoa hồng: 1.0% khi khách cọc/thanh toán đợt 1 và 1.0% còn lại sau khi bàn giao căn hộ</p>
+                </div>
                 <span className="text-xs px-2.5 py-0.5 bg-[#c49a62]/10 text-[#c49a62] border border-[#c49a62]/20 rounded-full font-bold">
-                  {payoutHistory.length} Giao dịch đối soát
+                  {payoutHistory.length} Đợt đối soát
                 </span>
               </div>
 
@@ -775,8 +814,8 @@ export default function SalesDashboard() {
                   <thead>
                     <tr className="border-b border-[#ebdcb9] text-slate-500 font-semibold">
                       <th className="py-3 px-2">Mã Lệnh Chi</th>
-                      <th className="py-3 px-2">Kỳ Thanh Toán / Nội dung</th>
-                      <th className="py-3 px-2 text-right">Tổng phát sinh (Gross)</th>
+                      <th className="py-3 px-2">Nội Dung Thanh Toán</th>
+                      <th className="py-3 px-2 text-right">Tổng phát sinh (Gross 1%)</th>
                       <th className="py-3 px-2 text-center">Thuế TNCN (Tax)</th>
                       <th className="py-3 px-2 text-right">Thực nhận (Net)</th>
                       <th className="py-3 px-2 text-center">Ngày Chi / Dự kiến</th>
@@ -816,7 +855,7 @@ export default function SalesDashboard() {
                                 'bg-slate-100 text-slate-500 border border-slate-200'
                               }`}>
                                 {payout.status === 'paid' ? 'Đã thanh toán' : 
-                                 payout.status === 'approved' ? 'Dự kiến chi' : 'Chờ kế toán duyệt'}
+                                 payout.status === 'approved' ? 'Dự kiến chi' : 'Chờ đối soát'}
                               </span>
                             )}
                           </td>
@@ -833,7 +872,6 @@ export default function SalesDashboard() {
           {activeTab === 'kyc' && (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start animate-fadeIn">
               
-              {/* Form updates */}
               <div className="lg:col-span-8 space-y-6">
                 <div className="bg-white border border-[#ebdcb9] rounded-2xl p-6 space-y-4 shadow-sm text-slate-800">
                   <h3 className="text-sm font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center justify-between">
@@ -955,7 +993,6 @@ export default function SalesDashboard() {
                       </span>
                     </h3>
 
-                    {/* Contract Template Text Box */}
                     <div className="bg-[#faf8f5] border border-[#ebdcb9] p-4 rounded-xl text-[10px] text-slate-650 h-44 overflow-y-auto leading-relaxed font-mono">
                       <div className="text-center font-bold text-slate-800 text-xs mb-3">
                         CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM<br />
@@ -976,7 +1013,7 @@ export default function SalesDashboard() {
                       </p>
                       <p className="mb-2">
                         <strong>ĐIỀU 2: CHÍNH SÁCH HOA HỒNG & THUẾ</strong><br />
-                        - Bên B được hưởng 2.0% trên tổng giá trị hợp đồng BOQ ký chốt thi công thành công thực tế.<br />
+                        - Bên B được hưởng 2.0% trên tổng giá trị hợp đồng BOQ ký chốt thi công thành công thực tế (Giải ngân làm 2 đợt: 1.0% khi khách cọc đợt 1 và 1.0% khi nghiệm thu bàn giao căn hộ).<br />
                         - Khoản thuế thu nhập cá nhân (TNCN) 10% sẽ được Bên A tự động trích nộp hộ về chi cục thuế dựa trên MST cá nhân Bên B cung cấp trước khi giải ngân.
                       </p>
                       {isContractSigned && (
@@ -986,7 +1023,6 @@ export default function SalesDashboard() {
                       )}
                     </div>
 
-                    {/* Verification & OTP Verification Button */}
                     {!isContractSigned ? (
                       <div className="space-y-4 pt-2">
                         <p className="text-xs text-slate-500 leading-relaxed">
@@ -1033,7 +1069,6 @@ export default function SalesDashboard() {
               {/* KYC Camera uploads */}
               <div className="lg:col-span-4 space-y-6">
                 
-                {/* KYC status card */}
                 <div className="bg-[#f4ebd9] border border-[#e2d5c3] rounded-2xl p-6 space-y-4 shadow-sm text-xs text-slate-800">
                   <h3 className="text-sm font-bold text-slate-900 border-b border-[#e2d5c3] pb-3">🛡️ Trạng Thái Xác Thực KYC</h3>
                   
