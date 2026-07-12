@@ -1,0 +1,63 @@
+﻿KẾ HOẠCH PHÁT TRIỂN HỆ THỐNG AI ENGINE & WEB E-COMMERCE
+1. Mục tiêu chiến lược của hệ thống công nghệ
+Trải nghiệm khách hàng: Giúp khách hàng Vinhomes Hậu Nghĩa "thấy ngay tổ ấm tương lai" chỉ sau 30 giây bằng công nghệ Generative AI dựa trên chính mặt bằng căn hộ của họ.
+Tự động hóa chuỗi cung ứng (Chuẩn hóa Modular): Bản vẽ AI tạo ra phải khớp 100% với danh mục sản phẩm (SKU) thực tế của các nhà cung cấp tại Showroom để tính ngay ra giá gói và chuyển thẳng lệnh sản xuất sang nhà máy khi ký HĐ.
+Giảm tải thiết kế: Chuyển đổi 80% công đoạn lên concept 2D/3D từ con người sang AI, giảm chi phí nhân sự kiến trúc sư (KTS) và rút ngắn thời gian chốt HĐ từ vài tuần xuống còn vài giờ.
+2. Cấu trúc chức năng chi tiết của Hệ thống số hóa
+Mô-đun A: Trải nghiệm AI trực quan (AI Interior Generator)
+Đây là "trái tim" của hệ thống, hoạt động theo quy trình 3 bước tự động:
+Thư viện Layout Vinhomes (Đã nạp sẵn): Chúng ta sẽ số hóa và nạp toàn bộ sơ đồ mặt bằng (2D CAD/BIM) của các dòng sản phẩm tại Vin Hậu Nghĩa (Căn hộ Studio, 1PN+, 2PN, 3PN, Shophouse, Biệt thự). Khách hàng hoặc Sales chỉ cần chọn: Phân khu  Tòa  Mã căn.
+Bộ lọc phong cách và Ngân sách: Khách hàng tick chọn gu thẩm mỹ (Hiện đại, Đông Dương - Indochine, Tối giản, Tân cổ điển) và chọn mức ngân sách (Vừa vặn - Cao cấp - Siêu sang).
+Gen AI Rendering (Kết xuất tức thì):
+Thuật toán AI (ứng dụng mô hình Stable Diffusion kết hợp ControlNet đã được train riêng bằng data nội thất của công ty) sẽ tự động "đổ" đồ đạc vào mặt bằng.
+Điểm cốt lõi: Các đồ rời (Sofa, bàn trà, giường, đèn) và đồ liền tường (Tủ bếp, tủ quần áo) được AI xếp vào phải là sản phẩm thật có mã SKU cụ thể từ các nhà cung cấp (An Cường, Kohler, v.v.) đang đặt gian hàng tại Showroom Hậu Nghĩa của chúng ta.
+Kết quả: Khách hàng có thể xoay góc nhìn hoặc xem ảnh phối cảnh 3D chất lượng cao ngay lập tức.
+Mô-đun B: Web E-Commerce "Click-to-Buy" & Quản lý gói hợp đồng
+Giỏ hàng thông minh (Smart Cart): Đi kèm với phối cảnh 3D của AI là một Bảng kê chi tiết vật liệu và báo giá (BOQ). Khách hàng có thể bật/tắt từng món đồ (Ví dụ: Bỏ đèn chùm để giảm 15 triệu, đổi từ sofa da sang sofa nỉ), giá tổng của gói nội thất sẽ tự động nhảy real-time.
+Tích hợp dòng tài chính 6% của Vin: Hệ thống web sẽ hiển thị rõ:
+Tổng chi phí gói nội thất.
+Số tiền được Vin tài trợ trực tiếp (6% giá trị nhà - trừ thẳng).
+Số tiền còn lại cần thanh toán.
+Nút bấm "Đăng ký vay tín chấp ngân hàng" (Kết nối API sang hệ thống ngân hàng liên kết để duyệt hạn mức online).
+Mô-đun C: Cổng kết nối Sales Affiliate (Hệ thống kích cầu)
+Mỗi Sales Vin khi đăng ký sẽ được cấp một ID và Dashboard riêng.
+Sales có thể dùng máy tính bảng tại công trường hoặc gửi link cho khách tự trải nghiệm AI tại nhà. Hệ thống tự động gắn cookie để ghi nhận: Khách hàng A mua gói nội thất thông qua sự tư vấn của Sales B  Hệ thống tự động tính hoa hồng cho Sales sau khi HĐ ba bên được Vin giải ngân.
+3. Lộ trình triển khai kỹ thuật (Phát triển Tech)
+Để đảm bảo hệ thống chạy mượt mà trước khi làn sóng bàn giao nhà tại Hậu Nghĩa bắt đầu, tôi phân chia lộ trình làm 3 giai đoạn cuốn chiếu:
+[Giai đoạn 1: Chuẩn bị Data & Core AI] ---> [Giai đoạn 2: Tích hợp E-Com & Báo giá] ---> [Giai đoạn 3: Beta Test & Bung hàng]
+        
+Giai đoạn 1: Chuẩn bị Data & Xây dựng Core AI (Tháng 1 - Tháng 2)
+Bước 1: Thu thập toàn bộ file bản vẽ mặt bằng căn hộ Vin Hậu Nghĩa.
+Bước 2: Chuẩn hóa dữ liệu sản phẩm (Số hóa 3D các mẫu Sofa, tủ, bàn ghế, thiết bị vệ sinh của các nhà cung cấp tại Showroom thành thư viện asset).
+Bước 3: Lập trình core AI (Train mô hình AI nhận diện không gian mặt bằng căn hộ của Vin và tự động sắp xếp đồ đạc theo đúng tỷ lệ kích thước thật).
+Giai đoạn 2: Tích hợp E-Commerce & Tính toán Báo giá (Tháng 3 - Tháng 4)
+Bước 1: Xây dựng giao diện Web frontend/backend cho phần E-commerce, kết nối thư viện 3D AI với hệ thống quản lý kho và báo giá (BOQ).
+Bước 2: Lập trình mô-đun phân tách dòng tiền (Tự động tính toán khấu trừ 6% tiền Vin và liên kết cổng đăng ký vay tín chấp).
+Bước 3: Hoàn thiện phân hệ Affiliate dành cho Sales Vin để họ theo dõi trạng thái đơn hàng.
+Giai đoạn 3: Nghiệm thu thử nghiệm (Beta Test) & Bung hàng (Từ Tháng 5)
+Bước 1: Chạy thử nghiệm nội bộ 100 căn mẫu đầu tiên với các layout phổ biến nhất tại Hậu Nghĩa để tinh chỉnh độ chính xác của AI (tránh lỗi AI đặt đồ đè lên cửa sổ hoặc sai kích thước).
+Bước 2: Đưa hệ thống lên các màn hình cảm ứng lớn đặt trực tiếp tại Showroom 1000m² Hậu Nghĩa để khách hàng đến tham quan có thể bấm trải nghiệm trực tiếp với sự hỗ trợ của KTS và Sales.
+BỔ SUNG KIẾN TRÚC CÔNG NGHỆ: MÔ-ĐUN D – SMART SRM & INTERIOR PROJECT MANAGEMENT
+Khi khách hàng bấm ký HĐ ba bên  Hệ thống tự động kích hoạt một mã dự án (VD: PRJ-HAUNGHIA-102). Toàn bộ hệ sinh thái từ Nhà máy, Nhà cung cấp vật liệu, Thầu phụ và Giám sát sẽ được kéo vào quy trình tự động hóa sau:
+1. Chuỗi quy trình Vận hành & Cung ứng Tự động (Automated Procurement)
+Tự động tách lệnh (Auto-PO): Ngay khi HĐ được ký, hệ thống tự động bóc tách bảng chi tiết vật liệu (BOQ) từ AI.
+Lệnh 1 (Đồ gỗ liền tường): Tự động đẩy file kỹ thuật xuống máy CNC của Nhà sản xuất/Nhà máy.
+Lệnh 2 (Thiết bị/Đồ rời): Tự động gửi đơn đặt hàng (PO) đến hệ thống của Nhà cung cấp (An Cường, Kohler...) để xuất kho.
+Điều phối tiến độ (Just-In-Time Logistics): Hệ thống tính toán thời gian sản xuất và vận chuyển để hàng đổ về kho vệ tinh Hậu Nghĩa đúng ngày bàn giao mặt bằng thi công, tránh việc tồn kho hoặc giao hàng quá sớm làm xước, hỏng đồ tại công trường của Vin.
+2. Số hóa Giám sát Hiện trường & Kiểm soát Chất lượng (Site & Quality Control)
+Để quản lý hàng ngàn căn hộ mà không cần nuôi bộ máy giám sát khổng lồ, chúng ta áp dụng công nghệ Báo cáo trực quan di động (Mobile-First Inspection):
+Báo cáo tiến độ bằng hình ảnh/Video (Visual Tracking): Đội ngũ giám sát (Site Manager) hoặc Thầu phụ tại căn hộ bắt buộc phải dùng App của công ty để check-in địa điểm (định vị GPS tránh báo cáo giả). Mỗi ngày, họ phải chụp ảnh/quay video các hạng mục hoàn thiện theo checklist (VD: Ảnh lắp trần thạch cao, ảnh lắp tủ bếp).
+Trải nghiệm khách hàng & Vin: Hình ảnh này sẽ tự động hiển thị lên Dashboard của Khách hàng và Ban Quản lý Vin để họ theo dõi từ xa mà không cần đến công trình.
+Đánh giá & Kiểm soát chất lượng (Digital QA/QC Checklist): Trước khi chuyển sang giai đoạn tiếp theo, giám sát phải tick nghiệm thu điện tử theo tiêu chuẩn khắt khe (độ phẳng của sơn, độ khít của cánh tủ). Nếu phát hiện lỗi, hệ thống tự động gắn cờ (Flag) cảnh báo và gửi yêu cầu sửa chữa (Rework) trực tiếp đến đơn vị phụ trách.
+3. Giao tiếp Nội bộ tập trung (Centralized Collaboration Hub)
+Xóa bỏ Zalo/Viber rời rạc: Mỗi dự án căn hộ sẽ có một Kênh chat tích hợp (Internal Chat Thread) riêng ngay trên phần mềm.
+Thành phần tham gia: Gồm Kiến trúc sư điều chỉnh, Giám sát hiện trường, Đại diện nhà máy sản xuất, và Thầu phụ lắp đặt.
+Lợi ích: Mọi trao đổi, chỉnh sửa bản vẽ hay xử lý sự cố tại công trường đều được lưu vết (Log history), tự động tag người chịu trách nhiệm và nhắc việc (Notification), giúp giảm thiểu tối đa tình trạng "đổ lỗi" giữa các bên.
+4. Quản trị Dòng tiền & Tiến độ Thanh toán Nhà thầu (Fintech Integration)
+Giải ngân theo Milestone sản lượng: Hệ thống tự động tính toán tiến độ thanh toán cho thầu phụ/nhà cung cấp dựa trên Biên bản nghiệm thu điện tử đã được phê duyệt ở bước QC.
+Lấy ví dụ: Khi giám sát xác nhận đã lắp xong phần thô tủ bếp bằng hình ảnh $\rightarrow$ Hệ thống tự động duyệt giải ngân đợt 2 cho Nhà thầu phụ và cập nhật dòng tiền chi ra của công ty (Real-time Cashflow Tracking).
+5. Hệ thống Đánh giá & Xếp hạng Đối tác (Vendor Credit & Rating System)
+Đây là công cụ giúp anh nắm toàn quyền kiểm soát chất lượng của chuỗi cung ứng:
+Sau mỗi dự án, hệ thống dựa trên dữ liệu thực tế để tự động chấm điểm (Scorecard) nhà cung cấp/thầu phụ theo 4 chỉ số: Tiến độ (Time) - Chất lượng (Quality) - Thái độ hợp tác (Cooperation) - Giá thành (Cost).
+Danh sách Đỏ/Vàng/Xanh (Vendor Tiering): Những đơn vị bị chấm điểm thấp (giao hàng trễ, nhiều lỗi QC) sẽ bị hệ thống tự động hạ bậc, giảm khối lượng giao việc trong các dự án tiếp theo, hoặc đưa vào danh sách đen (Blacklist). Những đơn vị xuất sắc sẽ được ưu tiên nhận các gói thầu lớn tại Cần Giờ hay Hóc Môn.
+

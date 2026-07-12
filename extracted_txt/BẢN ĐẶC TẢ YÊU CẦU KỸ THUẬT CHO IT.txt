@@ -1,0 +1,61 @@
+﻿BẢN ĐẶC TẢ YÊU CẦU KỸ THUẬT (PRODUCT REQUIREMENT DOCUMENT)
+Dự án: Hệ thống Số hóa Vận hành & Bán hàng Nội thất Chiến lược (MVP)
+Thời gian triển khai: 2 Tháng (8 Tuần)
+Hạ tầng chỉ định: Supabase (Database & Auth), AWS S3/Google Cloud (Storage), Web-App Responsive (Chạy mượt trên PC & Mobile, không build App Native để tiết kiệm chi phí).
+PHẦN I: MA TRẬN PHÂN QUYỀN TRÊN CƠ SỞ DỮ LIỆU (SUPABASE AUTH & RLS)
+Đội Tech bắt buộc phải cấu hình tính năng bảo mật Row Level Security (RLS) trên Supabase để phân quyền giao diện và dữ liệu theo đúng cấu trúc sau:
+Loại tài khoản
+Giao diện hiển thị
+Quyền hạn dữ liệu (Database Permission)
+1. Admin (Anh)
+Dashboard Tổng
+- Toàn quyền (Xem, Sửa, Xóa) tất cả các bảng tài chính, dự án, vật tư.
+
+- Duyệt tối cao các yêu cầu ứng phát sinh vượt BOM.
+2. Kế toán
+Dashboard Tài chính
+- Xem/Sửa bảng công nợ, tiến độ thanh toán của Khách/Vin/Thợ.
+
+- Không có quyền xóa dữ liệu lịch sử dòng tiền.
+3. Giám sát
+Dashboard Hiện trường
+- Xem danh sách căn hộ phụ trách.
+
+- Cập nhật Checklist QC, phê duyệt ảnh nghiệm thu của Thợ.
+4. Đội thợ
+Giao diện Mobile Web
+- Chỉ xem được bản vẽ và định mức vật tư (BOM) của căn hộ mình làm.
+
+- Bấm yêu cầu cấp vật tư và upload ảnh nhật ký thi công.
+5. Nhân viên Sale
+Dashboard Affiliate
+- Chỉ xem được danh sách khách hàng của mình và trạng thái hoa hồng.
+PHẦN II: CHI TIẾT CÁC MODULE CHỨC NĂNG CẦN CODE (SCOPE OF WORK)
+MODULE 1: WEB BÁN HÀNG NỘI THẤT & TRẢI NGHIỆM AI (ĐẦU RA BÁN HÀNG)
+Trang Catalog E-Commerce: Hiển thị danh mục sản phẩm nội thất đồ rời/đồ liền tường theo mã SKU, thương hiệu của nhà cung cấp, kích thước thực tế.
+Giỏ hàng thông minh (Smart Billing):
+Tự động nhận diện Mã căn hộ của dự án Vin Hậu Nghĩa để load đúng diện tích/mặt bằng.
+Tích hợp công thức tính toán: [Tổng giá gói] - [6% giá trị nhà do Vin tài trợ] = [Số tiền khách cần trả].
+Nút liên kết đăng ký gói vay tín chấp ngân hàng (Form đăng ký cơ bản thu thập thông tin chuyển Kế toán).
+Core AI Interior Engine (Tích hợp API):
+Tích hợp API Stable Diffusion + ControlNet (chạy qua RunPod/Replicate).
+Logic xử lý: Khách chọn Mặt bằng căn hộ + Phong cách (Indochine/Hiện đại...) $\rightarrow$ AI render ra ảnh phối cảnh 3D trong vòng dưới 30 giây $\rightarrow$ Tự động map (khớp) danh mục đồ rời trong ảnh với các SKU sản phẩm thật trong kho của nhà cung cấp để ra bảng giá dự toán (BOQ).
+Hệ thống Affiliate cho Sales: Tự động tạo Link/Mã QR định danh cho từng Sales. Khách vào web qua link này sẽ tự động gắn ID Sales đó vào Hợp đồng.
+MODULE 2: QUẢN LÝ DỰ ÁN & HIỆN TRƯỜNG (SRM & PMS MINI - ĐẦU VÀO VẬN HÀNH)
+Quản lý Khóa định mức vật tư (BOM Lock): Ngay khi HĐ được ký, hệ thống khóa cứng số lượng vật tư tối đa thợ được gọi cho căn hộ đó dựa trên BOQ của AI.
+Luồng cấp phát vật tư bằng mã QR:
+Thợ bấm gọi hàng trên điện thoại $\rightarrow$ Hệ thống trừ lùi vào kho tổng/kho vệ tinh $\rightarrow$ Xuất mã QR xuất kho $\rightarrow$ Thợ quét QR để xác nhận nhận hàng tại hiện trường.
+Nút ứng phát sinh: Nếu vượt định mức BOM, hệ thống khóa chức năng tự động và chuyển yêu cầu (kèm ảnh lý do lỗi) về màn hình của Admin chờ duyệt thủ công.
+Nhật ký thi công bằng hình ảnh (Mobile Web Visual Report):
+Giao diện cho thợ chụp ảnh tiến độ hàng ngày. Bắt buộc tích hợp định vị GPS và thời gian thực (Timestamp) khi chụp, không cho phép chọn ảnh cũ từ thư viện máy để chống báo cáo giả.
+Checklist QC điện tử: Giám sát tích chọn Đạt/Không đạt theo bộ tiêu chí kỹ thuật nạp sẵn $\rightarrow$ Ký tên bằng tay trên màn hình điện thoại $\rightarrow$ Hệ thống tự động kích hoạt trạng thái "Chờ quyết toán công" gửi về Kế toán.
+PHẦN III: TIÊU CHÍ NGHIỆM THU PHẦN MỀM & KẾ HOẠCH GIẢI NGÂN (BẢO VỆ DÒNG VỐN)
+Để kiểm soát đội Tech Outsource không bị trễ hạn và bàn giao code chất lượng, 200 triệu tiền nhân sự sẽ được chia làm 4 đợt giải ngân gắn chặt với 4 mốc nghiệm thu kỹ thuật thực tế:
+[Đợt 1: 20%] ➔ [Đợt 2: 30%] ➔ [Đợt 3: 30%] ➔ [Đợt 4: 20%]
+  Ký kết &       Xong Web E-Com      Xong Module AI     Bàn giao Code &
+ Setup Cloud      & Phân quyền      & Quản lý Thợ/Kho     Vận hành chạy ổn
+Đợt 1 (20% - Ký hợp đồng & Thiết lập hạ tầng): Đội Tech bàn giao cấu trúc Database hoàn thiện trên Supabase, thiết kế UI/UX tất cả các màn hình (Figma) và tạo kho lưu trữ code (Repository) trên GitHub của anh.
+Đợt 2 (30% - Nghiệm thu Tuần 3): Hoàn thiện khung Web bán hàng E-commerce, tính năng Giỏ hàng thông minh (trừ 6% tiền Vin) và cấu hình xong ma trận phân quyền 5 vị trí. Đội Tech phải demo chạy mượt khâu đăng nhập và lên đơn hàng.
+Đợt 3 (30% - Nghiệm thu Tuần 6): Tích hợp thành công API AI (bấm nút chọn căn hộ Vin Hậu Nghĩa ra ảnh phối cảnh 3D và báo giá SKU sản phẩm thật) + Hoàn thiện giao diện gọi vật tư QR và chụp ảnh nghiệm thu GPS của thợ trên Mobile Web.
+Đợt 4 (20% - Nghiệm thu Tuần 8 & Bàn giao): Chạy thử nghiệm hệ thống (Beta Test) với 50 căn hộ mẫu tại Showroom Hậu Nghĩa không phát sinh lỗi nghiêm trọng (Crash/Lỗi bảo mật). Đội Tech bàn giao toàn bộ quyền Master tài khoản Supabase, AWS và bàn giao 100% mã nguồn sạch (Source Code) trên GitHub của anh
+

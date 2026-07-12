@@ -1,0 +1,15 @@
+# 🔗 SYSTEM INTEGRATION & API ENDPOINTS
+
+## 1. Kết nối Core AI (Stable Diffusion + ControlNet)
+*   **Provider:** RunPod hoặc Replicate API (Pay-per-use).
+*   **Input:** Gửi file ảnh 2D Layout căn hộ (dạng đen trắng phân vùng tường) + Prompt phong cách nội thất khách chọn.
+*   **Output:** Trả về file ảnh Render 3D hoàn thiện có độ phân giải 2K dưới 30 giây.
+
+## 2. Kết nối Cổng Tín dụng Ngân hàng (Techcombank Mini-Link)
+*   **Phương thức:** API thu thập hồ sơ online bảo mật.
+*   **Dữ liệu gửi đi:** Mã định danh căn hộ + Số điện thoại khách + Tổng giá trị hợp đồng (đã trừ 6% tiền Vin).
+*   **Dữ liệu trả về:** Link Webview an toàn của Ngân hàng để khách tự điền thông tin phê duyệt hạn mức tín chấp tự động trong 24 giờ.
+
+## 3. Hệ thống quét QR xuất kho (Just-In-Time Logistics)
+*   **Cơ chế mã hóa:** Sử dụng thư viện JWT sinh mã Token duy nhất mã hóa theo chuỗi `[Mã_Dự_Án] + [Mã_SKU] + [Số_Lượng_Xuất]`.
+*   **Thời gian sống:** Mã QR xuất hàng chỉ có hiệu lực trong vòng 60 phút kể từ lúc kho xuất lệnh để tránh gian lận lấy trùng mã QR cũ.

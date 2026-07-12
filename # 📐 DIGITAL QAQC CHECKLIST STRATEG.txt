@@ -1,0 +1,16 @@
+# 📐 DIGITAL QA/QC CHECKLIST STRATEGY
+
+Mọi dự án căn hộ khi bấm nút "Nghiệm thu giai đoạn" trên App phải hiển thị các checklist điện tử này để Giám sát tích chọn:
+
+## Hạng mục 1: Đồ gỗ liền tường (Tủ bếp, tủ quần áo, kệ tivi)
+*   [ ] Độ phẳng và khít: Khe hở giữa các cánh tủ gỗ không vượt quá 1.5mm. Cánh tủ khi đóng không bị vênh.
+*   [ ] Bề mặt vật liệu: Gỗ phủ Melamine/Acrylic của nhà cung cấp (An Cường) không bị trầy xước, không bong tróc các đường dán cạnh nẹp nhựa.
+*   [ ] Phụ kiện lắp đặt: Bản lề, ray trượt giảm chấn vận hành êm ái, không phát ra tiếng động.
+
+## Hạng mục 2: Phần sơn bả và Trần thạch cao
+*   [ ] Bề mặt tường/trần: Sử dụng đèn pin quét sát bề mặt, không để lại vết lồi lõm, vết chân chim hoặc loang màu sơn Dulux.
+*   [ ] Góc cạnh: Các góc tường, góc trần thạch cao phải thẳng, vuông góc 90 độ, không sứt mẻ.
+
+## Hạng mục 3: Hệ thống Điện - Đèn chiếu sáng
+*   [ ] Đo kiểm nguồn: Tất cả các ổ cắm điện âm tường phải có nguồn điện ổn định.
+*   [ ] Thiết bị: Đèn led, đèn chùm trang trí bật sáng đồng bộ, đúng vị trí công tắc theo bản vẽ phối cảnh AI.

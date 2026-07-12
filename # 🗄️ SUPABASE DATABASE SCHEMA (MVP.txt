@@ -1,0 +1,56 @@
+# 🗄️ SUPABASE DATABASE SCHEMA (MVP)
+
+Mọi bảng dữ liệu dưới đây phải bật tính năng Row Level Security (RLS) và phân quyền theo ma trận trong file `Context.md`.
+
+## 1. Bảng `profiles` (Quản lý Tài khoản & Phân quyền)
+*   `id`: uuid (Primary Key, liên kết với auth.users của Supabase)
+*   `phone_number`: text (Dùng làm số tài khoản đăng nhập)
+*   `full_name`: text
+*   `role`: text (Nhận các giá trị: 'admin', 'accounting', 'site_manager', 'subcontractor', 'sales')
+*   `affiliate_code`: text (Chỉ dành cho sales, tự động sinh)
+*   `created_at`: timestamp
+
+## 2. Bảng `projects` (Quản lý các căn hộ - Micro-Projects)
+*   `id`: uuid (Primary Key)
+*   `project_code`: text (Mã dự án, ví dụ: PRJ-HAUNGHIA-102)
+*   `vinhomes_block`: text (Số tòa/Phân khu)
+*   `vinhomes_floor_căn`: text (Số tầng, số căn)
+*   `client_name`: text
+*   `sales_id`: uuid (Foreign Key liên kết với bảng profiles)
+*   `site_manager_id`: uuid (Foreign Key liên kết với bảng profiles)
+*   `subcontractor_id`: uuid (Foreign Key liên kết với bảng profiles)
+*   `total_amount`: numeric (Tổng giá trị gói nội thất)
+*   `vin_subsidy`: numeric (Số tiền 6% Vin tài trợ = 0.06 * giá trị nhà)
+*   `status`: text ('pending_design', 'in_production', 'qc_inspection', 'completed')
+*   `created_at`: timestamp
+
+## 3. Bảng `bom_materials` (Định mức vật tư cố định của từng căn)
+*   `id`: uuid (Primary Key)
+*   `project_id`: uuid (Foreign Key liên kết với bảng projects)
+*   `sku`: text (Mã sản phẩm của nhà cung cấp)
+*   `item_name`: text (Tên vật tư)
+*   `allocated_quantity`: numeric (Số lượng định mức tối đa được cấp)
+*   `disbursed_quantity`: numeric (Số lượng thực tế đã xuất kho, mặc định = 0)
+*   `unit`: text (Mét tới, bộ, thùng...)
+
+## 4. Bảng `material_requests` (Luồng gọi vật tư hiện trường)
+*   `id`: uuid (Primary Key)
+*   `project_id`: uuid (Foreign Key)
+*   `subcontractor_id`: uuid (Foreign Key)
+*   `sku`: text
+*   `requested_quantity`: numeric
+*   `status`: text ('pending_approval', 'approved', 'disbursed_in_warehouse')
+*   `is_over_budget`: boolean (True nếu yêu cầu vượt hạn mức BOM)
+*   `evidence_image_url`: text (Ảnh chứng minh lý do nếu ứng vượt định mức)
+*   `qr_code_token`: text (Mã token dùng để sinh QR nhận hàng)
+
+## 5. Bảng `site_reports` (Nhật ký tiến độ và QC hình ảnh)
+*   `id`: uuid (Primary Key)
+*   `project_id`: uuid (Foreign Key)
+*   `subcontractor_id`: uuid (Foreign Key)
+*   `image_url`: text (Link ảnh lưu trên AWS S3)
+*   `gps_latitude`: numeric (Vị trí bắt buộc)
+*   `gps_longitude`: numeric (Vị trí bắt buộc)
+*   `timestamp`: timestamp (Thời gian thực lúc chụp, khóa sửa đổi)
+*   `qc_status`: text ('pending', 'passed', 'failed')
+*   `qc_notes`: text (Ghi chú của Giám sát nếu thi công lỗi)

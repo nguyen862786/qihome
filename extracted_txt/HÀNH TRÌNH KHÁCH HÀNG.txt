@@ -1,0 +1,35 @@
+﻿HÀNH TRÌNH KHÁCH HÀNG & MA TRẬN ĐIỂM CHẠM SỐ HÓA (CUSTOMER FLOW)
+[1. Tiếp Cận] ➔ [2. Trải Nghiệm AI] ➔ [3. Ký HĐ Tay Ba] ➔ [4. Giám Sát Online] ➔ [5. Nhận Nhà Hoàn Thiện]
+  (Sales Vin)      (Web E-Com/AI)      (Showroom Hậu Nghĩa)      (Mobile Web App)         (Đánh giá & Bảo hành)
+Bước 1: Tiếp cận & Nhận biết (Awareness)
+Hành động của Khách hàng: Khách hàng đang làm thủ tục đặt cọc hoặc vừa mua xong căn hộ Vinhomes Hậu Nghĩa qua nhân viên Sales Vin.
+Điểm chạm Công nghệ/Vận hành:
+Nhân viên Sales Vin mở App Affiliate của công ty, gửi cho khách một đường link định danh kèm thông điệp: "Chúc mừng anh/chị đã sở hữu căn hộ. Vin đang có chính sách tặng gói nội thất trị giá 6% giá trị nhà. Anh/chị quét link này để tự tay thiết kế và xem căn hộ tương lai của mình ngay nhé."
+Tâm lý khách hàng: Tò mò, hào hứng vì được nhận quà (6%) và muốn xem nhà mình trông như thế nào khi lên đồ.
+Bước 2: Trải nghiệm AI & Tự cá nhân hóa (Consideration)
+Hành động của Khách hàng: Khách click vào link trên điện thoại/máy tính để vào Web E-Commerce của công ty.
+Điểm chạm Công nghệ/Vận hành:
+Điểm chạm 1: Khách nhập Mã phân khu  Số tòa $\rightarrow$ Số căn hộ. Hệ thống lập tức hiện ra sơ đồ mặt bằng chuẩn của căn nhà họ.
+Điểm chạm 2 (Wow Effect): Khách chọn Phong cách (Hiện đại/Đông Dương) + Mức ngân sách Bấm nút "Thiết kế ngay" Trong 30 giây, AI kết xuất ra ảnh phối cảnh 3D sắc nét.
+Điểm chạm 3 (Minh bạch): Kèm theo ảnh là bảng dự toán chi tiết từng món đồ (Sofa, giường, tủ...). Giao diện hiển thị rõ: [Giá gốc] - [6% Vin trả thẳng] = [Số tiền khách cần trả]. Khách có thể chủ động tăng/giảm đồ rời để khớp với túi tiền.
+Tâm lý khách hàng: Bị thuyết phục hoàn toàn vì thấy hình ảnh trực quan, an tâm vì chi phí rõ ràng, không sợ bị "chặt chém" hay phát sinh.
+Bước 3: Chốt Hợp đồng & Giải ngân Tài chính (Conversion)
+Hành động của Khách hàng: Khách hàng muốn chốt phương án thiết kế và đến Showroom 1000m² tại Hậu Nghĩa để xem chất liệu thực tế.
+Điểm chạm Công nghệ/Vận hành:
+Điểm chạm 1 (Showroom Vật lý): Khách đến showroom, KTS mở lại đúng phương án AI khách đã chốt trên màn hình cảm ứng lớn. Khách sờ, chạm vào các chất liệu gỗ, thiết bị của các nhà cung cấp (An Cường, Kohler...) để kiểm chứng chất lượng.
+Điểm chạm 2 (Ký kết thần tốc): Khách bấm nút "Ký Hợp đồng" điện tử qua mã OTP. Hệ thống tự động kích hoạt thủ tục giải ngân: Vin chuyển 6%, Ngân hàng kích hoạt hồ sơ duyệt vay tín chấp phần còn lại cho khách trong 24 giờ.
+Tâm lý khách hàng: Cực kỳ an tâm vì công ty có showroom lớn hoành tráng ngay tại dự án, thủ tục tài chính lại quá tiện lợi (được hỗ trợ vốn, không phải tự bỏ tiền mặt lớn ra ngay).
+Bước 4: Giám sát Tiến độ Thi công từ xa (Retention/Production)
+Hành động của Khách hàng: Trong thời gian công ty thi công hoàn thiện căn hộ, khách hàng vẫn đi làm bình thường, không cần đến công trường.
+Điểm chạm Công nghệ/Vận hành:
+Điểm chạm Nhật ký Số: Khách hàng truy cập vào đường link theo dõi dự án của mình trên Web. Mỗi ngày, họ sẽ thấy thanh tiến độ chạy (Ví dụ: Đang lắp trần thạch cao: 100%, Đang lắp tủ bếp: 50%).
+Điểm chạm Hình ảnh thực tế: Khách xem được các bức ảnh chụp hiện trường thực tế do Đội thợ upload cuối ngày (đã được Giám sát của chúng ta duyệt Đạt QC). Khách có thể bình luận (Comment) trực tiếp dưới ảnh nếu có thắc mắc.
+Tâm lý khách hàng: Cảm thấy được tôn trọng, tự tin kiểm soát được tiến độ và chất lượng nhà mình mà không mất thời gian đi lại, giảm 100% sự sốt ruột, lo lắng.
+Bước 5: Bàn giao & Đánh giá Dịch vụ (Delight)
+Hành động của Khách hàng: Căn hộ hoàn thiện, khách đến nghiệm thu thực tế và nhận bàn giao chìa khóa.
+Điểm chạm Công nghệ/Vận hành:
+Điểm chạm 1: Giám sát cầm máy tính bảng cùng khách đi check căn hộ, khách ký nghiệm thu điện tử ngay trên màn hình.
+Điểm chạm 2 (Rating): Hệ thống tự động gửi một bảng khảo sát mức độ hài lòng (5 sao). Nếu khách đánh giá 5 sao kèm lời khen, hệ thống tự động tặng họ một voucher giảm giá 10% cho lần mua đồ rời tiếp theo hoặc link Affiliate để họ giới thiệu cho hàng xóm.
+Điểm chạm 3 (Bảo hành số): Khách nhận được một "Sổ bảo hành điện tử" trên web, hiển thị rõ thời hạn bảo hành của từng món đồ (Gỗ bảo hành 2 năm, thiết bị vệ sinh bảo hành 5 năm). Khi cần bảo hành, họ chỉ cần vào web bấm nút "Yêu cầu bảo trì" + chụp ảnh lỗi $\rightarrow$ Hệ thống tự động điều thợ xuống xử lý.
+Tâm lý khách hàng: Hạnh phúc, thỏa mãn vì nhà đẹp đúng cam kết của AI, dịch vụ hậu mãi chuyên nghiệp như các thương hiệu lớn toàn cầu.
+

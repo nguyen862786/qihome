@@ -1,0 +1,324 @@
+﻿QI HOLDING
+Chiến lược Tài chính – Đầu tư – Hệ sinh thái Kinh doanh
+
+ĐỀ ÁN DỰ ÁN
+HỆ THỐNG SỐ HÓA VẬN HÀNH & KINH DOANH NỘI THẤT CHIẾN LƯỢC
+Case study khởi động: Vinhomes Hậu Nghĩa — Nhân rộng: Hóc Môn, Cần Giờ
+BÁO CÁO TRÌNH HỘI ĐỒNG QUẢN TRỊ / CỔ ĐÔNG
+Xin phê duyệt chủ trương đầu tư, ngân sách và lộ trình triển khai
+Người trình báo cáo: Nguyễn Duy Quang
+Chức danh: CEO Qi Holding
+Ngày trình: 12/07/2026
+Mức độ bảo mật: Nội bộ – Chỉ lưu hành trong HĐQT/Cổ đông
+
+MỤC LỤC
+1. Tóm tắt điều hành
+2. Bối cảnh & cơ hội chiến lược
+3. Mô hình kinh doanh (Tay ba B2B2C)
+4. Hành trình khách hàng số hóa
+5. Kiến trúc hệ thống công nghệ
+6. Vận hành đội thầu phụ & quản lý vật tư
+7. Ma trận phân quyền & bảo mật dữ liệu
+8. Lộ trình triển khai
+9. Ngân sách & định biên nhân sự
+10. Chiến lược kinh doanh & mạng lưới Affiliate
+11. Rủi ro trọng yếu & biện pháp kiểm soát
+12. Mục tiêu tài chính dài hạn
+13. Kết luận & đề xuất phê duyệt
+
+1. TÓM TẮT ĐIỀU HÀNH
+Đề án này trình bày phương án triển khai một hệ thống số hóa toàn diện nhằm vận hành và bán hàng gói nội thất cho cư dân Vinhomes Hậu Nghĩa — nơi Vingroup tài trợ trực tiếp 6% giá trị căn hộ cho gói nội thất. Hệ thống lấy công nghệ AI tạo sinh (Generative AI) làm lõi trải nghiệm khách hàng, kết hợp nền tảng thương mại điện tử B2B2C, mạng lưới Affiliate cho lực lượng Sales Vinhomes, và bộ máy quản trị thi công – vật tư – tài chính số hóa hoàn toàn cho đội ngũ thầu phụ ruột.
+Mục tiêu không chỉ là một phần mềm quản lý, mà là hạ tầng vận hành cho phép Qi Holding nhân rộng mô hình “Mua nhà tặng nội thất – Vin trả tiền, Ngân hàng trợ vốn” ra các cụm dự án tiếp theo (Hóc Môn, Cần Giờ) mà không phải tăng tương ứng biên chế quản lý, hướng tới mốc doanh thu lũy tiến 1.000 tỷ VNĐ vào năm 2030.
+Các con số chốt của đề án
+3–4 tháng
+Thời gian xây dựng hệ thống
+200 triệu VNĐ
+Ngân sách nhân sự tech
+14 nhân sự
+Đội ngũ Tech tối thiểu
+1.000 tỷ VNĐ
+Mục tiêu doanh thu 2030
+
+Đề án đề xuất HĐQT/cổ đông phê duyệt 3 nội dung: (1) chủ trương đầu tư ngân sách công nghệ theo phương án tối ưu chi phí (MVP + tích hợp nền tảng có sẵn), (2) mốc giải ngân gắn với nghiệm thu kỹ thuật theo 4 đợt để bảo vệ dòng vốn, và (3) kế hoạch nhân rộng mô hình sang các cụm dự án Vinhomes tiếp theo sau khi Beta Test tại Hậu Nghĩa thành công.
+2. BỐI CẢNH & CƠ HỘI CHIẾN LƯỢC
+Vinhomes Hậu Nghĩa đang bước vào làn sóng bàn giao căn hộ đầu tiên, đi kèm chính sách tài trợ 6% giá trị nhà cho gói nội thất — một dòng tiền chắc chắn và quy mô lớn nếu Qi Holding tổ chức được kênh bán hàng và vận hành thi công đủ nhanh, đủ minh bạch để giữ niềm tin của cả Vingroup lẫn khách hàng.
+Vận hành hiện tại của ngành nội thất dự án (Zalo, gọi điện, Excel) không thể mở rộng quy mô lên hàng nghìn căn hộ cùng lúc: rủi ro thất thoát vật tư, tranh chấp nghiệm thu, chậm đối soát công nợ thầu phụ, và thiếu dữ liệu để Vingroup yên tâm giải ngân đúng hạn. Đây chính là khoảng trống mà hệ thống số hóa trong đề án này giải quyết.
+Cơ hội mở rộng
+Nhân rộng mô hình sang cụm Hóc Môn và Cần Giờ ngay sau khi Beta Test tại Hậu Nghĩa ổn định, không cần xây lại hạ tầng công nghệ từ đầu.
+Showroom 1.000m² tại Hậu Nghĩa không chỉ là chi phí trưng bày mà là nguồn thu bổ sung (phí slot, chia sẻ doanh thu với nhà cung cấp vật liệu như An Cường, Euroto, Kohler).
+Mạng lưới Sales Vinhomes trở thành lực lượng bán hàng Affiliate miễn phí, không tốn chi phí tuyển dụng đội sales riêng.
+3. MÔ HÌNH KINH DOANH (HỢP ĐỒNG TAY BA B2B2C)
+Toàn bộ vòng lặp vận hành và dòng tiền được thiết kế khép kín qua 4 mắt xích: Sales Vinhomes tiếp cận khách qua App Affiliate → khách trải nghiệm AI/Showroom → ký hợp đồng ba bên (Khách hàng – Qi Holding – Vinhomes, có ngân hàng đối tác tài trợ phần vay tín chấp) → hệ thống ERP tự động đẩy lệnh sản xuất và cập nhật tiến độ real-time cho cả khách hàng và Ban Quản lý Vin.
+Cấu trúc dòng tiền
+Vingroup chuyển thẳng 6% giá trị căn hộ cho Qi Holding theo các cột mốc giải ngân đã thống nhất (ví dụ: 30% khi ký hợp đồng, 40% khi bàn giao vật tư, 30% khi nghiệm thu hoàn thiện).
+Ngân hàng đối tác (ví dụ Techcombank) duyệt gói vay tín chấp 3–5 năm cho phần còn lại, dựa trên chính hợp đồng ba bên và biên bản bàn giao nhà làm căn cứ, rút ngắn thời gian duyệt vay xuống 24 giờ.
+Showroom thu thêm phí trưng bày/chia sẻ doanh thu từ các nhà cung cấp vật liệu cam kết tồn kho tại kho vệ tinh của công ty.
+Vai trò từng bên
+Bên tham gia
+Vai trò trong mô hình
+Vingroup
+Tài trợ 6% giá trị nhà, cung cấp danh sách khách hàng/căn hộ, đối tác pháp lý hợp đồng ba bên
+Ngân hàng đối tác
+Duyệt vay tín chấp phần còn lại cho khách hàng trong 24 giờ
+Qi Holding
+Chủ đầu tư nền tảng công nghệ, vận hành showroom, điều phối thầu phụ và nhà cung cấp
+Khách hàng (cư dân Vin)
+Trải nghiệm AI, chọn gói thiết kế, thanh toán phần chênh lệch (nếu có)
+Sales Vinhomes
+Kênh Affiliate giới thiệu khách, nhận hoa hồng số hóa theo hợp đồng thành công
+Nhà cung cấp/thầu phụ
+Cung ứng vật tư, thi công hoàn thiện theo BOM đã khóa định mức
+
+4. HÀNH TRÌNH KHÁCH HÀNG SỐ HÓA
+Hành trình khách hàng được thiết kế thành 5 bước liền mạch, mỗi bước đều có điểm chạm công nghệ cụ thể để tối đa hóa tỷ lệ chuyển đổi và cảm giác an tâm của khách hàng.
+Bước
+Tên giai đoạn
+Điểm chạm công nghệ chính
+Tâm lý khách hàng
+1
+Tiếp cận
+Sales Vin gửi link Affiliate định danh kèm thông điệp về gói nội thất 6%
+Tò mò, hào hứng vì nhận quà tài trợ
+2
+Trải nghiệm AI
+Nhập mã căn hộ → chọn phong cách & ngân sách → AI render phối cảnh 3D < 30 giây kèm bảng dự toán minh bạch
+Bị thuyết phục, an tâm vì chi phí rõ ràng
+3
+Ký hợp đồng
+Showroom 1.000m² xem chất liệu thật; ký điện tử qua OTP; Vin & Ngân hàng giải ngân trong 24h
+An tâm nhờ showroom hoành tráng, thủ tục tài chính tiện lợi
+4
+Giám sát online
+Theo dõi % tiến độ real-time, xem ảnh nghiệm thu đã duyệt QC, bình luận trực tiếp
+Được tôn trọng, kiểm soát tiến độ mà không cần đến công trường
+5
+Bàn giao & đánh giá
+Ký nghiệm thu điện tử, khảo sát 5 sao, sổ bảo hành điện tử, yêu cầu bảo trì qua web
+Hài lòng, tin tưởng dịch vụ hậu mãi chuyên nghiệp
+5. KIẾN TRÚC HỆ THỐNG CÔNG NGHỆ
+5.1. AI Interior Engine — trái tim trải nghiệm khách hàng
+Hệ thống số hóa toàn bộ layout 2D/CAD/BIM của các dòng sản phẩm tại Vinhomes Hậu Nghĩa (Studio, 1PN+, 2PN, 3PN, Shophouse, Biệt thự). Khách chọn Phân khu → Tòa → Mã căn, sau đó chọn phong cách (Hiện đại, Đông Dương, Tối giản, Tân cổ điển) và ngân sách.
+Mô hình Stable Diffusion kết hợp ControlNet (chạy qua RunPod/Replicate), được huấn luyện riêng bằng dữ liệu nội thất của công ty, tự động sắp xếp đồ đạc vào đúng mặt bằng — và quan trọng nhất: mọi món đồ trong ảnh render đều là sản phẩm thật, có mã SKU cụ thể từ nhà cung cấp đang đặt gian hàng tại showroom, để tự động khớp ra bảng giá dự toán (BOQ) chính xác thay vì chỉ là ảnh minh họa.
+5.2. Web E-Commerce “Click-to-Buy”
+Giỏ hàng thông minh (Smart Cart): khách bật/tắt từng món đồ, giá tổng cập nhật real-time; tự động trừ 6% Vin tài trợ và hiển thị số tiền còn lại cần thanh toán.
+Nút đăng ký vay tín chấp ngân hàng tích hợp thẳng trên giỏ hàng, kết nối API duyệt hạn mức online.
+Catalog E-Commerce chuẩn hóa theo mã SKU, thương hiệu, kích thước thực, file 3D asset (.obj/.fbx) phục vụ AI.
+5.3. Ứng dụng di động cho hiện trường
+Mobile Web-App (không build App Native trong giai đoạn MVP để tiết kiệm chi phí Store) phục vụ ba nhóm người dùng chính: Đội trưởng thầu phụ (nhận việc, gọi vật tư, chụp ảnh nhật ký GPS), Giám sát công trình (checklist QC điện tử, ký duyệt nghiệm thu), và Sales (theo dõi Affiliate, dashboard hoa hồng).
+5.4. Hạ tầng kỹ thuật
+Lớp hệ thống
+Công nghệ chỉ định
+Web Frontend & CMS
+Next.js / React.js — tối ưu SEO, hiển thị 3D mượt trên cả PC & mobile
+Mobile App
+Flutter hoặc React Native (giai đoạn mở rộng); Responsive Web cho MVP
+Backend & Database
+Node.js + Supabase/PostgreSQL, mã hóa đầu cuối, cấu hình Row Level Security (RLS)
+Lưu trữ ảnh/video/bản vẽ 3D
+AWS S3 hoặc Google Cloud Storage
+AI Engine
+Stable Diffusion + ControlNet, hạ tầng suy luận qua RunPod/Replicate (pay-per-use)
+
+6. VẬN HÀNH ĐỘI THẦU PHỤ & QUẢN LÝ VẬT TƯ
+6.1. Số hóa hồ sơ & phân vùng tự động
+Thay vì mở cổng đăng ký tự do, bộ phận Nhân sự/Dự án khởi tạo tài khoản định danh cho toàn bộ đối tác, nhà cung cấp và đội thầu phụ quen thuộc hiện có. Mỗi đội thầu có một “Vendor Passport” số hóa: năng lực nhân sự, thế mạnh thi công, chứng chỉ an toàn lao động (bắt buộc để ra vào công trường Vin). Hệ thống tự động phân vùng dự án theo địa bàn hoạt động và thế mạnh của từng đội.
+6.2. Quy trình phân việc & kiểm soát hiện trường
+Mọi tương tác giữa Ban Quản lý và thầu phụ chuyển 100% từ Zalo/điện thoại sang quy trình đóng gói trên phần mềm:
+Bước 1 – Nhận việc qua App: ngay khi khách chốt hợp đồng, hệ thống tự động bắn Work Order kèm bản vẽ AI, bản vẽ kỹ thuật và tiến độ cam kết đến App của Trưởng đội thầu phụ.
+Bước 2 – Báo cáo tiến độ hằng ngày: check-in GPS tại đúng căn hộ, chụp 3–5 ảnh trực tiếp từ camera App (không cho chọn ảnh cũ) để đảm bảo tính trung thực.
+Bước 3 – Nghiệm thu QC điện tử: Giám sát dùng checklist tiêu chuẩn, ký điện tử nếu đạt → hệ thống tự chuyển trạng thái “Chờ thanh toán” và đồng bộ ảnh hoàn thiện cho khách hàng & Ban quản lý Vin; nếu không đạt, tự động trả lệnh sửa chữa và tính vào KPI tiến độ.
+6.3. Quản lý cấp phát & ứng vật tư số hóa
+Khóa định mức vật tư tự động (BOM Lock): ngay khi hợp đồng được duyệt, hệ thống tính ra bảng định mức vật tư chính xác cho từng căn hộ, làm “trần chặn” cứng trên tài khoản thầu phụ.
+Gọi hàng qua App → duyệt tại kho tổng/kho vệ tinh → giao nhận xác nhận bằng quét mã QR tại công trường, xóa bỏ tranh chấp mất mát/trầy xước vật tư.
+Yêu cầu ứng phát sinh ngoài định mức phải kèm ảnh lý do, chỉ được xuất kho sau khi Admin/Giám sát trưởng phê duyệt; chi phí phát sinh do lỗi thầu phụ sẽ tự động khấu trừ vào đợt thanh toán công tiếp theo.
+Quyết toán dự án: khi bấm “Hoàn thành”, thầu phụ khai báo vật tư dư thừa, Giám sát nghiệm thu trả lại kho vệ tinh, hệ thống tự động cộng ngược vào tồn kho và đóng mã dự án.
+6.4. Chấm điểm & xếp hạng tự động (Scorecard)
+Sau mỗi căn hộ hoàn thành, hệ thống tự động xuất Scorecard theo 3 tiêu chí: tiến độ (số ngày trễ), chất lượng (số lần bị trả QC), kỷ luật (vi phạm an toàn). Các đội được xếp hạng từ A (xuất sắc) đến C (cần cải thiện) — cơ sở để giao các gói thầu VIP/biệt thự lớn cho đội Hạng A khi nhân rộng sang Cần Giờ, Hóc Môn, đảm bảo uy tín tuyệt đối với Vingroup.
+7. MA TRẬN PHÂN QUYỀN & BẢO MẬT DỮ LIỆU
+Hệ thống dùng cơ chế đăng nhập một cổng, phân luồng giao diện (dashboard) theo vai trò, được kiểm soát chặt bằng Row Level Security trên Supabase.
+Vai trò
+Giao diện
+Quyền hạn dữ liệu chính
+Admin (Anh Duy)
+Dashboard Tổng
+Toàn quyền xem/sửa/xóa tài chính, dự án, vật tư; duyệt tối cao các yêu cầu vượt định mức
+Kế toán
+Dashboard Tài chính
+Xem/sửa công nợ, tiến độ thanh toán Khách/Vin/Thầu phụ; không có quyền xóa lịch sử dòng tiền
+Giám sát công trình
+Dashboard Hiện trường
+Xem căn hộ phụ trách; cập nhật checklist QC; phê duyệt/từ chối ảnh nghiệm thu
+Đội thầu phụ
+Mobile Web
+Chỉ xem bản vẽ & BOM của căn hộ mình làm; gọi vật tư; upload nhật ký thi công
+Sales (Affiliate)
+Dashboard Affiliate
+Chỉ xem danh sách khách hàng của mình và trạng thái hoa hồng
+Nhà cung cấp/Vendor
+Cổng quản lý kho
+Quản lý tồn kho và công nợ với công ty
+7.1. Chiến lược lưu trữ & an toàn dữ liệu
+Hạ tầng Hybrid Cloud: dữ liệu lõi (dòng tiền, hợp đồng, khách hàng, phân quyền) lưu tại Supabase/PostgreSQL mã hóa đầu cuối; dữ liệu hình ảnh/video/bản vẽ 3D nặng lưu tại AWS S3/Google Cloud Storage.
+Sao lưu tự động (Auto-Backup) lúc 2h sáng mỗi ngày, lưu 12 tháng phiên bản độc lập; khôi phục sự cố trong vòng 15 phút.
+Bảo mật thông tin cư dân: số điện thoại và thông tin tài chính cá nhân được che mờ (Masking), chỉ hiển thị đầy đủ trên tài khoản Admin và Kế toán khi làm thủ tục giải ngân.
+Audit Log: mọi hành động (ai sửa báo giá, ai duyệt xuất kho, ai ký nghiệm thu, thời gian, vị trí) được ghi nhật ký hệ thống, không thể xóa sửa — kiểm soát tuyệt đối tính minh bạch, chống gian lận nội bộ.
+7.2. Cảnh báo & báo cáo tự động
+8h sáng mỗi ngày: Dashboard Dòng tiền vào – ra – dự chi tuần gửi thẳng vào tài khoản Admin.
+Cảnh báo đỏ tự động (System Alert): căn hộ trễ tiến độ quá 48 giờ so với Master Timeline, hoặc yêu cầu ứng vật tư vượt định mức, sẽ được gắn cờ đỏ và báo khẩn cấp đến Admin.
+
+8. LỘ TRÌNH TRIỂN KHAI
+Hệ thống được phát triển cuốn chiếu theo phương pháp Agile/Scrum trong 4 tháng, không cần hoàn thiện 100% mới đưa vào vận hành thử nghiệm tại Showroom Hậu Nghĩa.
+Giai đoạn
+Thời gian
+Nội dung trọng tâm
+1. Khởi động & kiến trúc dữ liệu
+Tháng 1
+Thiết kế Database, UI/UX toàn bộ giao diện; thu thập bản vẽ 2D/3D căn hộ mẫu; chuẩn hóa SKU và file 3D nhà cung cấp
+2. Lập trình Core & huấn luyện AI
+Tháng 2
+Lập trình Web E-Commerce & App di động Thợ/Giám sát; huấn luyện mô hình AI nhận diện mặt bằng; tích hợp cổng Affiliate
+3. Tích hợp SRM, vật tư & tài chính
+Tháng 2–3
+Module tách lệnh vật tư (BOM) & quản lý kho QR; tích hợp quy trình nghiệm thu ảnh/QC; kết nối API thanh toán 3 bên & duyệt tín chấp ngân hàng
+4. Beta Test tại Showroom Hậu Nghĩa
+Tháng 3
+Lên màn hình cảm ứng lớn tại showroom; 50 Sales Vin & 10 đội thầu ruột dùng thử; tối ưu AI đạt độ chính xác ~98%
+5. Bàn giao & vận hành chính thức
+Tháng 4
+Bàn giao tài khoản Master; đào tạo Kế toán/Thủ kho/Giám sát; kích hoạt chiến dịch marketing đón làn sóng bàn giao nhà
+8.1. Mốc giải ngân cho đội Tech (bảo vệ dòng vốn)
+200 triệu VNĐ ngân sách nhân sự tech được chia làm 4 đợt giải ngân gắn chặt với 4 mốc nghiệm thu kỹ thuật thực tế, tránh rủi ro đội outsource trễ hạn hoặc bàn giao code kém chất lượng:
+Đợt
+Tỷ lệ
+Điều kiện nghiệm thu
+Đợt 1
+20%
+Ký hợp đồng & thiết lập hạ tầng: Database hoàn thiện trên Supabase, UI/UX Figma đầy đủ, Repository GitHub bàn giao
+Đợt 2
+30%
+Nghiệm thu tuần 3: Web E-commerce, giỏ hàng thông minh (trừ 6% Vin), ma trận phân quyền 5 vị trí — demo chạy mượt đăng nhập & lên đơn
+Đợt 3
+30%
+Nghiệm thu tuần 6: Tích hợp API AI (chọn căn Vin Hậu Nghĩa ra ảnh 3D + báo giá SKU thật) và giao diện gọi vật tư QR + chụp ảnh GPS
+Đợt 4
+20%
+Nghiệm thu tuần 8: Beta Test 50 căn hộ mẫu không lỗi nghiêm trọng; bàn giao 100% quyền Master (Supabase, AWS) & mã nguồn sạch trên GitHub
+8.2. Lộ trình mở rộng theo năm
+Giai đoạn
+Mốc thời gian
+Kết quả đầu ra
+1. Xây nền móng & công nghệ
+Tháng 1–3
+Ký xong Master Agreement với Vin & Ngân hàng; Bản Beta Web AI chạy thử 50 mặt bằng mẫu
+2. Kích hoạt hệ sinh thái
+Tháng 4–6
+Showroom đi vào hoạt động, phủ 80% slot tài trợ; tối thiểu 1.000 Sales Vin đăng ký Affiliate
+3. Tăng tốc & cán mốc doanh thu
+Từ tháng 7
+Chốt 30–40% tổng số căn hộ bàn giao đợt 1; nhân rộng sang Hóc Môn, Cần Giờ; hướng tới 1.000 tỷ VNĐ năm 2030
+
+9. NGÂN SÁCH & ĐỊNH BIÊN NHÂN SỰ
+9.1. Phương án tối ưu ngân sách
+Với ngân sách 200 triệu VNĐ nhân sự trong 2 tháng, chiến lược phát triển chuyển từ “xây dựng mọi thứ từ đầu” sang “tích hợp nền tảng có sẵn (low-code/no-code core) + thuê chuyên gia AI viết module lõi” để đảm bảo tính khả thi tài chính.
+Hạng mục chi phí
+Định biên ngân sách
+Phương án phân bổ
+Nhân sự dự án (2 tháng)
+200.000.000 VNĐ
+1 Tech Lead kiêm Backend (80tr) + 1 Frontend Web/App (60tr) + 1 Kỹ sư AI (60tr) — thuê khoán trọn gói
+Hạ tầng setup ban đầu
+100.000.000 VNĐ
+Bản quyền core thương mại điện tử có sẵn, template UI/UX, thiết lập hệ thống tổng thể
+Phí duy trì Supabase
+~2.500.000 VNĐ/tháng (100 USD)
+Gói Supabase Pro: backup tự động, mã hóa dữ liệu khách hàng, tốc độ truy vấn cao
+Công cụ & API AI
+30.000.000 VNĐ
+Nạp API Replicate/RunPod/OpenAI, tính phí theo lượt sử dụng (pay-per-use)
+Server lưu trữ ảnh/3D
+20.000.000 VNĐ/năm
+Gói lưu trữ đám mây tốc độ cao (AWS S3/Google Cloud) cho thư viện vật liệu & ảnh công trường
+9.2. Chiến lược bung hàng thần tốc trong 2 tháng (nguyên lý MVP)
+Tháng 1 — Hoàn thiện mặt trước (đầu ra bán hàng B2B2C): dựng Web bán hàng trên mã nguồn mở (Strapi/WooCommerce + Next.js) trong 2 tuần; kỹ sư AI train Stable Diffusion + ControlNet với đúng 50 layout căn hộ Hậu Nghĩa. Kết quả: khách & Sales Vin đã vào web, quét chọn căn và xem phối cảnh AI ra bảng giá sơ bộ.
+Tháng 2 — Hoàn thiện mặt sau (đầu vào quản lý SRM & thợ): xây luồng tính BOM tự động từ bảng giá AI; cấu hình ma trận phân quyền Supabase cho 5 vị trí; đóng gói giao diện Web-App tối giản chạy trên trình duyệt điện thoại (không build App Store/Google Play) để tiết kiệm chi phí.
+9.3. Định biên nhân sự phát triển (giai đoạn mở rộng đầy đủ): 14 nhân sự
+Nhóm
+Vai trò
+Số lượng
+Quản lý & Thiết kế
+Product Manager
+1
+Quản lý & Thiết kế
+UI/UX Designer
+2
+Lập trình viên
+Backend Developer
+2
+Lập trình viên
+Frontend Developer
+2
+Lập trình viên
+Mobile App Developer
+2
+Lập trình viên
+AI & Data Engineer
+2
+Kiểm thử & QA
+Tester/QA
+2
+Kiểm thử & QA
+Solutions Architect
+1
+10. CHIẾN LƯỢC KINH DOANH & MẠNG LƯỚI AFFILIATE
+Mục tiêu: biến toàn bộ lực lượng bán hàng của Vinhomes và các sàn đại lý thành cộng tác viên bán hàng của Qi Holding, không phát sinh chi phí tuyển dụng đội sales riêng.
+Chính sách Affiliate minh bạch: mức chiết khấu hấp dẫn trên tổng giá trị gói nội thất cho Sales Vin giới thiệu thành công; tổ chức workshop tại Showroom Hậu Nghĩa cho Trưởng sàn, Giám đốc kinh doanh Vin.
+Sales Kit số hóa: mỗi Sales Vin có mã QR/link Affiliate định danh riêng; hệ thống tự động gắn cookie ghi nhận nguồn khách và tính hoa hồng khi hợp đồng ba bên được Vin giải ngân.
+Sales theo dõi trực tiếp trạng thái khách hàng (Đang tư vấn → Đang thiết kế → Đã ký HĐ → Đã giải ngân) để chủ động chăm sóc, tăng tỷ lệ chốt.
+Chương trình giới thiệu (Referral) dành cho khách hàng đã hài lòng: đánh giá 5 sao tự động nhận voucher 10% cho lần mua tiếp theo hoặc link Affiliate giới thiệu hàng xóm.
+
+11. RỦI RO TRỌNG YẾU & BIỆN PHÁP KIỂM SOÁT
+Nhóm rủi ro
+Rủi ro cụ thể
+Biện pháp kiểm soát trong đề án
+Kỹ thuật
+Đội Tech outsource trễ tiến độ hoặc bàn giao code kém chất lượng
+Giải ngân 4 đợt (20/30/30/20%) gắn chặt với mốc nghiệm thu kỹ thuật thực tế; bàn giao Master account & source code sạch ở đợt cuối
+Kỹ thuật
+AI render sai lệch so với mặt bằng thật, đồ đạc không khớp SKU
+Beta Test 50–100 căn hộ mẫu để tinh chỉnh thuật toán trước khi bung hàng; mục tiêu độ chính xác ~98%
+Vận hành
+Thầu phụ gian lận vật tư, báo cáo tiến độ giả
+Check-in GPS bắt buộc, chụp ảnh trực tiếp từ camera App (không chọn ảnh cũ), giao nhận vật tư xác nhận bằng quét QR tại công trường
+Vận hành
+Tranh chấp chất lượng thi công
+Checklist QC điện tử + ký duyệt điện tử của Giám sát; lỗi bị trả về tính vào KPI tiến độ của thầu phụ
+Tài chính
+Vingroup/Ngân hàng chậm giải ngân, ảnh hưởng dòng tiền
+Hợp đồng ba bên chuẩn hóa với Ban Pháp chế Vingroup, ký điện tử (e-signing), cột mốc giải ngân rõ ràng theo % tiến độ
+Tài chính
+Chi phí phát sinh ngoài định mức vật tư (BOM)
+Khóa cứng định mức (Hard Limit) theo hợp đồng; yêu cầu vượt định mức bắt buộc phê duyệt thủ công kèm ảnh lý do
+Bảo mật dữ liệu
+Rò rỉ thông tin tài chính/cá nhân của cư dân Vinhomes
+Row Level Security theo vai trò, masking số điện thoại/thông tin tài chính, mã hóa đầu cuối, audit log không thể xóa sửa
+Bảo mật dữ liệu
+Mất dữ liệu do sự cố kỹ thuật
+Auto-Backup hằng ngày (2h sáng), lưu 12 tháng phiên bản độc lập, khôi phục trong 15 phút
+12. MỤC TIÊU TÀI CHÍNH DÀI HẠN
+Đề án đặt nền móng để Qi Holding chuyển từ mô hình thi công/bán hàng thủ công sang nền tảng số có thể nhân rộng vô hạn về quy mô căn hộ mà không tăng tương ứng chi phí quản lý. Ba cột mốc tài chính chính được đặt ra như sau:
+Giai đoạn 1 (Tháng 1–3): hoàn thiện hạ tầng công nghệ và pháp lý, chạy Beta 50 mặt bằng mẫu, chưa đặt mục tiêu doanh thu — tập trung chất lượng nền móng.
+Giai đoạn 2 (Tháng 4–6): showroom vận hành, 1.000+ Sales Vin kích hoạt Affiliate — đây là giai đoạn xây kênh bán hàng quy mô lớn với chi phí biên gần như bằng 0.
+Giai đoạn 3 (Từ tháng 7): chốt 30–40% tổng số căn hộ đợt bàn giao đầu tiên tại Hậu Nghĩa, đồng thời nhân rộng mô hình sang Hóc Môn và Cần Giờ, hướng tới tốc độ doanh thu lũy tiến đạt mốc 1.000 tỷ VNĐ vào năm 2030.
+Đòn bẩy tài chính cốt lõi của mô hình: công ty không cần vốn lưu động lớn để tài trợ khách hàng vì 6% đến trực tiếp từ Vingroup và phần còn lại được ngân hàng đối tác giải ngân qua vay tín chấp — rủi ro công nợ khách hàng gần như được chuyển giao cho hệ thống tài chính đối tác, cho phép Qi Holding tập trung vốn vào mở rộng công suất thi công và showroom.
+13. KẾT LUẬN & ĐỀ XUẤT PHÊ DUYỆT
+Đề án này chuyển hóa một cơ hội kinh doanh cụ thể (chính sách 6% nội thất của Vinhomes Hậu Nghĩa) thành một hệ thống vận hành số có thể nhân rộng, với rủi ro tài chính được chuyển phần lớn sang đối tác (Vingroup, ngân hàng) và rủi ro vận hành được kiểm soát bằng dữ liệu thời gian thực thay vì lòng tin thủ công.
+Kính trình HĐQT/Cổ đông Qi Holding xem xét và phê duyệt các nội dung sau:
+Phê duyệt chủ trương đầu tư ngân sách công nghệ theo phương án tối ưu chi phí: 200 triệu VNĐ nhân sự (2 tháng) + 100 triệu VNĐ hạ tầng setup + chi phí vận hành định kỳ (Supabase, API AI, lưu trữ đám mây).
+Phê duyệt cơ chế giải ngân 4 đợt (20/30/30/20%) cho đội Tech gắn với mốc nghiệm thu kỹ thuật, nhằm bảo vệ dòng vốn của công ty.
+Phê duyệt kế hoạch Beta Test tại Showroom Hậu Nghĩa (50–100 căn hộ mẫu) làm điều kiện tiên quyết trước khi bung hàng chính thức và nhân rộng sang Hóc Môn, Cần Giờ.
+Ủy quyền cho CEO (Nguyễn Duy Quang) trực tiếp đàm phán và ký kết Master Agreement với Vingroup và ngân hàng đối tác trong khung chính sách đã trình bày tại đề án này.
+
+TP.HCM, ngày 12 tháng 07 năm 2026
+Người trình báo cáo
+NGUYỄN DUY QUANG
+CEO Qi Holding

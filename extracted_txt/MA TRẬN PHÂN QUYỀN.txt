@@ -1,0 +1,95 @@
+﻿MA TRẬN PHÂN QUYỀN & MÔ TẢ CHỨC NĂNG HỆ THỐNG SỐ HÓA
+I. BẢNG CHI TIẾT PHÂN QUYỀN VÀ LUỒNG VẬN HÀNH
+Vị trí nhân sự
+Chức năng công việc chính
+Quyền hạn trên phần mềm Web/App
+Báo cáo công việc cho ai
+1. Admin Tổng thể (Anh/Giám đốc dự án)
+- Điều hành toàn bộ dự án.
+
+- Xem bức tranh tài chính, tiến độ tổng.
+
+- Duyệt các khoản chi, ứng vượt định mức.
+- Full Quyền (Super Admin): Xem toàn bộ dữ liệu hệ thống.
+
+- Quyền tối cao phê duyệt các yêu cầu vượt hạn mức, thay đổi nhân sự master.
+- Hội đồng Quản trị / Trực tiếp điều hành.
+2. Quản lý Kho (Thủ kho tổng/Kho vệ tinh)
+- Tiếp nhận vật tư từ Nhà cung cấp.
+
+- Cấp phát vật tư cho Thầu phụ theo định mức.
+- Xem danh mục BOM (Định mức) của từng dự án.
+
+- Bấm xuất/nhập kho bằng quét mã QR.
+
+- Cảnh báo tồn kho an toàn.
+- Giám đốc Dự án (Hệ thống tự động đồng bộ báo cáo tồn kho).
+3. Kế toán Dự án
+- Đối soát dòng tiền 6% với Vin.
+
+- Giải ngân cho Nhà cung cấp, Thầu phụ.
+
+- Kiểm soát chi phí phát sinh.
+- Xem các Hợp đồng đã ký, biên bản nghiệm thu đạt QC.
+
+- Lập lệnh chi tiền (chờ Admin duyệt).
+
+- Quản lý công nợ đối tác.
+- Giám đốc Dự án & Giám đốc Tài chính tổng.
+4. Đội trưởng Thợ (Thầu phụ ruột)
+- Tiếp nhận mặt bằng và thi công.
+
+- Gọi vật tư trong định mức.
+
+- Báo cáo tiến độ ngày bằng hình ảnh.
+- Xem bản vẽ kỹ thuật & Phối cảnh AI căn hộ được giao.
+
+- Nút bấm "Yêu cầu cấp vật tư", "Yêu cầu nghiệm thu".
+
+- Chỉ xem được dự án mình phụ trách.
+- Giám sát công trình (Site Manager) phụ trách phân khu đó.
+5. Nhân viên Sale (Sales Vin/Sales Nội bộ)
+- Tiếp cận khách hàng mua nhà.
+
+- Gửi link trải nghiệm AI cho khách.
+
+- Chăm sóc khách ký hợp đồng.
+- Chỉ xem được Dashboard cá nhân: Danh sách khách hàng của mình, trạng thái HĐ, số tiền hoa hồng (Affiliate) được nhận.
+- Trưởng phòng Kinh doanh (Hệ thống tự động cập nhật doanh số).
+6. Nhân viên Thiết kế (KTS điều chỉnh)
+- Tiếp nhận concept AI khách chọn.
+
+- Bóc tách bản vẽ kỹ thuật chi tiết.
+
+- Điều chỉnh thiết kế nếu khách yêu cầu.
+- Upload bản vẽ kỹ thuật, nạp thư viện 3D sản phẩm mới.
+
+- Sửa đổi cấu trúc không gian căn hộ trên hệ thống khi có yêu cầu được duyệt.
+- Giám đốc Mỹ thuật / Trưởng phòng Thiết kế.
+7. Giám sát Công trình (Site Manager - Nhân sự cốt lõi)
+- Quản lý trực tiếp các căn hộ tại hiện trường.
+
+- Nghiệm thu chất lượng thi công của thợ.
+- Đánh giá QC theo Checklist trên App.
+
+- Phê duyệt hoặc Từ chối nghiệm thu kèm hình ảnh lỗi.
+
+- Ký biên bản bàn giao nhà.
+- Giám đốc Dự án.
+II. QUY TRÌNH BÁO CÁO CÔNG VIỆC ONLINE (REAL-TIME REPORTING)
+Để loại bỏ hoàn toàn các báo cáo giấy và họp hành không cần thiết, hệ thống sẽ tự động hóa luồng báo cáo online theo thời gian thực:
+Báo cáo Tiến độ Hiện trường (Thợ  Giám sát Khách hàng): Khi thợ chụp ảnh cập nhật nhật ký thi công cuối ngày, hệ thống tự động bắn thông báo (Push Notification) qua App cho Giám sát. Khi Giám sát bấm duyệt "Đạt", dữ liệu này lập tức cập nhật lên giao diện theo dõi của Khách hàng và Ban Quản lý Vin.
+Báo cáo Tài chính & Dòng tiền (Kế toán Admin): Hệ thống tự động tổng hợp số liệu doanh thu ghi nhận từ Vin (khoản 6%) và ngân hàng giải ngân theo ngày. 8h sáng mỗi ngày, một báo cáo tự động (Dashboard Dashboard) về Dòng tiền vào - Dòng tiền ra - Dự chi tuần sẽ được gửi thẳng vào tài khoản của anh.
+Cảnh báo Đỏ tự động (System Alert): Nếu một căn hộ bị trễ tiến độ quá 48 giờ so với Master Timeline đã ký với Vin, hoặc có yêu cầu ứng vật tư vượt định mức, hệ thống sẽ tự động "gắn cờ đỏ" và gửi thông báo khẩn cấp đến máy của anh để anh can thiệp kịp thời.
+III. CHIẾN LƯỢC LƯU TRỮ VÀ AN TOÀN DỮ LIỆU (DATA STORAGE)
+Với quy mô doanh thu 1.000 tỷ, dữ liệu chính là tài sản vô giá và bảo mật tối mật của công ty. Quy hoạch lưu trữ được thiết kế như sau:
+1. Hạ tầng lưu trữ đám mây kết hợp (Hybrid Cloud):
+Dữ liệu lõi (Dòng tiền, Hợp đồng, Data khách hàng, Phân quyền): Lưu trữ tại hệ thống cơ sở dữ liệu độc lập bảo mật cao (sử dụng Supabase/PostgreSQL) có mã hóa đầu cuối.
+Dữ liệu hình ảnh/Video/Bản vẽ 3D nặng: Lưu trữ tại các kho lưu trữ đám mây tốc độ cao (như AWS S3 hoặc Google Cloud Storage). Việc này giúp App chạy cực mượt, không bị giật lag khi thợ upload hàng vạn bức ảnh nghiệm thu cùng lúc.
+2. Cơ chế sao lưu tự động (Auto-Backup):
+Hệ thống tự động sao lưu toàn bộ dữ liệu (Daily Backup) vào lúc 2h sáng mỗi ngày và lưu trữ thành các phiên bản độc lập trong vòng 12 tháng. Nếu xảy ra sự cố kỹ thuật, hệ thống có thể khôi phục lại trạng thái gần nhất trong vòng 15 phút.
+3. Bảo mật thông tin cư dân (Data Privacy):
+Nhân viên Sale, Thiết kế hay Đội thợ chỉ nhìn thấy những thông tin cần thiết phục vụ công việc của họ. Số điện thoại và thông tin tài chính cá nhân của khách hàng Vinhomes sẽ bị che mờ (Masking - Ví dụ: 090****123) và chỉ hiển thị đầy đủ trên tài khoản Admin của anh và Kế toán khi làm thủ tục giải ngân.
+4. Lưu vết hoạt động (Audit Log):
+Mọi hành động trên phần mềm (Ai sửa báo giá, ai duyệt xuất kho, ai ký nghiệm thu, thời gian nào, ở đâu) đều được hệ thống ghi lại nhật ký hệ thống (System Log) và không thể xóa sửa. Điều này giúp anh kiểm soát tuyệt đối tính minh bạch, chống gian lận nội bộ.
+

@@ -1,0 +1,75 @@
+﻿TỔNG HỢP KIẾN TRÚC HỆ THỐNG SỐ HÓA TOÀN DIỆN 
+PHẦN 1: HẠ TẦNG HỆ THỐNG (WEB & APP)
+Web App (Frontend & CMS): Phát triển bằng Next.js/React.js để tối ưu SEO cho web bán hàng, giao diện hiển thị 3D AI mượt mà và chạy tốt trên cả máy tính lẫn điện thoại.
+Mobile App (iOS & Android): Phát triển bằng Flutter hoặc React Native. Trọng tâm dành cho Đội trưởng Thợ, Giám sát (Site Manager), và Sales để thao tác nhanh tại công trường (chụp ảnh, quét QR kho, check-in).
+Backend & Cơ sở dữ liệu: Node.js kết hợp Supabase/PostgreSQL để quản lý phân quyền và dữ liệu dòng tiền bảo mật, mã hóa đầu cuối. Hình ảnh/Bản vẽ nặng lưu trữ tại AWS S3.
+PHẦN 2: CHỨC NĂNG ĐĂNG NHẬP & PHÂN QUYỀN TRUY CẬP (CORE AUTHENTICATION)
+Hệ thống sử dụng cơ chế đăng nhập một cổng nhưng phân luồng giao diện (Dashboard) theo ID chức vụ:
+Khách hàng (Cư dân Vin): Đăng nhập qua Số điện thoại + mã OTP. Giao diện tối giản, tập trung vào trải nghiệm.
+Đối tác & Nhà cung cấp (Vendor/OEM): Đăng nhập bằng tài khoản doanh nghiệp được cấp. Giao diện quản lý kho và công nợ.
+Đội trưởng Thợ (Thầu phụ ruột): Đăng nhập qua Mobile App. Giao diện hiển thị danh sách công việc và quản lý vật tư được cấp.
+Nhân viên Sale (Affiliate): Đăng nhập bằng tài khoản định danh, gắn mã QR code cá nhân để theo dõi hoa hồng.
+KTS/Thiết kế: Đăng nhập bằng tài khoản chuyên môn, giao diện nạp file 3D và bóc tách kỹ thuật (BOQ).
+PHẦN 3: CHI TIẾT GIAO DIỆN QUẢN LÝ (BACKOFFICE GUI)
+1. Giao diện Admin Tổng thể (Dành cho Anh/Giám đốc Dự án)
+Dashboard Tài chính Real-time: Hiển thị tổng doanh thu theo ngày/tháng, biểu đồ dòng tiền vào (từ nguồn 6% của Vin + giải ngân Ngân hàng) và dòng tiền ra (thanh toán thầu phụ, nhà cung cấp).
+Trung tâm phê duyệt (Approval Center):
+Nút duyệt các yêu cầu ứng vật tư vượt định mức (Over-budget).
+Nút lệnh duyệt chi tiền hàng tuần cho Kế toán.
+Báo cáo sức khỏe dự án (Global Project Health): Danh sách toàn bộ căn hộ đang thi công, lọc theo trạng thái màu: Xanh (Đúng tiến độ) - Vàng (Rủi ro trễ) - Đỏ (Trễ > 48h cần can thiệp).
+Bảng xếp hạng Đối tác (Vendor Scorecard): Xem điểm số uy tín, tiến độ của các đội thợ để điều phối.
+2. Giao diện Quản lý Dự án (Dành cho Giám sát - Site Manager)
+Quản lý khu vực hiện trường: Hiển thị danh sách các căn hộ được phân công phụ trách tại cụm (Hậu Nghĩa/Hóc Môn/Cần Giờ).
+Cổng nghiệm thu chất lượng (Digital QA/QC): Giao diện dạng checklist tích chọn đạt/không đạt cho từng hạng mục thi công. Có nút chụp ảnh trực tiếp lỗi và ký tên điện tử phê duyệt.
+Điều phối nhân sự: Giao diện điều chuyển hoặc chỉ định Đội thợ phụ trách căn hộ mới.
+PHẦN 4: TOÀN BỘ CÁC LUỒNG CHỨC NĂNG ĐỂ XÂY DỰNG CODE (USER FLOWS)
+Để đội Tech lập trình các hàm xử lý (Logic Backend), hệ thống cần vận hành theo 5 luồng cốt lõi sau:
+Luồng 1: Tiếp cận & Trải nghiệm AI (Sales  Khách hàng)
+Sales gửi Link Affiliate ➔ Khách vào Web ➔ Chọn Mã Căn Hậu Nghĩa ➔ Hệ thống Load Bản vẽ 2D/3D
+                                                                           │
+Khách chốt Phương án ◄── Tính Tiền Real-time ◄── AI tự xếp sản phẩm thật ◄── Chọn Gu Thẩm Mỹ + Ngân sách
+Luồng 2: Ký Hợp đồng & Khởi tạo Dự án nhỏ lẻ (Micro-Project)
+Khách bấm "Ký Hợp đồng ba bên" bằng chữ ký số $\rightarrow$ Hệ thống Backend tự động tạo bản ghi dự án mới (PRJ-[ID]).
+Hệ thống khóa ngay Bảng định mức vật tư (BOM) dựa trên phối cảnh AI đã chốt.
+Hệ thống tự động kích hoạt tiến độ tổng (Master Timeline) đồng bộ với lịch bàn giao của Vin.
+Luồng 3: Quản lý Cấp phát & Ứng vật tư tại Hiện trường (Procurement & Inventory)
+Thợ bấm "Gọi vật tư" trên App  Hệ thống kiểm tra: Nếu số lượng < Hạn mức BOM còn lại Tự động chuyển lệnh đến Kho vệ tinh Hậu Nghĩa  Thủ kho xuất hàng Thợ quét mã QR giao nhận tại công trường.
+Nếu vượt hạn mức (Làm hỏng/Đổi thiết kế): Hệ thống khóa lệnh tự động Chuyển sang luồng "Yêu cầu ứng phát sinh" chờ Giám đốc Dự án duyệt thủ công.
+Luồng 4: Nhật ký Thi công & Nghiệm thu Chất lượng (Daily Reporting & QC)
+Cuối ngày: Thợ mở App Check-in vị trí GPS Chụp ảnh thực tế Upload Nhật ký.
+Hoàn thành giai đoạn: Thợ bấm "Yêu cầu nghiệm thu" Giám sát nhận thông báo Thực hiện chấm điểm theo QC Checklist trên App Nếu Đạt, hệ thống gửi hình ảnh hoàn thiện sang giao diện của Khách hàng & Vin, đồng thời kích hoạt lệnh đối soát kế toán.
+Luồng 5: Đối soát & Quyết toán Dòng tiền (Finance Flow)
+Giám sát duyệt Đạt QC  Hệ thống tự động tính công cho thợ và tiền hàng cho Nhà cung cấp Kế toán lập phiếu chi tự động Admin (Anh) bấm duyệt Giải ngân.
+PHẦN 5: KIẾN TRÚC WEB BÁN HÀNG NỘI THẤT COMMERCE WEB)
+Web bán hàng nội thất không chỉ là trang web trưng bày thông thường, mà là một Sàn thương mại điện tử tích hợp sâu B2B2C:
+Trang chủ & Thương hiệu: Giới thiệu năng lực công ty, các dự án lớn đã làm với Vin, và định vị Showroom 1000m² tại Hậu Nghĩa.
+Hệ thống Phân mục Sản phẩm (Catalog E-Com): Phân chia rõ ràng theo danh mục (Phòng khách, Phòng ngủ, Thiết bị bếp, Đèn trang trí...) và theo Thương hiệu nhà cung cấp đặt gian hàng. Mỗi sản phẩm bắt buộc phải có: Mã SKU, Giá niêm yết, Kích thước thực tế, File 3D asset (.obj/.fbx) để phục vụ bộ gen AI.
+Tính năng Giỏ hàng thông minh (Smart Cart Integration): Khách mua lẻ có thể mua như Shopee/Lazada. Khách dự án (mua combo) có tính năng tùy chỉnh vật liệu trực tiếp, tự động tính khấu trừ 6% chi phí Vin tài trợ và nút kết nối cổng duyệt hồ sơ vay tín chấp ngân hàng trong 24 giờ.
+ Thời gian xây dựng toàn bộ hệ thống: 3 Tháng
+Hệ thống sẽ được phát triển cuốn chiếu theo phương pháp Agile/Scrum để đảm bảo Tháng thứ 4 đã có thể đưa vào vận hành thử nghiệm tại Showroom Hậu Nghĩa, không cần đợi hoàn thiện 100% mới bung hàng.
+Giai đoạn 1: Khởi động & Kiến trúc dữ liệu
+Tháng 1
+Thiết kế Database, UI/UX chi tiết cho tất cả các giao diện nhân sự.
+- Thu thập bản vẽ 2D/3D các căn hộ mẫu Vinhomes Hậu Nghĩa.
+
+- Chuẩn hóa mã SKU và file 3D của các nhà cung cấp.
+Giai đoạn 2: Lập trình Core & Huấn luyện AI
+Tháng 2 - 
+Lập trình Web E-Commerce và App di động cho Thợ/Giám sát.
+- Hấn luyện (Train) mô hình AI nhận diện mặt bằng và tự động xếp đồ.
+- Tích hợp cổng Affiliate cho Sales Vin.
+Giai đoạn 3: Tích hợp SRM, Vận tư & Tài chính
+Lập trình Module tự động tách lệnh vật tư (BOM), Quản lý kho QR Code.
+- Tích hợp quy trình nghiệm thu ảnh và QC Checklist trên App.
+- Kết nối API cổng thanh toán 3 bên và duyệt tín chấp Ngân hàng.
+Giai đoạn 4: Beta Test tại Showroom Hậu Nghĩa
+Tháng 3
+Đưa hệ thống lên màn hình cảm ứng lớn tại Showroom Hậu Nghĩa.
+- Cho 50 Sales Vin và 10 đội thợ ruột dùng thử nghiệm hiện trường để fit lỗi kỹ thuật.
+- Tối ưu hóa thuật toán AI để ảnh render chuẩn xác 98%.
+Giai đoạn 5: Bàn giao & Vận hành chính thức
+Tháng 4
+Đóng gói toàn bộ hệ thống, bàn giao tài khoản Master cho Admin (Anh).
+- Đào tạo vận hành cho Kế toán, Thủ kho, Giám sát.
+- Kích hoạt toàn bộ chiến dịch Marketing đón làn sóng bàn giao nhà của Vin.
+

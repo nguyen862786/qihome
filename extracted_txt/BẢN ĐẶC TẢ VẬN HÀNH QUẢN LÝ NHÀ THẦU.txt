@@ -1,0 +1,49 @@
+﻿BẢN ĐẶC TẢ VẬN HÀNH: SỐ HÓA & QUẢN LÝ ĐỘI THẦU RUỘT (PHƯƠNG ÁN 1)
+1. Số hóa Hồ sơ Danh sách trắng (Whitelisting & Onboarding)
+Bước đầu tiên, chúng ta sẽ không mở cổng đăng ký tự do, mà bộ phận Nhân sự/Dự án sẽ khởi tạo tài khoản định danh cho toàn bộ danh sách các đối tác, nhà cung cấp và đội thầu phụ quen thuộc hiện tại vào hệ thống.
+Hồ sơ số hóa (Vendor Passport): Mỗi đội thầu sẽ có một hồ sơ số gồm: Năng lực nhân sự (số lượng thợ cứng), thế mạnh thi công (chuyên gỗ rời, chuyên điện nước, hay thạch cao), và các chứng chỉ an toàn lao động (đặc biệt quan trọng để ra vào công trường Vin).
+Phân vùng dự án tự động: Hệ thống dựa vào thế mạnh và địa bàn hoạt động của từng đội (Ví dụ: Đội thầu A chuyên cụm Hậu Nghĩa, Đội thầu B chuyên cụm Hóc Môn) để cấu hình bộ lọc. Khi dự án mới tại khu vực đó kích hoạt, hệ thống sẽ tự động chỉ định hoặc gợi ý đúng nhóm thầu phụ này.
+2. Quy trình Phân việc & Kiểm soát Hiện trường (Workflow Automation)
+Mọi tương tác giữa anh (Ban quản lý) và Đội thầu phụ sẽ dịch chuyển 100% từ Zalo/gọi điện sang quy trình đóng gói trên phần mềm:
+[Ký HĐ Khách hàng] ➔ [Hệ thống Auto-Assign việc cho Thầu phụ] ➔ [Thầu phụ nhận lệnh trên App]
+                                                                        │
+[Đối soát & Thanh toán] ◄── [Hệ thống tự động chấm điểm] ◄── [Giám sát nghiệm thu ảnh/QC]
+Bước 1: Nhận việc qua App (Push Notification)
+Ngay khi khách hàng chốt HĐ, dựa trên cấu hình phân vùng, hệ thống tự động bắn một lệnh thực hiện dự án (Work Order) kèm toàn bộ bản vẽ phối cảnh AI, bản vẽ kỹ thuật chi tiết và tiến độ cam kết đến App di động của Trưởng đội thầu phụ. Họ chỉ cần bấm "Xác nhận nhận việc".
+Bước 2: Báo cáo tiến độ bằng hình ảnh (Daily Visual Report)
+Check-in công trường: Khi đến căn hộ tại Vinhomes Hậu Nghĩa, đội thầu phải mở App check-in vị trí (sử dụng GPS của điện thoại để xác nhận họ đang có mặt tại đúng căn hộ đó).
+Cập nhật nhật ký thi công: Cuối ngày, thay vì nhắn tin Zalo, thầu phụ phải chụp ít nhất 3-5 bức ảnh sắc nét về hạng mục họ vừa làm (Ví dụ: Sơn bả tường, lắp khung tủ bếp) và tải lên hệ thống. Ảnh này phải chụp trực tiếp từ camera của App (không cho phép chọn ảnh cũ từ bộ sưu tập) để đảm bảo tính trung thực.
+Bước 3: Nghiệm thu & Kiểm soát chất lượng (Digital QA/QC Checklist)
+Khi thầu phụ bấm "Yêu cầu nghiệm thu giai đoạn", một thông báo sẽ gửi tới máy của Giám sát công trình (Site Manager) của chúng ta.
+Giám sát sẽ cầm máy tính bảng/điện thoại xuống căn hộ, mở Checklist tiêu chuẩn chất lượng đã cài sẵn (Ví dụ: 1. Cánh tủ có bị lệch không? 2. Bề mặt sơn có bong tróc không? 3. Các ổ cắm điện có nguồn chưa?).
+Nếu ĐẠT: Giám sát ký điện tử $\rightarrow$ Hệ thống tự động chuyển trạng thái sang "Chờ thanh toán giai đoạn" và đồng thời đồng bộ ảnh hoàn thiện lên trang theo dõi của Khách hàng và Ban quản lý Vin.
+Nếu KHÔNG ĐẠT: Giám sát chụp ảnh vị trí lỗi, ghi chú yêu cầu sửa chữa trên màn hình $\rightarrow$ Hệ thống tự động trả lệnh về cho Đội thầu phụ để xử lý lại, thời gian sửa lỗi sẽ được tính vào KPI tiến độ.
+3. Quản trị Dòng tiền đối ứng với Thầu phụ (Payment Automation)
+Để giữ uy tín và giữ chân các đội thầu phụ ruột, dòng tiền thanh toán cho họ phải cực kỳ sòng phẳng và minh bạch:
+Mỗi khi một cột mốc QC được duyệt ĐẠT trên hệ thống, phần mềm tự động tính toán số tiền công thanh toán giai đoạn đó cho thầu phụ dựa trên đơn giá khung đã ký từ trước.
+Dashboard của anh sẽ hiển thị danh sách các khoản "Phải trả thầu phụ theo sản lượng thực tế". Anh chỉ cần ký duyệt lệnh chi tập trung một tuần/lần trên hệ thống, kế toán sẽ chuyển khoản chính xác, giảm thiểu 100% việc tính toán thủ công bằng Excel vào cuối tháng.
+4. Hệ thống chấm điểm tự động (Automated Scorecard)
+Vì đây là các đội thầu quen thuộc, hệ thống này sẽ giúp anh "lọc vàng trong cát", biết chính xác đội nào làm tốt nhất để ưu tiên cho các siêu dự án tiếp theo:
+Sau khi mỗi căn hộ hoàn thành, phần mềm tự động xuất ra một bảng điểm (Scorecard) của đội thầu đó dựa trên dữ liệu thật thu thập suốt quá trình thi công:
+Tiến độ: Trễ bao nhiêu ngày so với kế hoạch?
+Chất lượng: Bị trả lại bao nhiêu lần ở bước QC?
+Kỷ luật: Có vi phạm quy định an toàn của Vin không?
+Hệ thống sẽ tự động xếp hạng các đội thầu từ Hạng A (Xuất sắc) đến Hạng C (Cần cải thiện). Khi triển khai sang các dự án lớn tiếp theo như Cần Giờ hay Hóc Môn, anh chỉ cần mở bộ lọc xem các đội Hạng A để giao các gói thầu VIP/Biệt thự lớn, đảm bảo uy tín tuyệt đối với Vingroup.
+BỔ SUNG TÍNH NĂNG: QUẢN LÝ CẤP PHÁT & ỨNG VẬT TƯ SỐ HÓA
+Toàn bộ quy trình từ tính toán định mức, yêu cầu cấp hàng, giao nhận tại căn hộ cho đến xử lý hao hụt sẽ được vận hành tự động trên App theo các bước sau:
+1. Khóa định mức vật tư tự động theo Hợp đồng (Material Baseline)
+Ngay khi HĐ của khách hàng được duyệt, phần mềm tự động tính toán ra Bảng định mức vật tư chính xác (BOM - Bill of Materials) cần thiết cho căn hộ đó (Ví dụ: Căn hộ A cần chính xác 45 mét tới gỗ An Cường mã MS 402, 5 bộ bản lề Blum, 10 thùng sơn Dulux...).
+Bảng định mức này sẽ làm "trần chặn" (Hard Limit) hiển thị trên tài khoản của Đội thầu phụ phụ trách căn hộ đó. Họ không thể yêu cầu cấp vật tư vượt quá số lượng này nếu không có lý do chính đáng và sự phê duyệt của anh.
+2. Quy trình Gọi hàng & Cấp phát qua App (Material Request Workflow)
+Thầu phụ chủ động gọi hàng: Thay vì gọi điện hay nhắn Zalo thúc giục kho: "Anh ơi ship cho em ít sơn/ít gỗ xuống căn 102", Trưởng đội thầu phụ sẽ mở App, chọn dự án đang làm  Vào mục "Yêu cầu cấp vật tư" Hệ thống hiển thị danh sách vật tư còn lại trong định mức Thầu phụ chọn số lượng và bấm gửi.
+Hệ thống duyệt và lệnh kho: Yêu cầu này tự động chuyển đến Thủ kho tổng hoặc Kho vệ tinh tại Hậu Nghĩa. Kho sẽ đóng gói đúng số lượng, mã hàng và xuất kho.
+Giao nhận bằng mã QR (QR Code Delivery): Khi xe chở vật tư đến căn hộ, tài xế/thủ kho vệ tinh sẽ mở mã QR xuất hàng trên điện thoại. Trưởng đội thầu phụ phải dùng App của mình quét mã này để xác nhận: "Đã nhận đủ hàng, đúng chủng loại và hàng hóa nguyên vẹn tại công trường". Kể từ giây phút này, trách nhiệm bảo quản vật tư thuộc về đội thầu phụ, xóa bỏ hoàn toàn việc tranh chấp nếu sau đó đồ bị mất mát hay trầy xước.
+3. Quản lý Yêu cầu Ứng/Bổ sung vật tư phát sinh (Over-budget Request)
+Trong trường hợp thi công bị lỗi dẫn đến hỏng vật liệu, hoặc khách hàng yêu cầu làm thêm hạng mục nhỏ:
+Thầu phụ sẽ bấm nút "Yêu cầu ứng thêm ngoài định mức", nhập lý do (Ví dụ: Khách đổi thiết kế hoặc thợ cắt lỗi) kèm hình ảnh hiện trạng.
+Yêu cầu này sẽ bắn thẳng về Dashboard của anh hoặc Giám sát trưởng. Chỉ khi anh bấm "Phê duyệt", kho mới được phép xuất thêm hàng.
+Đối soát tài chính: Hệ thống tự động ghi nhận phần chi phí phát sinh này. Nếu lỗi do thầu phụ làm hỏng, chi phí vật tư ứng thêm sẽ tự động khấu trừ vào đợt thanh toán công tiếp theo của đội đó. Nếu do khách đổi thiết kế, hệ thống tự động đưa vào phần phụ lục tính thêm tiền cho khách.
+4. Báo cáo Tồn kho Hiện trường & Quyết toán Dự án
+Kiểm kho online: Tại mọi thời điểm, anh chỉ cần mở Dashboard là thấy rõ: Căn hộ đó đã xuất bao nhiêu % vật tư, còn lại bao nhiêu trong kho vệ tinh.
+Quyết toán vật tư dư thừa: Khi dự án bấm nút "Hoàn thành", thầu phụ phải khai báo vật tư thừa (nếu có, ví dụ các tấm gỗ nguyên chưa cắt, phụ kiện chưa dùng). Giám sát sẽ nghiệm thu số hàng thừa này trả lại kho vệ tinh, hệ thống tự động cộng ngược lại vào kho và đóng mã dự án.
+

@@ -1,0 +1,46 @@
+﻿Định biên Nhân sự Phát triển (Tech Team): 14 Nhân sự
+Để chạy song song cả phần AI, Web, App và Hệ thống quản trị công trường, bộ máy nhân sự công nghệ tối thiểu cần có:
+Quản lý & Thiết kế (3 người):
+1 Product Manager (Quản lý tiến độ sản phẩm, kết nối với anh).
+2 UI/UX Designer (Thiết kế toàn bộ giao diện Web, App, Dashboard Admin).
+Đội ngũ Lập trình viên (8 người):
+2 Backend Developers (Lập trình logic hệ thống, bảo mật dữ liệu dòng tiền).
+2 Frontend Developers (Lập trình Web bán hàng nội thất & Dashboard).
+2 Mobile App Developers (Lập trình App di động cho Thợ và Giám sát).
+2 AI & Data Engineers (Chuyên trách train mô hình AI sắp xếp và render đồ đạc).
+Kiểm thử & Đảm bảo chất lượng (3 người):
+2 Tester/QA (Liên tục test lỗi hệ thống, test quét QR kho, test vị trí GPS).
+1 Solutions Architect (Kỹ sư trưởng kiến trúc hệ thống, chuyên cấu hình hạ tầng Cloud AWS/Supabase).
+PHƯƠNG ÁN TIẾT KIỆM CHI PHÍ VÀ THỜI GIAN TỐI ĐA
+Mức ngân sách 200 triệu cho nhân sự trong 2 tháng và các định biên hạ tầng anh đưa ra hoàn toàn có thể khả thi, với điều kiện chúng ta thay đổi chiến lược phát triển từ "xây dựng mọi thứ từ đầu" sang "Tích hợp các nền tảng có sẵn (Low-code/No-code Core) + Thuê chuyên gia AI viết module lõi".
+Với vai trò Giám đốc Dự án, tôi xin đóng gói lại bảng cân đối ngân sách và lộ trình triển khai theo bài toán tài chính mới của anh như sau:
+I. BẢNG DỰ TRÙ TÀI CHÍNH TỐI ƯU CỦA DOANH NGHIỆP (6 THÁNG)
+Hạng mục chi phí
+Định biên ngân sách của Anh
+Phương án phân bổ của Giám đốc Dự án
+1. Nhân sự dự án (2 tháng)
+200.000.000 VND
+Thuê khoán trọn gói theo cấu trúc: 1 Tech Lead kiêm Backend (80tr) + 1 Frontend Web/App (60tr) + 1 Kỹ sư AI (60tr).
+2. Hạ tầng setup ban đầu
+100.000.000 VND
+Chi trả chi phí bản quyền core thương mại điện tử có sẵn, template UI/UX và thiết lập hệ thống tổng thể.
+3. Phí duy trì Supabase
+~2.500.000 VND / tháng (100 USD)
+Đăng ký gói Supabase Pro để có tính năng backup tự động, mã hóa dữ liệu khách hàng và tốc độ truy vấn cao.
+4. Công cụ & API AI
+30.000.000 VND
+Nạp tiền vào tài khoản API của các bên trung gian (như Replicate, RunPod hoặc OpenAI) để chạy thuật toán gen ảnh nội thất theo lượt quét (Pay-per-use).
+5. Server lưu trữ ảnh/3D
+20.000.000 VND / năm
+Thuê gói lưu trữ đám mây tốc độ cao (AWS S3 hoặc Google Cloud Storage) để lưu trữ thư viện vật liệu và ảnh công trường.
+II. CHIẾN LƯỢC BUNG HÀNG THẦN TỐC TRONG 2 THÁNG
+Để khớp với quỹ thời gian 2 tháng thuê nhân sự, chúng ta sẽ áp dụng nguyên lý MVP (Minimum Viable Product - Sản phẩm khả dụng tối thiểu). Đội Tech sẽ tập trung làm phần "cốt lõi nhất" để anh đưa vào Showroom Hậu Nghĩa chạy ra tiền ngay, các tính năng phụ sẽ nâng cấp dần bằng dòng tiền thu về sau đó.
+Tháng 1: Hoàn thiện Mặt trước (Đầu ra bán hàng - B2B2C)
+Thiết lập Web bán hàng dựa trên các mã nguồn mở có sẵn (như Strapi hoặc WooCommerce kết hợp Next.js) để có ngay cổng E-Commerce trong 2 tuần.
+Kỹ sư AI tập trung train mô hình Stable Diffusion gắn ControlNet với đúng 50 layout căn hộ của Vin Hậu Nghĩa.
+Kết quả cuối tháng 1: Khách hàng và Sales Vin đã có thể vào web, quét chọn căn hộ và bấm xem phối cảnh AI ra bảng giá sơ bộ.
+Tháng 2: Hoàn thiện Mặt sau (Đầu vào quản lý - SRM & Thợ)
+Xây dựng luồng tính toán BOM (Định mức vật tư) tự động từ bảng giá AI.
+Cấu hình ma trận phân quyền trên Supabase cho 5 vị trí: Admin (Anh), Kho, Kế toán, Thợ, Giám sát.
+Đóng gói giao diện Web-App tối giản (Responsive Web) cho thợ chụp ảnh nghiệm thu và thủ kho quét QR xuất hàng (chạy trực tiếp trên trình duyệt điện thoại để tiết kiệm chi phí build App Store/Google Play).
+
