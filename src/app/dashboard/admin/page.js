@@ -8,6 +8,7 @@ export default function AdminDashboard() {
   const router = useRouter();
   const [profile, setProfile] = useState(null);
   const [isLive, setIsLive] = useState(false);
+  const [activeTab, setActiveTab] = useState('health'); // 'health' | 'requests' | 'vendors'
   
   // Dashboard real-time states
   const [financials, setFinancials] = useState({
@@ -21,6 +22,15 @@ export default function AdminDashboard() {
   const [projectHealth, setProjectHealth] = useState([]);
   const [scorecards, setScorecards] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  // New Vendor Evaluation Form states
+  const [subcontractorsList, setSubcontractorsList] = useState([]);
+  const [selectedSubId, setSelectedSubId] = useState('');
+  const [formQuality, setFormQuality] = useState(9.0);
+  const [formSpeed, setFormSpeed] = useState(9.0);
+  const [formReworks, setFormReworks] = useState(0);
+  const [formNotes, setFormNotes] = useState('');
+  const [formSuccess, setFormSuccess] = useState('');
 
   // Fallback static data
   const MOCK_FINANCIALS = {
@@ -43,8 +53,13 @@ export default function AdminDashboard() {
   ];
 
   const MOCK_SCORECARDS = [
-    { name: 'Thầu Phụ Hùng Vương', type: 'Đồ gỗ & Hoàn thiện', rating: 'Hạng A', score: 9.2, ontimedelivery: '95%', reworks: 2 },
-    { name: 'Thầu Phụ Đông Á', type: 'Cơ điện & Sơn bả', rating: 'Hạng B', score: 8.1, ontimedelivery: '88%', reworks: 5 }
+    { name: 'Thầu Phụ Hùng Vương', type: 'Đồ gỗ & Hoàn thiện', rating: 'Hạng A', score: 9.2, speed: 9.5, reworks: 2, notes: 'Thi công sắc nét, đúng thời hạn bàn giao.' },
+    { name: 'Thầu Phụ Đông Á', type: 'Cơ điện & Sơn bả', rating: 'Hạng B', score: 8.1, speed: 7.8, reworks: 5, notes: 'Sơn bả thạch cao đợt đầu hơi loang, đã yêu cầu sửa đổi.' }
+  ];
+
+  const MOCK_SUBS = [
+    { id: 'a0000000-0000-0000-0000-000000000004', full_name: 'Thầu Phụ Hùng Vương' },
+    { id: 'sub-east-asia', full_name: 'Thầu Phụ Đông Á' }
   ];
 
   useEffect(() => {
@@ -74,56 +89,63 @@ export default function AdminDashboard() {
       setOverBudgetRequests(MOCK_REQUESTS);
       setProjectHealth(MOCK_HEALTH);
       setScorecards(MOCK_SCORECARDS);
+      setSubcontractorsList(MOCK_SUBS);
+      if (MOCK_SUBS.length > 0) setSelectedSubId(MOCK_SUBS[0].id);
     }
   };
 
-  // Load real-time admin KPIs from Supabase
+  // Load real-time admin KPIs and Vendor Evaluations
   const loadLiveAdminData = async () => {
     try {
-      // 1. Fetch Projects for Revenue and Health
-      const { data: projects, error: pError } = await supabase
-        .from('projects')
-        .select('*');
-
+      // 1. Fetch Projects
+      const { data: projects, error: pError } = await supabase.from('projects').select('*');
       if (pError) throw pError;
 
       // 2. Fetch Over-budget material requests
       const { data: requests, error: rError } = await supabase
         .from('material_requests')
         .select(`
-          id,
-          sku,
-          requested_quantity,
-          evidence_image_url,
-          status,
+          id, sku, requested_quantity, evidence_image_url, status,
           project:project_id(project_code),
           subcontractor:subcontractor_id(full_name)
         `)
         .eq('is_over_budget', true)
         .eq('status', 'pending_approval');
-
       if (rError) throw rError;
+
+      // 3. Fetch Subcontractor Profiles
+      const { data: subs, error: sError } = await supabase
+        .from('profiles')
+        .select('id, full_name')
+        .eq('role', 'subcontractor');
+      if (sError) throw sError;
+      setSubcontractorsList(subs || MOCK_SUBS);
+      if (subs && subs.length > 0) setSelectedSubId(subs[0].id);
+
+      // 4. Fetch Vendor Evaluations
+      const { data: evals, error: eError } = await supabase
+        .from('vendor_evaluations')
+        .select(`
+          id, quality_score, speed_score, reworks_count, notes,
+          vendor:vendor_id(full_name)
+        `);
+      if (eError) throw eError;
 
       // Calculate financials
       let totalRevenue = 0;
       let vinSubsidy = 0;
       let bankDisbursed = 0;
       let profitGross = 0;
-
       const healthList = [];
 
       if (projects) {
         projects.forEach(p => {
           totalRevenue += Number(p.total_amount);
           vinSubsidy += Number(p.vin_subsidy);
-          // Bank loan disburse simulation (70% value less Vin subsidy)
           const bankAmt = Number(p.total_amount) * 0.7 - Number(p.vin_subsidy);
           if (bankAmt > 0) bankDisbursed += bankAmt;
-
-          // Estimated profit (15% margins)
           profitGross += Number(p.total_amount) * 0.15;
 
-          // Project health list mapping
           let progress = 10;
           let alert = 'green';
           let desc = 'Đang chuẩn bị lên bản vẽ concept 3D AI.';
@@ -169,10 +191,43 @@ export default function AdminDashboard() {
         reason: r.evidence_image_url ? 'Yêu cầu ứng phát sinh do thợ thi công lỗi hoặc hao hụt thực tế.' : 'Ứng vật tư dự phòng.',
         image: r.evidence_image_url
       }));
-
       setOverBudgetRequests(mappedRequests);
       setProjectHealth(healthList);
-      setScorecards(MOCK_SCORECARDS); // Standalone vendor scorecards (MVP seeded)
+
+      // Group evaluations by vendor to render dynamically
+      if (evals && evals.length > 0) {
+        const vendorGroups = {};
+        evals.forEach(ev => {
+          const vName = ev.vendor?.full_name || 'Đối tác liên kết';
+          if (!vendorGroups[vName]) {
+            vendorGroups[vName] = { count: 0, qualitySum: 0, speedSum: 0, reworks: 0, notesList: [] };
+          }
+          vendorGroups[vName].count += 1;
+          vendorGroups[vName].qualitySum += Number(ev.quality_score);
+          vendorGroups[vName].speedSum += Number(ev.speed_score);
+          vendorGroups[vName].reworks += Number(ev.reworks_count);
+          if (ev.notes) vendorGroups[vName].notesList.push(ev.notes);
+        });
+
+        const dynamicScorecards = Object.keys(vendorGroups).map(vName => {
+          const group = vendorGroups[vName];
+          const quality = (group.qualitySum / group.count).toFixed(1);
+          const speed = (group.speedSum / group.count).toFixed(1);
+          const rating = quality >= 9.0 ? 'Hạng A' : quality >= 7.5 ? 'Hạng B' : 'Hạng C';
+          return {
+            name: vName,
+            type: 'Đối tác hoàn thiện',
+            rating,
+            score: Number(quality),
+            speed: Number(speed),
+            reworks: group.reworks,
+            notes: group.notesList[0] || 'Chưa ghi chú'
+          };
+        });
+        setScorecards(dynamicScorecards);
+      } else {
+        setScorecards(MOCK_SCORECARDS);
+      }
 
     } catch (err) {
       console.error('Error loading live admin metrics:', err);
@@ -183,14 +238,75 @@ export default function AdminDashboard() {
     }
   };
 
-  // Handle over-budget requests approvals directly on DB
+  // Submit new Vendor Evaluation to database
+  const handleSubmitEvaluation = async (e) => {
+    e.preventDefault();
+    setFormSuccess('');
+    setLoading(true);
+
+    try {
+      if (isLive) {
+        const { error } = await supabase
+          .from('vendor_evaluations')
+          .insert([
+            {
+              vendor_id: selectedSubId,
+              evaluated_by: profile.id,
+              quality_score: formQuality,
+              speed_score: formSpeed,
+              reworks_count: formReworks,
+              notes: formNotes
+            }
+          ]);
+
+        if (error) throw error;
+        setFormSuccess('Đã gửi đánh giá năng lực đối tác lên LIVE DB thành công!');
+        await loadLiveAdminData();
+      } else {
+        // Mock Sandbox simulation
+        setFormSuccess('Đã lưu đánh giá (Mô phỏng Sandbox)!');
+        const targetSub = subcontractorsList.find(s => s.id === selectedSubId);
+        const subName = targetSub ? targetSub.full_name : 'Thầu Phụ Hùng Vương';
+        
+        setScorecards(prev => {
+          const exists = prev.find(v => v.name === subName);
+          if (exists) {
+            return prev.map(v => v.name === subName ? {
+              ...v,
+              score: Number(((v.score + formQuality) / 2).toFixed(1)),
+              speed: Number(((v.speed + formSpeed) / 2).toFixed(1)),
+              reworks: v.reworks + Number(formReworks),
+              notes: formNotes
+            } : v);
+          } else {
+            return [...prev, {
+              name: subName,
+              type: 'Đối tác hoàn thiện',
+              rating: formQuality >= 9.0 ? 'Hạng A' : 'Hạng B',
+              score: Number(formQuality),
+              speed: Number(formSpeed),
+              reworks: Number(formReworks),
+              notes: formNotes
+            }];
+          }
+        });
+      }
+      setFormNotes('');
+      setFormReworks(0);
+    } catch (err) {
+      alert('Lỗi lưu đánh giá: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle over-budget requests approvals
   const handleApproveRequest = async (id, approved) => {
     setLoading(true);
     try {
       const statusUpdate = approved ? 'approved' : 'rejected';
       
       if (isLive) {
-        // 1. Update request status in Database
         const { error } = await supabase
           .from('material_requests')
           .update({ status: statusUpdate })
@@ -198,7 +314,6 @@ export default function AdminDashboard() {
 
         if (error) throw error;
 
-        // 2. Insert audit log record
         await supabase
           .from('audit_logs')
           .insert([
@@ -214,7 +329,6 @@ export default function AdminDashboard() {
         alert(`Đã ${approved ? 'PHÊ DUYỆT' : 'TỪ CHỐI'} yêu cầu thành công trên LIVE DB!`);
         await loadLiveAdminData();
       } else {
-        // Mock Sandbox Fallback
         alert(`Đã ${approved ? 'PHÊ DUYỆT' : 'TỪ CHỐI'} yêu cầu thành công (Mô phỏng Sandbox)!`);
         setOverBudgetRequests(prev => prev.filter(r => r.id !== id));
       }
@@ -274,112 +388,260 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Tab Navigator */}
+        <div className="flex bg-slate-900/60 p-1.5 rounded-xl border border-slate-900 max-w-lg">
+          <button
+            onClick={() => setActiveTab('health')}
+            className={`flex-1 py-2 text-center text-xs font-bold rounded-lg transition ${
+              activeTab === 'health' ? 'bg-amber-500 text-slate-950 shadow-md' : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            🚦 Sức Khỏe Dự Án
+          </button>
+          <button
+            onClick={() => setActiveTab('requests')}
+            className={`flex-1 py-2 text-center text-xs font-bold rounded-lg transition ${
+              activeTab === 'requests' ? 'bg-amber-500 text-slate-950 shadow-md' : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            🔔 Đơn Gọi Hàng Vượt BOM ({overBudgetRequests.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('vendors')}
+            className={`flex-1 py-2 text-center text-xs font-bold rounded-lg transition ${
+              activeTab === 'vendors' ? 'bg-amber-500 text-slate-950 shadow-md' : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            🏆 Đánh Giá Đối Tác & Thầu
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-fadeIn">
           
-          {/* Left Column: Health and Over-budget Queue */}
-          <div className="lg:col-span-8 space-y-8">
+          {/* Left Column: Active tab content */}
+          <div className="lg:col-span-8 space-y-6">
             
-            {/* Approval Center for Over Budget */}
-            <div className="bg-slate-900/40 border border-slate-900 rounded-2xl p-6 space-y-4">
-              <h3 className="text-sm font-bold text-white tracking-tight flex items-center justify-between">
-                <span>🔔 Trung Tâm Phê Duyệt Cấp Phát Phát Sinh (Over-budget Queue)</span>
-                <span className="text-xs font-medium px-2 py-0.5 bg-red-500/10 text-red-400 border border-red-500/20 rounded-full">
-                  {overBudgetRequests.length} Yêu cầu chờ duyệt
-                </span>
-              </h3>
-
-              {overBudgetRequests.length === 0 ? (
-                <div className="text-center text-xs text-slate-500 py-6">
-                  Không có yêu cầu vượt định mức nào đang chờ duyệt.
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {overBudgetRequests.map((req) => (
-                    <div key={req.id} className="bg-slate-950/60 border border-slate-800 rounded-xl p-4 space-y-3">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <div className="text-xs font-bold text-slate-200">{req.projectCode} - {req.contractor}</div>
-                          <div className="text-[10px] text-slate-500 mt-0.5">
-                            Yêu cầu cấp thêm: <strong className="text-slate-300">{req.qty} đơn vị</strong> ({req.item})
-                          </div>
-                        </div>
-                        <span className="text-[9px] uppercase font-bold tracking-wide px-2 py-0.5 bg-red-500/10 text-red-400 border border-red-500/20 rounded">
-                          Vượt BOM
-                        </span>
-                      </div>
-                      
-                      <div className="text-xs bg-slate-950 p-2.5 rounded border border-slate-900 text-slate-400 leading-relaxed">
-                        📝 {req.reason}
-                      </div>
-
-                      <div className="flex justify-end space-x-3 pt-2">
-                        <button
-                          disabled={loading}
-                          onClick={() => handleApproveRequest(req.id, false)}
-                          className="bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 text-xs px-3.5 py-1.5 rounded-lg transition"
-                        >
-                          Từ chối
-                        </button>
-                        <button
-                          disabled={loading}
-                          onClick={() => handleApproveRequest(req.id, true)}
-                          className="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs px-4 py-1.5 rounded-lg font-bold transition"
-                        >
-                          ✓ Duyệt Lệnh Chi
-                        </button>
-                      </div>
+            {/* Tab 1: Project Health */}
+            {activeTab === 'health' && (
+              <div className="bg-slate-900/40 border border-slate-900 rounded-2xl p-6 space-y-4">
+                <h3 className="text-sm font-bold text-white tracking-tight">🚦 Báo Cáo Sức Khỏe Dự Án (Global Project Health)</h3>
+                
+                <div className="divide-y divide-slate-900 space-y-4 max-h-[500px] overflow-y-auto pr-1">
+                  {projectHealth.length === 0 ? (
+                    <div className="text-center text-xs text-slate-500 py-6">
+                      Chưa có dự án thi công nào trên cơ sở dữ liệu.
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                  ) : (
+                    projectHealth.map((proj, idx) => (
+                      <div key={idx} className="pt-4 first:pt-0 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div className="space-y-1">
+                          <div className="flex items-center space-x-2">
+                            <span className={`w-2.5 h-2.5 rounded-full ${
+                              proj.alert === 'green' ? 'bg-emerald-500' : proj.alert === 'yellow' ? 'bg-amber-500' : 'bg-red-500'
+                            }`}></span>
+                            <strong className="text-xs text-white">{proj.code}</strong>
+                            <span className="text-[10px] text-slate-500">Khách hàng: {proj.client}</span>
+                          </div>
+                          <p className="text-xs text-slate-400">{proj.desc}</p>
+                        </div>
 
-            {/* Global Project Health Status */}
-            <div className="bg-slate-900/40 border border-slate-900 rounded-2xl p-6 space-y-4">
-              <h3 className="text-sm font-bold text-white tracking-tight">🚦 Báo Cáo Sức Khỏe Dự Án (Global Project Health)</h3>
-              
-              <div className="divide-y divide-slate-900 space-y-4 max-h-72 overflow-y-auto pr-1">
-                {projectHealth.length === 0 ? (
+                        <div className="flex items-center space-x-4">
+                          <div className="w-24 bg-slate-950 border border-slate-800 h-2 rounded-full overflow-hidden">
+                            <div className="bg-amber-500 h-full" style={{ width: `${proj.progress}%` }}></div>
+                          </div>
+                          <span className="text-[10px] font-mono text-slate-400 font-bold">{proj.progress}%</span>
+                          <span className="text-[10px] font-bold uppercase px-2 py-0.5 bg-slate-900 text-slate-400 border border-slate-800 rounded">
+                            {proj.status}
+                          </span>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Tab 2: Over Budget Approval Center */}
+            {activeTab === 'requests' && (
+              <div className="bg-slate-900/40 border border-slate-900 rounded-2xl p-6 space-y-4">
+                <h3 className="text-sm font-bold text-white tracking-tight flex items-center justify-between">
+                  <span>🔔 Phê Duyệt Phát Sinh Ngoài Định Mức</span>
+                  <span className="text-xs font-medium px-2.5 py-0.5 bg-red-500/10 text-red-400 border border-red-500/20 rounded-full">
+                    {overBudgetRequests.length} Đơn chờ duyệt
+                  </span>
+                </h3>
+
+                {overBudgetRequests.length === 0 ? (
                   <div className="text-center text-xs text-slate-500 py-6">
-                    Chưa có dự án thi công nào trên cơ sở dữ liệu.
+                    Không có yêu cầu vượt định mức nào đang chờ duyệt.
                   </div>
                 ) : (
-                  projectHealth.map((proj, idx) => (
-                    <div key={idx} className="pt-4 first:pt-0 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                      <div className="space-y-1">
-                        <div className="flex items-center space-x-2">
-                          <span className={`w-2.5 h-2.5 rounded-full ${
-                            proj.alert === 'green' ? 'bg-emerald-500' : proj.alert === 'yellow' ? 'bg-amber-500' : 'bg-red-500'
-                          }`}></span>
-                          <strong className="text-xs text-white">{proj.code}</strong>
-                          <span className="text-[10px] text-slate-500">Khách hàng: {proj.client}</span>
+                  <div className="space-y-4">
+                    {overBudgetRequests.map((req) => (
+                      <div key={req.id} className="bg-slate-950/60 border border-slate-800 rounded-xl p-4 space-y-3">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <div className="text-xs font-bold text-slate-200">{req.projectCode} - {req.contractor}</div>
+                            <div className="text-[10px] text-slate-500 mt-0.5">
+                              Yêu cầu cấp thêm: <strong className="text-slate-300">{req.qty} đơn vị</strong> ({req.item})
+                            </div>
+                          </div>
+                          <span className="text-[9px] uppercase font-bold tracking-wide px-2 py-0.5 bg-red-500/10 text-red-400 border border-red-500/20 rounded">
+                            Vượt BOM
+                          </span>
                         </div>
-                        <p className="text-xs text-slate-400">{proj.desc}</p>
-                      </div>
+                        
+                        <div className="text-xs bg-slate-950 p-2.5 rounded border border-slate-900 text-slate-400 leading-relaxed">
+                          📝 {req.reason}
+                        </div>
 
-                      <div className="flex items-center space-x-4">
-                        <div className="w-24 bg-slate-950 border border-slate-800 h-2 rounded-full overflow-hidden">
-                          <div className="bg-amber-500 h-full" style={{ width: `${proj.progress}%` }}></div>
+                        {req.image && (
+                          <div className="text-[10px] text-amber-500 font-semibold underline cursor-pointer">
+                            🔍 Xem ảnh bằng chứng lỗi hỏng
+                          </div>
+                        )}
+
+                        <div className="flex justify-end space-x-3 pt-2">
+                          <button
+                            disabled={loading}
+                            onClick={() => handleApproveRequest(req.id, false)}
+                            className="bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 text-xs px-3.5 py-1.5 rounded-lg transition"
+                          >
+                            Từ chối
+                          </button>
+                          <button
+                            disabled={loading}
+                            onClick={() => handleApproveRequest(req.id, true)}
+                            className="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs px-4 py-1.5 rounded-lg font-bold transition"
+                          >
+                            ✓ Duyệt Cấp Phát
+                          </button>
                         </div>
-                        <span className="text-[10px] font-mono text-slate-400 font-bold">{proj.progress}%</span>
-                        <span className="text-[10px] font-bold uppercase px-2 py-0.5 bg-slate-900 text-slate-400 border border-slate-800 rounded">
-                          {proj.status}
-                        </span>
                       </div>
-                    </div>
-                  ))
+                    ))}
+                  </div>
                 )}
               </div>
-            </div>
+            )}
+
+            {/* Tab 3: Vendor & Supplier Evaluations */}
+            {activeTab === 'vendors' && (
+              <div className="space-y-6">
+                
+                {/* Interactive Evaluation Form */}
+                <div className="bg-slate-900/40 border border-slate-900 rounded-2xl p-6 space-y-4">
+                  <h3 className="text-sm font-bold text-white tracking-tight">📝 Biểu Mẫu Đánh Giá Năng Lực Đối Tác</h3>
+                  
+                  {formSuccess && (
+                    <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs p-3.5 rounded-xl">
+                      {formSuccess}
+                    </div>
+                  )}
+
+                  <form onSubmit={handleSubmitEvaluation} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Chọn Thầu phụ / Đối tác</label>
+                      <select
+                        value={selectedSubId}
+                        onChange={(e) => setSelectedSubId(e.target.value)}
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none"
+                      >
+                        {subcontractorsList.map(sub => (
+                          <option key={sub.id} value={sub.id}>{sub.full_name}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Số lần Rework (Sửa lỗi hoàn thiện)</label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={formReworks}
+                        onChange={(e) => setFormReworks(e.target.value)}
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Điểm Chất lượng thi công (0 - 10)</label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        min="0"
+                        max="10"
+                        value={formQuality}
+                        onChange={(e) => setFormQuality(Number(e.target.value))}
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Điểm Tiến độ bàn giao (0 - 10)</label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        min="0"
+                        max="10"
+                        value={formSpeed}
+                        onChange={(e) => setFormSpeed(Number(e.target.value))}
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none"
+                      />
+                    </div>
+
+                    <div className="md:col-span-2">
+                      <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Ghi chú nhận xét năng lực</label>
+                      <textarea
+                        required
+                        rows="2"
+                        value={formNotes}
+                        onChange={(e) => setFormNotes(e.target.value)}
+                        placeholder="Nhận xét chi tiết về tác phong công nghiệp, chất lượng gỗ, sơn bả của nhà thầu..."
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 placeholder-slate-600 focus:outline-none"
+                      ></textarea>
+                    </div>
+
+                    <div className="md:col-span-2 flex justify-end">
+                      <button
+                        type="submit"
+                        disabled={loading}
+                        className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-6 py-2.5 rounded-xl transition text-xs shadow-lg shadow-amber-500/10"
+                      >
+                        {loading ? 'Đang gửi...' : 'Gửi Đánh Giá KPI'}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+
+                {/* Historical Evaluations Table */}
+                <div className="bg-slate-900/40 border border-slate-900 rounded-2xl p-6 space-y-4">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Danh sách nhật ký năng lực</h3>
+                  <div className="space-y-3">
+                    {scorecards.map((vendor, idx) => (
+                      <div key={idx} className="bg-slate-950/40 border border-slate-900 p-3 rounded-xl text-xs space-y-2">
+                        <div className="flex justify-between items-center">
+                          <span className="font-bold text-slate-200">{vendor.name}</span>
+                          <span className="text-[10px] bg-slate-900 border border-slate-800 px-2 py-0.5 rounded text-amber-500 font-bold">
+                            {vendor.rating}
+                          </span>
+                        </div>
+                        <p className="text-slate-400 italic">" {vendor.notes} "</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+              </div>
+            )}
 
           </div>
 
-          {/* Right Column: Scorecards */}
+          {/* Right Column: Scorecards overview (Fixed Summary) */}
           <div className="lg:col-span-4 space-y-6">
             
-            {/* Vendor Scorecard */}
+            {/* Vendor Scorecard Summary */}
             <div className="bg-slate-900/40 border border-slate-900 rounded-2xl p-6 space-y-4">
-              <h3 className="text-sm font-bold text-white tracking-tight">🏆 Bảng Xếp Hạng Thầu Phụ (Vendor Scorecard)</h3>
+              <h3 className="text-sm font-bold text-white tracking-tight">🏆 Bảng Xếp Hạng Đối Tác & Thầu (Vendor Scorecard)</h3>
               
               <div className="space-y-4">
                 {scorecards.map((vendor, idx) => (
@@ -396,12 +658,12 @@ export default function AdminDashboard() {
 
                     <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-900 text-center">
                       <div>
-                        <div className="text-[9px] text-slate-600">Đơn vị KPI</div>
+                        <div className="text-[9px] text-slate-600">Chất lượng</div>
                         <div className="text-xs font-bold text-white mt-0.5">{vendor.score}</div>
                       </div>
                       <div>
-                        <div className="text-[9px] text-slate-600">Đúng tiến độ</div>
-                        <div className="text-xs font-bold text-white mt-0.5">{vendor.ontimedelivery}</div>
+                        <div className="text-[9px] text-slate-600">Tiến độ</div>
+                        <div className="text-xs font-bold text-white mt-0.5">{vendor.speed}</div>
                       </div>
                       <div>
                         <div className="text-[9px] text-slate-600">Lỗi Rework</div>
