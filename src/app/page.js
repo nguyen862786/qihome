@@ -374,8 +374,8 @@ function StorefrontContent() {
               return (
                 <div 
                   key={prod.sku} 
-                  className={`bg-slate-900/40 border rounded-2xl p-6 backdrop-blur transition flex flex-col justify-between ${
-                    inCart ? 'border-amber-500 bg-amber-500/[0.02]' : 'border-slate-800 hover:border-slate-700'
+                  className={`glass-panel rounded-2xl p-6 transition duration-300 flex flex-col justify-between ${
+                    inCart ? 'border-amber-500/80 bg-amber-500/[0.03] gold-glow' : 'hover:border-amber-500/30'
                   }`}
                 >
                   <div>
@@ -416,7 +416,7 @@ function StorefrontContent() {
 
         {/* Smart Cart Right Panel */}
         <div className="lg:col-span-1">
-          <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-6 sticky top-24 backdrop-blur space-y-6 shadow-xl">
+          <div className="glass-panel gold-glow rounded-3xl p-6 sticky top-24 space-y-6">
             <h3 className="text-sm font-bold text-white uppercase tracking-wider border-b border-slate-800 pb-3">
               🧾 Giỏ hàng thông minh (BOQ dự toán)
             </h3>
