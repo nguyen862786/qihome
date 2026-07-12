@@ -8,7 +8,7 @@ export default function AdminDashboard() {
   const router = useRouter();
   const [profile, setProfile] = useState(null);
   const [isLive, setIsLive] = useState(false);
-  const [activeTab, setActiveTab] = useState('health'); // 'health' | 'requests' | 'vendors' | 'financial_report'
+  const [activeTab, setActiveTab] = useState('health'); // 'health' | 'clients' | 'vendors' | 'sales_affiliate' | 'requests' | 'financial_report'
   
   // Dashboard real-time states
   const [financials, setFinancials] = useState({
@@ -23,11 +23,14 @@ export default function AdminDashboard() {
   const [scorecards, setScorecards] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Filters for Project Health Tab
+  // Filters for Project Health / Client Tab
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStage, setFilterStage] = useState('All');
   const [filterType, setFilterType] = useState('All');
   const [filterVinhomes, setFilterVinhomes] = useState('All');
+
+  // Sales time filter
+  const [salesTimeFilter, setSalesTimeFilter] = useState('month'); // 'month' | 'quarter' | 'year'
 
   // New Vendor Evaluation Form states
   const [subcontractorsList, setSubcontractorsList] = useState([]);
@@ -52,21 +55,57 @@ export default function AdminDashboard() {
   ];
 
   const MOCK_HEALTH = [
-    { code: 'PRJ-HAUNGHIA-101', client: 'Phan Văn Trị', progress: 10, status: 'pending_design', alert: 'green', desc: 'Đã ký HĐ, đang chuẩn bị concept phối cảnh AI.', type: 'Chung cư', vinhomes: 'Vinhomes Hậu Nghĩa' },
-    { code: 'PRJ-HAUNGHIA-102', client: 'Hoàng Thị Hoa', progress: 45, status: 'in_production', alert: 'green', desc: 'Hàng đã về kho vệ tinh, đang tiến hành lắp đặt.', type: 'Nhà phố', vinhomes: 'Vinhomes Hậu Nghĩa' },
-    { code: 'PRJ-GRANDPARK-201', client: 'Nguyễn Thị Bình', progress: 85, status: 'qc_inspection', alert: 'yellow', desc: 'Đang làm kiểm tra QC checklist gỗ liền tường.', type: 'Chung cư', vinhomes: 'Vinhomes Grand Park' },
-    { code: 'PRJ-OCEANPARK-301', client: 'Trịnh Quốc Bảo', progress: 100, status: 'completed', alert: 'green', desc: 'Công trình đã bàn giao hoàn thiện, đạt QC.', type: 'Biệt thự', vinhomes: 'Vinhomes Ocean Park' }
+    { code: 'PRJ-HAUNGHIA-101', client: 'Phan Văn Trị', progress: 10, status: 'pending_design', alert: 'green', desc: 'Đã ký HĐ, đang chuẩn bị concept phối cảnh AI.', type: 'Chung cư', vinhomes: 'Vinhomes Hậu Nghĩa', location: 'Tòa S1.02 - Căn 1205', total_amount: 500000000, created_at: '2026-06-01', expected_delivery: '15/07/2026' },
+    { code: 'PRJ-HAUNGHIA-102', client: 'Hoàng Thị Hoa', progress: 45, status: 'in_production', alert: 'green', desc: 'Hàng đã về kho vệ tinh, đang tiến hành lắp đặt.', type: 'Nhà phố', vinhomes: 'Vinhomes Hậu Nghĩa', location: 'Liền kề LK-08', total_amount: 450000000, created_at: '2026-05-15', expected_delivery: '30/06/2026' },
+    { code: 'PRJ-GRANDPARK-201', client: 'Nguyễn Thị Bình', progress: 85, status: 'qc_inspection', alert: 'yellow', desc: 'Đang làm kiểm tra QC checklist gỗ liền tường.', type: 'Chung cư', vinhomes: 'Vinhomes Grand Park', location: 'Tòa L3 - Căn 2004', total_amount: 600000000, created_at: '2026-04-20', expected_delivery: '05/06/2026' },
+    { code: 'PRJ-OCEANPARK-301', client: 'Trịnh Quốc Bảo', progress: 100, status: 'completed', alert: 'green', desc: 'Công trình đã bàn giao hoàn thiện, đạt QC.', type: 'Biệt thự', vinhomes: 'Vinhomes Ocean Park', location: 'Biệt thự San Hô SH-12', total_amount: 650000000, created_at: '2026-03-10', expected_delivery: '25/04/2026' }
   ];
 
   const MOCK_SCORECARDS = [
     { name: 'Thầu Phụ Hùng Vương', type: 'Đồ gỗ & Hoàn thiện', rating: 'Hạng A', score: 9.2, speed: 9.5, reworks: 2, notes: 'Thi công sắc nét, đúng thời hạn bàn giao.' },
-    { name: 'Thầu Phụ Đông Á', type: 'Cơ điện & Sơn bả', rating: 'Hạng B', score: 8.1, speed: 7.8, reworks: 5, notes: 'Sơn bả thạch cao đợt đầu hơi loang, đã yêu cầu sửa đổi.' }
+    { name: 'Thầu Phụ Đông Á', type: 'Cơ điện & Sơn bả', rating: 'Hạng B', score: 8.1, speed: 7.8, reworks: 5, notes: 'Sơn bả thạch cao đợt đầu hơi loang, đã yêu cầu sửa đổi.' },
+    { name: 'Studio Hoàng Gia', type: 'Thiết kế & Concept', rating: 'Hạng A', score: 9.5, speed: 9.2, reworks: 0, notes: 'Concept 3D dựng AI chuẩn chỉ, cư dân duyệt nhanh.' },
+    { name: 'Nhà Máy Qi Wood', type: 'Nhà máy Sản xuất', rating: 'Hạng A', score: 9.8, speed: 9.6, reworks: 1, notes: 'Sản xuất gỗ công nghiệp An Cường đúng tiến độ và định mức BOM.' }
   ];
 
   const MOCK_SUBS = [
     { id: 'a0000000-0000-0000-0000-000000000004', full_name: 'Thầu Phụ Hùng Vương' },
     { id: 'sub-east-asia', full_name: 'Thầu Phụ Đông Á' }
   ];
+
+  // Mock Sales statistics
+  const MOCK_SALES_DATA = {
+    month: {
+      personalRevenue: 400000000,
+      floorRevenue: 1800000000,
+      contractsCount: 4,
+      leaderboard: [
+        { name: 'Nguyễn Minh Nam', role: 'Sales Lead', amount: 1200000000, count: 2 },
+        { name: 'Lê Thu Trang', role: 'Affiliate Partner', amount: 400000000, count: 1 },
+        { name: 'Trần Hoàng Bách', role: 'Sales Consultant', amount: 200000000, count: 1 }
+      ]
+    },
+    quarter: {
+      personalRevenue: 1200000000,
+      floorRevenue: 5400000000,
+      contractsCount: 12,
+      leaderboard: [
+        { name: 'Nguyễn Minh Nam', role: 'Sales Lead', amount: 3100000000, count: 6 },
+        { name: 'Lê Thu Trang', role: 'Affiliate Partner', amount: 1500000000, count: 4 },
+        { name: 'Trần Hoàng Bách', role: 'Sales Consultant', amount: 800000000, count: 2 }
+      ]
+    },
+    year: {
+      personalRevenue: 4500000000,
+      floorRevenue: 21000000000,
+      contractsCount: 45,
+      leaderboard: [
+        { name: 'Nguyễn Minh Nam', role: 'Sales Lead', amount: 12500000000, count: 25 },
+        { name: 'Lê Thu Trang', role: 'Affiliate Partner', amount: 5500000000, count: 12 },
+        { name: 'Trần Hoàng Bách', role: 'Sales Consultant', amount: 3000000000, count: 8 }
+      ]
+    }
+  };
 
   useEffect(() => {
     const stored = localStorage.getItem('qihome_user_profile');
@@ -146,11 +185,11 @@ export default function AdminDashboard() {
 
       if (projects) {
         projects.forEach(p => {
-          totalRevenue += Number(p.total_amount);
-          vinSubsidy += Number(p.vin_subsidy);
-          const bankAmt = Number(p.total_amount) * 0.7 - Number(p.vin_subsidy);
+          totalRevenue += Number(p.total_amount || 0);
+          vinSubsidy += Number(p.vin_subsidy || 0);
+          const bankAmt = Number(p.total_amount || 0) * 0.7 - Number(p.vin_subsidy || 0);
           if (bankAmt > 0) bankDisbursed += bankAmt;
-          profitGross += Number(p.total_amount) * 0.15;
+          profitGross += Number(p.total_amount || 0) * 0.15;
 
           let progress = 10;
           let alert = 'green';
@@ -176,6 +215,11 @@ export default function AdminDashboard() {
           }
           let vinhomes = p.vinhomes_block || 'Vinhomes Hậu Nghĩa';
 
+          let expected_delivery = 'Chưa xác định';
+          if (p.created_at) {
+            expected_delivery = new Date(new Date(p.created_at).getTime() + 45 * 24 * 60 * 60 * 1000).toLocaleDateString('vi-VN');
+          }
+
           healthList.push({
             code: p.project_code,
             client: p.client_name,
@@ -184,7 +228,11 @@ export default function AdminDashboard() {
             alert,
             desc,
             type,
-            vinhomes
+            vinhomes,
+            location: `${p.vinhomes_block || ''} - ${p.vinhomes_floor_căn || ''}`,
+            total_amount: Number(p.total_amount || 0),
+            created_at: p.created_at ? new Date(p.created_at).toLocaleDateString('vi-VN') : '---',
+            expected_delivery
           });
         });
       }
@@ -230,9 +278,15 @@ export default function AdminDashboard() {
           const quality = (group.qualitySum / group.count).toFixed(1);
           const speed = (group.speedSum / group.count).toFixed(1);
           const rating = quality >= 9.0 ? 'Hạng A' : quality >= 7.5 ? 'Hạng B' : 'Hạng C';
+          
+          let subType = 'Thi công hoàn thiện';
+          if (vName.includes('Studio') || vName.includes('Concept')) subType = 'Thiết kế';
+          else if (vName.includes('Nhà Máy')) subType = 'Nhà máy sản xuất';
+          else if (vName.includes('Đông Á')) subType = 'Điện nước & Sơn bả';
+
           return {
             name: vName,
-            type: 'Đối tác hoàn thiện',
+            type: subType,
             rating,
             score: Number(quality),
             speed: Number(speed),
@@ -357,6 +411,8 @@ export default function AdminDashboard() {
 
   if (!profile) return null;
 
+  const currentSalesData = MOCK_SALES_DATA[salesTimeFilter] || MOCK_SALES_DATA.month;
+
   return (
     <div className="min-h-screen text-slate-800 flex flex-col md:flex-row relative overflow-hidden bg-[#faf8f5]">
       {/* LEFT SIDEBAR PANEL (Matching the reference screenshots) */}
@@ -392,8 +448,44 @@ export default function AdminDashboard() {
                 : 'text-slate-400 hover:text-white hover:bg-slate-900/40'
             }`}
           >
-            <span>🚦</span>
-            <span>Sức Khỏe Dự Án</span>
+            <span>📊</span>
+            <span>Tiến Độ Dự Án</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('clients')}
+            className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-bold transition duration-200 ${
+              activeTab === 'clients' 
+                ? 'bg-[#c49a62] text-white shadow-lg shadow-[#c49a62]/20' 
+                : 'text-slate-400 hover:text-white hover:bg-slate-900/40'
+            }`}
+          >
+            <span>👥</span>
+            <span>Danh Sách Khách Hàng</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('vendors')}
+            className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-bold transition duration-200 ${
+              activeTab === 'vendors' 
+                ? 'bg-[#c49a62] text-white shadow-lg shadow-[#c49a62]/20' 
+                : 'text-slate-400 hover:text-white hover:bg-slate-900/40'
+            }`}
+          >
+            <span>🤝</span>
+            <span>Đối Tác</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('sales_affiliate')}
+            className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-bold transition duration-200 ${
+              activeTab === 'sales_affiliate' 
+                ? 'bg-[#c49a62] text-white shadow-lg shadow-[#c49a62]/20' 
+                : 'text-slate-400 hover:text-white hover:bg-slate-900/40'
+            }`}
+          >
+            <span>📢</span>
+            <span>Sale / Affiliate</span>
           </button>
 
           <button
@@ -415,18 +507,6 @@ export default function AdminDashboard() {
             )}
           </button>
 
-          <button
-            onClick={() => setActiveTab('vendors')}
-            className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-bold transition duration-200 ${
-              activeTab === 'vendors' 
-                ? 'bg-[#c49a62] text-white shadow-lg shadow-[#c49a62]/20' 
-                : 'text-slate-400 hover:text-white hover:bg-slate-900/40'
-            }`}
-          >
-            <span>🏆</span>
-            <span>Đánh Giá Đối Tác</span>
-          </button>
-
           <div className="pt-4 text-[10px] uppercase font-bold text-slate-500 px-3 mb-2 tracking-wider">
             Báo cáo hệ thống
           </div>
@@ -439,8 +519,8 @@ export default function AdminDashboard() {
                 : 'text-slate-400 hover:text-white hover:bg-slate-900/40'
             }`}
           >
-            <span>📊</span>
-            <span>Báo Cáo Tài Chính</span>
+            <span>💵</span>
+            <span>Báo Cáo Tài Chỉh</span>
           </button>
         </nav>
 
@@ -555,7 +635,7 @@ export default function AdminDashboard() {
 
                     return (
                       <div className="bg-white border border-[#ebdcb9] rounded-2xl p-6 space-y-5 shadow-sm text-slate-800">
-                        <h3 className="text-sm font-bold text-slate-900 tracking-tight border-b border-slate-100 pb-3">🚦 Báo Cáo Sức Khỏe Dự Án (Global Project Health)</h3>
+                        <h3 className="text-sm font-bold text-slate-900 tracking-tight border-b border-slate-100 pb-3">📊 Tiến Độ Dự Án (Project Progress Health)</h3>
                         
                         {/* Search & Filters Row */}
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-3 bg-[#faf8f5] p-3 rounded-xl border border-[#ebdcb9] text-xs">
@@ -697,86 +777,107 @@ export default function AdminDashboard() {
               </>
             )}
 
-            {/* Tab 2: Over Budget Approval Center */}
-            {activeTab === 'requests' && (
-              <>
-                <div className="lg:col-span-8">
-                  <div className="bg-white border border-[#ebdcb9] rounded-2xl p-6 space-y-4 shadow-sm text-slate-800">
-                    <h3 className="text-sm font-bold text-slate-900 tracking-tight flex items-center justify-between border-b border-slate-100 pb-3">
-                      <span>🔔 Phê Duyệt Phát Sinh Ngoài Định Mức</span>
-                      <span className="text-xs font-medium px-2.5 py-0.5 bg-red-500/10 text-red-600 border border-red-500/20 rounded-full">
-                        {overBudgetRequests.length} Đơn chờ duyệt
-                      </span>
-                    </h3>
+            {/* NEW TAB: Tab 2: Danh Sách Khách Hàng (clients) */}
+            {activeTab === 'clients' && (
+              <div className="lg:col-span-12">
+                <div className="bg-white border border-[#ebdcb9] rounded-2xl p-6 space-y-5 shadow-sm text-slate-800 animate-fadeIn">
+                  <div className="flex justify-between items-center border-b border-[#ebdcb9] pb-3">
+                    <h3 className="text-sm font-bold text-slate-900 tracking-tight">👥 Danh Sách Quản Lý Khách Hàng & Hợp Đồng</h3>
+                    <span className="text-xs px-2.5 py-0.5 bg-[#c49a62]/10 text-[#c49a62] border border-[#c49a62]/20 rounded-full font-bold">
+                      {projectHealth.length} Khách hàng đăng ký
+                    </span>
+                  </div>
 
-                    {overBudgetRequests.length === 0 ? (
-                      <div className="text-center text-xs text-slate-400 py-6">
-                        Không có yêu cầu vượt định mức nào đang chờ duyệt.
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        {overBudgetRequests.map((req) => (
-                          <div key={req.id} className="bg-[#faf8f5] border border-[#ebdcb9] rounded-xl p-4 space-y-3">
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <div className="text-xs font-bold text-slate-900">{req.projectCode} - {req.contractor}</div>
-                                <div className="text-[10px] text-slate-500 mt-0.5">
-                                  Yêu cầu cấp thêm: <strong className="text-slate-700">{req.qty} đơn vị</strong> ({req.item})
-                                </div>
-                              </div>
-                              <span className="text-[9px] uppercase font-bold tracking-wide px-2 py-0.5 bg-red-500/10 text-red-600 border border-red-500/20 rounded">
-                                Vượt BOM
-                              </span>
-                            </div>
-                            
-                            <div className="text-xs bg-white p-2.5 rounded border border-[#ebdcb9] text-slate-600 leading-relaxed">
-                              📝 {req.reason}
-                            </div>
+                  {/* Filter box */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 bg-[#faf8f5] p-3 rounded-xl border border-[#ebdcb9] text-xs">
+                    <input
+                      type="text"
+                      placeholder="Tìm theo tên cư dân hoặc mã dự án..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="bg-white border border-[#ebdcb9] rounded-lg px-2.5 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#c49a62]"
+                    />
+                    <select
+                      value={filterVinhomes}
+                      onChange={(e) => setFilterVinhomes(e.target.value)}
+                      className="bg-white border border-[#ebdcb9] rounded-lg px-2 py-1.5 text-xs text-slate-800 focus:outline-none"
+                    >
+                      <option value="All">Tất cả dự án Vin</option>
+                      <option value="Vinhomes Hậu Nghĩa">Vinhomes Hậu Nghĩa</option>
+                      <option value="Vinhomes Grand Park">Vinhomes Grand Park</option>
+                      <option value="Vinhomes Ocean Park">Vinhomes Ocean Park</option>
+                    </select>
+                    <select
+                      value={filterStage}
+                      onChange={(e) => setFilterStage(e.target.value)}
+                      className="bg-white border border-[#ebdcb9] rounded-lg px-2 py-1.5 text-xs text-slate-800 focus:outline-none"
+                    >
+                      <option value="All">Tất cả tiến độ</option>
+                      <option value="pending_design">Concept phối cảnh AI</option>
+                      <option value="in_production">Đang thi công</option>
+                      <option value="qc_inspection">Đang kiểm định QC</option>
+                      <option value="completed">Đã bàn giao</option>
+                    </select>
+                  </div>
 
-                            {req.image && (
-                              <div className="text-[10px] text-[#c49a62] font-semibold underline cursor-pointer">
-                                🔍 Xem ảnh bằng chứng lỗi hỏng
-                              </div>
-                            )}
-
-                            <div className="flex justify-end space-x-3 pt-2">
-                              <button
-                                disabled={loading}
-                                onClick={() => handleApproveRequest(req.id, false)}
-                                className="bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 text-xs px-3.5 py-1.5 rounded-lg transition"
-                              >
-                                Từ chối
-                              </button>
-                              <button
-                                disabled={loading}
-                                onClick={() => handleApproveRequest(req.id, true)}
-                                className="bg-[#c49a62] hover:bg-[#b08752] text-white text-xs px-4 py-1.5 rounded-lg font-bold transition shadow-sm"
-                              >
-                                ✓ Duyệt Cấp Phát
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                  <div className="overflow-x-auto pt-2">
+                    <table className="w-full text-xs text-left border-collapse">
+                      <thead>
+                        <tr className="border-b border-[#ebdcb9] text-slate-500 font-semibold uppercase">
+                          <th className="py-3 px-2">Khách Hàng</th>
+                          <th className="py-3 px-2">Mã Dự Án</th>
+                          <th className="py-3 px-2">Địa Chỉ Căn Hộ</th>
+                          <th className="py-3 px-2 text-right">Giá Trị HĐ</th>
+                          <th className="py-3 px-2 text-center">Tiến Độ Thực Tế</th>
+                          <th className="py-3 px-2 text-center">Ngày Bàn Giao Dự Kiến</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {projectHealth
+                          .filter(p => {
+                            const matchQuery = p.client.toLowerCase().includes(searchQuery.toLowerCase()) || p.code.toLowerCase().includes(searchQuery.toLowerCase());
+                            const matchVin = filterVinhomes === 'All' || p.vinhomes === filterVinhomes;
+                            const matchStage = filterStage === 'All' || p.status === filterStage;
+                            return matchQuery && matchVin && matchStage;
+                          })
+                          .map((client, idx) => (
+                            <tr key={idx} className="hover:bg-slate-50/50">
+                              <td className="py-3 px-2 font-bold text-slate-900">{client.client}</td>
+                              <td className="py-3 px-2 font-mono font-semibold text-slate-600">{client.code}</td>
+                              <td className="py-3 px-2">
+                                <div className="text-slate-700">{client.vinhomes}</div>
+                                <div className="text-[10px] text-slate-400">{client.location}</div>
+                              </td>
+                              <td className="py-3 px-2 text-right font-bold text-[#c49a62]">
+                                {(client.total_amount || 500000000).toLocaleString('vi-VN')}đ
+                              </td>
+                              <td className="py-3 px-2 text-center">
+                                <span className={`inline-block text-[9px] font-bold px-2 py-0.5 rounded border ${
+                                  client.status === 'completed' 
+                                    ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
+                                    : client.status === 'qc_inspection'
+                                    ? 'bg-amber-500/10 text-amber-600 border-amber-500/20'
+                                    : 'bg-blue-500/10 text-blue-600 border-blue-500/20'
+                                }`}>
+                                  {client.status === 'pending_design' ? 'Concept phối cảnh AI' :
+                                   client.status === 'in_production' ? 'Đang thi công lắp đặt' :
+                                   client.status === 'qc_inspection' ? 'Đang chấm điểm QC' : 'Đã bàn giao'}
+                                </span>
+                              </td>
+                              <td className="py-3 px-2 text-center text-slate-600 font-semibold">
+                                📅 {client.expected_delivery || '30/08/2026'}
+                              </td>
+                            </tr>
+                          ))
+                        }
+                      </tbody>
+                    </table>
                   </div>
                 </div>
-
-                <div className="lg:col-span-4">
-                  <div className="bg-[#f4ebd9] border border-[#e2d5c3] rounded-2xl p-6 space-y-4 shadow-sm text-xs text-slate-800">
-                    <h3 className="text-sm font-bold text-slate-900 border-b border-[#e2d5c3] pb-3">ℹ Quyền Phê Duyệt</h3>
-                    <p className="text-slate-600 leading-relaxed">
-                      Để hạn chế thất thoát vật tư, mọi yêu cầu vượt định mức của thầu phụ hoặc thợ thi công đều phải được trình lên Chủ tịch kiểm duyệt.
-                    </p>
-                    <div className="p-3 bg-[#c49a62]/10 border border-[#c49a62]/20 text-[#c49a62] rounded-xl space-y-1 mt-2">
-                      <strong>Lưu ý:</strong> Vui lòng kiểm tra kỹ hình ảnh hiện trạng thợ gửi lên trước khi đồng ý giải ngân xuất vật tư bổ sung.
-                    </div>
-                  </div>
-                </div>
-              </>
+              </div>
             )}
 
-            {/* Tab 3: Vendor & Supplier Evaluations */}
+            {/* Tab 3: Đối Tác (vendors) */}
             {activeTab === 'vendors' && (
               <>
                 <div className="lg:col-span-8 space-y-6">
@@ -869,12 +970,15 @@ export default function AdminDashboard() {
                 <div className="lg:col-span-4">
                   {/* Historical Evaluations Table */}
                   <div className="bg-white border border-[#ebdcb9] rounded-2xl p-6 space-y-4 shadow-sm text-slate-850">
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 border-b border-slate-100 pb-3">Nhật ký đánh giá năng lực</h3>
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 border-b border-slate-100 pb-3">Phân loại & Điểm số đối tác</h3>
                     <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1">
                       {scorecards.map((vendor, idx) => (
                         <div key={idx} className="bg-[#faf8f5] border border-[#ebdcb9] p-3 rounded-xl text-xs space-y-2">
                           <div className="flex justify-between items-center">
-                            <span className="font-bold text-slate-800">{vendor.name}</span>
+                            <div>
+                              <span className="font-bold text-slate-800 block">{vendor.name}</span>
+                              <span className="text-[9px] uppercase px-1.5 py-0.2 bg-[#c49a62]/10 border border-[#c49a62]/20 rounded text-[#c49a62] font-black">{vendor.type}</span>
+                            </div>
                             <span className="text-[10px] bg-[#c49a62]/10 border border-[#c49a62]/20 px-2 py-0.5 rounded text-[#c49a62] font-bold">
                               {vendor.rating}
                             </span>
@@ -888,7 +992,179 @@ export default function AdminDashboard() {
               </>
             )}
 
-            {/* Tab 4: Financial Report */}
+            {/* NEW TAB: Tab 4: Sale / Affiliate (sales_affiliate) */}
+            {activeTab === 'sales_affiliate' && (
+              <>
+                <div className="lg:col-span-8 space-y-6">
+                  {/* Sales performance details card */}
+                  <div className="bg-white border border-[#ebdcb9] rounded-2xl p-6 space-y-4 shadow-sm text-slate-800 animate-fadeIn">
+                    <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+                      <h3 className="text-sm font-bold text-slate-900 tracking-tight flex items-center space-x-2">
+                        <span>📢 Báo cáo doanh số & bảng xếp hạng</span>
+                      </h3>
+
+                      {/* Time Filter Month / Quarter / Year */}
+                      <select
+                        value={salesTimeFilter}
+                        onChange={(e) => setSalesTimeFilter(e.target.value)}
+                        className="bg-[#faf8f5] border border-[#ebdcb9] rounded-lg px-2.5 py-1 text-xs font-bold text-slate-700 focus:outline-none"
+                      >
+                        <option value="month">Thời gian: Tháng này</option>
+                        <option value="quarter">Thời gian: Quý này</option>
+                        <option value="year">Thời gian: Năm nay</option>
+                      </select>
+                    </div>
+
+                    {/* Sales overview chart details */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-[#faf8f5] border border-[#ebdcb9] p-4 rounded-2xl space-y-1">
+                        <div className="text-[10px] font-bold uppercase text-slate-500">Doanh thu Sale Cá Nhân</div>
+                        <div className="text-lg font-black text-[#c49a62]">{currentSalesData.personalRevenue.toLocaleString('vi-VN')}đ</div>
+                        <div className="text-[9px] text-slate-400">Doanh số tiếp thị liên kết cá nhân</div>
+                      </div>
+                      <div className="bg-[#faf8f5] border border-[#ebdcb9] p-4 rounded-2xl space-y-1">
+                        <div className="text-[10px] font-bold uppercase text-slate-500">Doanh thu toàn sàn (Floor)</div>
+                        <div className="text-lg font-black text-slate-900">{currentSalesData.floorRevenue.toLocaleString('vi-VN')}đ</div>
+                        <div className="text-[9px] text-slate-400">Tổng doanh số toàn bộ đại lý/affiliates</div>
+                      </div>
+                    </div>
+
+                    {/* Leaderboard of Top Sales */}
+                    <div className="space-y-3 pt-2">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-slate-600 flex items-center space-x-1.5">
+                        <span>🏆 Bảng Xếp Hạng Doanh Số Top Sales</span>
+                      </h4>
+
+                      <div className="space-y-2">
+                        {currentSalesData.leaderboard.map((sale, idx) => (
+                          <div key={idx} className="flex justify-between items-center p-3.5 bg-slate-50 border border-slate-100 rounded-xl">
+                            <div className="flex items-center space-x-3">
+                              <span className="w-5 h-5 rounded-full bg-[#c49a62]/10 border border-[#c49a62]/20 text-[#c49a62] font-black text-[10px] flex items-center justify-center">
+                                {idx + 1}
+                              </span>
+                              <div>
+                                <strong className="text-xs text-slate-900">{sale.name}</strong>
+                                <span className="text-[9px] uppercase px-1.5 py-0.2 bg-[#c49a62]/10 text-[#c49a62] font-bold rounded ml-2">{sale.role}</span>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-xs font-bold text-slate-800">{sale.amount.toLocaleString('vi-VN')}đ</div>
+                              <div className="text-[9px] text-slate-500">Đã chốt: <strong className="text-[#c49a62]">{sale.count} HĐ</strong></div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="lg:col-span-4">
+                  {/* Statistics Closed successfully */}
+                  <div className="bg-[#f4ebd9] border border-[#e2d5c3] rounded-2xl p-6 space-y-4 shadow-sm text-xs text-slate-800">
+                    <h3 className="text-sm font-bold text-slate-900 border-b border-[#e2d5c3] pb-3">📈 Thống Kê Affiliate</h3>
+                    <div className="space-y-4">
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-slate-600 text-[10px]">
+                          <span>Số lượng hợp đồng chốt thành công:</span>
+                          <span className="text-slate-900 font-bold">{currentSalesData.contractsCount} HĐ</span>
+                        </div>
+                        <div className="w-full bg-white border border-[#e2d5c3] h-1.5 rounded-full overflow-hidden">
+                          <div className="bg-[#c49a62] h-full" style={{ width: `${(currentSalesData.contractsCount / 50) * 100}%` }}></div>
+                        </div>
+                      </div>
+
+                      <div className="p-3 bg-white border border-[#e2d5c3] rounded-xl space-y-1.5">
+                        <div className="text-[10px] font-bold text-slate-700">Chính sách hoa hồng Sale:</div>
+                        <p className="text-[10px] text-slate-500 leading-relaxed">
+                          Mỗi thành viên khi giới thiệu cư dân Vinhomes sử dụng dịch vụ QiHome.vn sẽ được hưởng <strong>2.0% giá trị hợp đồng thi công thực tế</strong> sau khi đối soát giải ngân.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Tab 5: Over Budget Approval Center */}
+            {activeTab === 'requests' && (
+              <>
+                <div className="lg:col-span-8">
+                  <div className="bg-white border border-[#ebdcb9] rounded-2xl p-6 space-y-4 shadow-sm text-slate-800">
+                    <h3 className="text-sm font-bold text-slate-900 tracking-tight flex items-center justify-between border-b border-slate-100 pb-3">
+                      <span>🔔 Phê Duyệt Phát Sinh Ngoài Định Mức</span>
+                      <span className="text-xs font-medium px-2.5 py-0.5 bg-red-500/10 text-red-600 border border-red-500/20 rounded-full">
+                        {overBudgetRequests.length} Đơn chờ duyệt
+                      </span>
+                    </h3>
+
+                    {overBudgetRequests.length === 0 ? (
+                      <div className="text-center text-xs text-slate-400 py-6">
+                        Không có yêu cầu vượt định mức nào đang chờ duyệt.
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {overBudgetRequests.map((req) => (
+                          <div key={req.id} className="bg-[#faf8f5] border border-[#ebdcb9] rounded-xl p-4 space-y-3">
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <div className="text-xs font-bold text-slate-900">{req.projectCode} - {req.contractor}</div>
+                                <div className="text-[10px] text-slate-500 mt-0.5">
+                                  Yêu cầu cấp thêm: <strong className="text-slate-700">{req.qty} đơn vị</strong> ({req.item})
+                                </div>
+                              </div>
+                              <span className="text-[9px] uppercase font-bold tracking-wide px-2 py-0.5 bg-red-500/10 text-red-600 border border-red-500/20 rounded">
+                                Vượt BOM
+                              </span>
+                            </div>
+                            
+                            <div className="text-xs bg-white p-2.5 rounded border border-[#ebdcb9] text-slate-600 leading-relaxed">
+                              📝 {req.reason}
+                            </div>
+
+                            {req.image && (
+                              <div className="text-[10px] text-[#c49a62] font-semibold underline cursor-pointer">
+                                🔍 Xem ảnh bằng chứng lỗi hỏng
+                              </div>
+                            )}
+
+                            <div className="flex justify-end space-x-3 pt-2">
+                              <button
+                                disabled={loading}
+                                onClick={() => handleApproveRequest(req.id, false)}
+                                className="bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-600 text-xs px-3.5 py-1.5 rounded-lg transition"
+                              >
+                                Từ chối
+                              </button>
+                              <button
+                                disabled={loading}
+                                onClick={() => handleApproveRequest(req.id, true)}
+                                className="bg-[#c49a62] hover:bg-[#b08752] text-white text-xs px-4 py-1.5 rounded-lg font-bold transition shadow-sm"
+                              >
+                                ✓ Duyệt Cấp Phát
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="lg:col-span-4">
+                  <div className="bg-[#f4ebd9] border border-[#e2d5c3] rounded-2xl p-6 space-y-4 shadow-sm text-xs text-slate-800">
+                    <h3 className="text-sm font-bold text-slate-900 border-b border-[#e2d5c3] pb-3">ℹ Quyền Phê Duyệt</h3>
+                    <p className="text-slate-600 leading-relaxed">
+                      Để hạn chế thất thoát vật tư, mọi yêu cầu vượt định mức của thầu phụ hoặc thợ thi công đều phải được trình lên Chủ tịch kiểm duyệt.
+                    </p>
+                    <div className="p-3 bg-[#c49a62]/10 border border-[#c49a62]/20 text-[#c49a62] rounded-xl space-y-1 mt-2">
+                      <strong>Lưu ý:</strong> Vui lòng kiểm tra kỹ hình ảnh hiện trạng thợ gửi lên trước khi đồng ý giải ngân xuất vật tư bổ sung.
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Tab 6: Financial Report */}
             {activeTab === 'financial_report' && (
               <>
                 <div className="lg:col-span-8">
