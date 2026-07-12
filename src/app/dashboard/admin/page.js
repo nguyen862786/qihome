@@ -342,9 +342,14 @@ export default function AdminDashboard() {
   if (!profile) return null;
 
   return (
-    <div className="min-h-screen text-slate-100 flex flex-col">
+    <div className="min-h-screen text-slate-100 flex flex-col relative overflow-hidden">
+      {/* Ambient background decorative light orbs (Wow factor) */}
+      <div className="absolute top-10 left-10 w-96 h-96 bg-amber-500/10 rounded-full blur-[130px] pointer-events-none z-0"></div>
+      <div className="absolute top-1/3 right-1/4 w-[450px] h-[450px] bg-indigo-500/[0.04] rounded-full blur-[150px] pointer-events-none z-0"></div>
+      <div className="absolute bottom-10 left-1/3 w-80 h-80 bg-emerald-500/[0.03] rounded-full blur-[100px] pointer-events-none z-0"></div>
+
       {/* Top Admin Navbar */}
-      <nav className="border-b border-slate-900 bg-slate-900/30 p-4 sticky top-0 z-20 backdrop-blur">
+      <nav className="border-b border-slate-900 bg-slate-950/20 p-4 sticky top-0 z-20 backdrop-blur-xl relative">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-3">
             <span className="font-bold text-2xl tracking-wider text-amber-500 bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-xl">Qi</span>
@@ -362,54 +367,54 @@ export default function AdminDashboard() {
       </nav>
 
       {/* Main Grid Content */}
-      <main className="max-w-7xl mx-auto w-full p-6 space-y-8">
+      <main className="max-w-7xl mx-auto w-full p-6 space-y-8 relative z-10">
         
         {/* KPI Financial Overview Grid */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="bg-slate-900/40 border border-slate-900 rounded-2xl p-5 backdrop-blur shadow">
-            <div className="text-xs font-semibold uppercase tracking-wider text-slate-500">Doanh thu dự án lũy kế</div>
-            <div className="text-2xl font-black text-white mt-2">{financials.totalRevenue.toLocaleString('vi-VN')}đ</div>
+          <div className="glass-panel gold-glow rounded-2xl p-5 shadow-2xl relative overflow-hidden group hover:border-amber-500/30 transition duration-300">
+            <div className="text-xs font-semibold uppercase tracking-wider text-slate-400">Doanh thu dự án lũy kế</div>
+            <div className="text-2xl font-black mt-2 gold-text-gradient">{financials.totalRevenue.toLocaleString('vi-VN')}đ</div>
             <div className="text-[10px] text-emerald-400 mt-1">Hợp đồng tay ba đã ký kết</div>
           </div>
-          <div className="bg-slate-900/40 border border-slate-900 rounded-2xl p-5 backdrop-blur shadow">
-            <div className="text-xs font-semibold uppercase tracking-wider text-slate-500">Dòng vốn tài trợ Vin 6%</div>
+          <div className="glass-panel rounded-2xl p-5 shadow-2xl relative overflow-hidden group hover:border-amber-500/30 transition duration-300">
+            <div className="text-xs font-semibold uppercase tracking-wider text-slate-400">Dòng vốn tài trợ Vin 6%</div>
             <div className="text-2xl font-black text-amber-500 mt-2">{financials.vinSubsidy.toLocaleString('vi-VN')}đ</div>
             <div className="text-[10px] text-slate-500 mt-1">Đã đối soát với Vin Accounting</div>
           </div>
-          <div className="bg-slate-900/40 border border-slate-900 rounded-2xl p-5 backdrop-blur shadow">
-            <div className="text-xs font-semibold uppercase tracking-wider text-slate-500">Ngân hàng giải ngân (TCB)</div>
-            <div className="text-2xl font-black text-white mt-2">{financials.bankDisbursed.toLocaleString('vi-VN')}đ</div>
+          <div className="glass-panel rounded-2xl p-5 shadow-2xl relative overflow-hidden group hover:border-amber-500/30 transition duration-300">
+            <div className="text-xs font-semibold uppercase tracking-wider text-slate-400">Ngân hàng giải ngân (TCB)</div>
+            <div className="text-2xl font-black text-blue-400 mt-2">{financials.bankDisbursed.toLocaleString('vi-VN')}đ</div>
             <div className="text-[10px] text-slate-500 mt-1">Tín chấp bảo lãnh dự án</div>
           </div>
-          <div className="bg-slate-900/40 border border-slate-900 rounded-2xl p-5 backdrop-blur shadow">
-            <div className="text-xs font-semibold uppercase tracking-wider text-slate-500">Lợi nhuận gộp mục tiêu</div>
-            <div className="text-2xl font-black text-emerald-500 mt-2">{financials.profitGross.toLocaleString('vi-VN')}đ</div>
-            <div className="text-[10px] text-emerald-400 mt-1">Biên lợi nhuận định mức 15%</div>
+          <div className="glass-panel rounded-2xl p-5 shadow-2xl relative overflow-hidden group hover:border-amber-500/30 transition duration-300">
+            <div className="text-xs font-semibold uppercase tracking-wider text-slate-400">Lợi nhuận gộp mục tiêu</div>
+            <div className="text-2xl font-black text-emerald-400 mt-2">{financials.profitGross.toLocaleString('vi-VN')}đ</div>
+            <div className="text-[10px] text-emerald-500/80 mt-1">Biên lợi nhuận định mức 15%</div>
           </div>
         </div>
 
         {/* Tab Navigator */}
-        <div className="flex bg-slate-900/60 p-1.5 rounded-xl border border-slate-900 max-w-lg">
+        <div className="flex glass-panel p-1 rounded-xl max-w-lg">
           <button
             onClick={() => setActiveTab('health')}
-            className={`flex-1 py-2 text-center text-xs font-bold rounded-lg transition ${
-              activeTab === 'health' ? 'bg-amber-500 text-slate-950 shadow-md' : 'text-slate-400 hover:text-slate-200'
+            className={`flex-1 py-2 text-center text-xs font-bold rounded-lg transition duration-200 ${
+              activeTab === 'health' ? 'bg-amber-500 text-slate-950 shadow-md font-extrabold gold-glow' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
             🚦 Sức Khỏe Dự Án
           </button>
           <button
             onClick={() => setActiveTab('requests')}
-            className={`flex-1 py-2 text-center text-xs font-bold rounded-lg transition ${
-              activeTab === 'requests' ? 'bg-amber-500 text-slate-950 shadow-md' : 'text-slate-400 hover:text-slate-200'
+            className={`flex-1 py-2 text-center text-xs font-bold rounded-lg transition duration-200 ${
+              activeTab === 'requests' ? 'bg-amber-500 text-slate-950 shadow-md font-extrabold gold-glow' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            🔔 Đơn Gọi Hàng Vượt BOM ({overBudgetRequests.length})
+            🔔 Đơn Vượt BOM ({overBudgetRequests.length})
           </button>
           <button
             onClick={() => setActiveTab('vendors')}
-            className={`flex-1 py-2 text-center text-xs font-bold rounded-lg transition ${
-              activeTab === 'vendors' ? 'bg-amber-500 text-slate-950 shadow-md' : 'text-slate-400 hover:text-slate-200'
+            className={`flex-1 py-2 text-center text-xs font-bold rounded-lg transition duration-200 ${
+              activeTab === 'vendors' ? 'bg-amber-500 text-slate-950 shadow-md font-extrabold gold-glow' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
             🏆 Đánh Giá Đối Tác & Thầu
@@ -423,8 +428,8 @@ export default function AdminDashboard() {
             
             {/* Tab 1: Project Health */}
             {activeTab === 'health' && (
-              <div className="bg-slate-900/40 border border-slate-900 rounded-2xl p-6 space-y-4">
-                <h3 className="text-sm font-bold text-white tracking-tight">🚦 Báo Cáo Sức Khỏe Dự Án (Global Project Health)</h3>
+              <div className="glass-panel rounded-2xl p-6 space-y-5 shadow-2xl">
+                <h3 className="text-sm font-bold text-white tracking-tight border-b border-slate-900 pb-3">🚦 Báo Cáo Sức Khỏe Dự Án (Global Project Health)</h3>
                 
                 <div className="divide-y divide-slate-900 space-y-4 max-h-[500px] overflow-y-auto pr-1">
                   {projectHealth.length === 0 ? (
@@ -434,11 +439,11 @@ export default function AdminDashboard() {
                   ) : (
                     projectHealth.map((proj, idx) => (
                       <div key={idx} className="pt-4 first:pt-0 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div className="space-y-1">
+                        <div className="space-y-1.5">
                           <div className="flex items-center space-x-2">
                             <span className={`w-2.5 h-2.5 rounded-full ${
                               proj.alert === 'green' ? 'bg-emerald-500' : proj.alert === 'yellow' ? 'bg-amber-500' : 'bg-red-500'
-                            }`}></span>
+                            } shadow-[0_0_8px_rgba(16,185,129,0.4)]`}></span>
                             <strong className="text-xs text-white">{proj.code}</strong>
                             <span className="text-[10px] text-slate-500">Khách hàng: {proj.client}</span>
                           </div>
@@ -446,11 +451,11 @@ export default function AdminDashboard() {
                         </div>
 
                         <div className="flex items-center space-x-4">
-                          <div className="w-24 bg-slate-950 border border-slate-800 h-2 rounded-full overflow-hidden">
-                            <div className="bg-amber-500 h-full" style={{ width: `${proj.progress}%` }}></div>
+                          <div className="w-24 bg-slate-950 border border-slate-900 h-2 rounded-full overflow-hidden">
+                            <div className="bg-gradient-to-r from-amber-500 to-amber-300 h-full rounded-full shadow-[0_0_8px_rgba(245,158,11,0.5)]" style={{ width: `${proj.progress}%` }}></div>
                           </div>
-                          <span className="text-[10px] font-mono text-slate-400 font-bold">{proj.progress}%</span>
-                          <span className="text-[10px] font-bold uppercase px-2 py-0.5 bg-slate-900 text-slate-400 border border-slate-800 rounded">
+                          <span className="text-[10px] font-mono text-slate-300 font-bold">{proj.progress}%</span>
+                          <span className="text-[9px] font-bold uppercase px-2 py-0.5 bg-slate-900 text-slate-400 border border-slate-800 rounded">
                             {proj.status}
                           </span>
                         </div>
@@ -463,8 +468,8 @@ export default function AdminDashboard() {
 
             {/* Tab 2: Over Budget Approval Center */}
             {activeTab === 'requests' && (
-              <div className="bg-slate-900/40 border border-slate-900 rounded-2xl p-6 space-y-4">
-                <h3 className="text-sm font-bold text-white tracking-tight flex items-center justify-between">
+              <div className="glass-panel rounded-2xl p-6 space-y-4 shadow-2xl">
+                <h3 className="text-sm font-bold text-white tracking-tight flex items-center justify-between border-b border-slate-900 pb-3">
                   <span>🔔 Phê Duyệt Phát Sinh Ngoài Định Mức</span>
                   <span className="text-xs font-medium px-2.5 py-0.5 bg-red-500/10 text-red-400 border border-red-500/20 rounded-full">
                     {overBudgetRequests.length} Đơn chờ duyệt
@@ -478,7 +483,7 @@ export default function AdminDashboard() {
                 ) : (
                   <div className="space-y-4">
                     {overBudgetRequests.map((req) => (
-                      <div key={req.id} className="bg-slate-950/60 border border-slate-800 rounded-xl p-4 space-y-3">
+                      <div key={req.id} className="bg-slate-950/40 border border-slate-900 rounded-xl p-4 space-y-3">
                         <div className="flex justify-between items-start">
                           <div>
                             <div className="text-xs font-bold text-slate-200">{req.projectCode} - {req.contractor}</div>
@@ -491,7 +496,7 @@ export default function AdminDashboard() {
                           </span>
                         </div>
                         
-                        <div className="text-xs bg-slate-950 p-2.5 rounded border border-slate-900 text-slate-400 leading-relaxed">
+                        <div className="text-xs bg-slate-950/60 p-2.5 rounded border border-slate-900 text-slate-400 leading-relaxed">
                           📝 {req.reason}
                         </div>
 
@@ -512,7 +517,7 @@ export default function AdminDashboard() {
                           <button
                             disabled={loading}
                             onClick={() => handleApproveRequest(req.id, true)}
-                            className="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs px-4 py-1.5 rounded-lg font-bold transition"
+                            className="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs px-4 py-1.5 rounded-lg font-bold transition shadow-md shadow-amber-500/10"
                           >
                             ✓ Duyệt Cấp Phát
                           </button>
@@ -529,8 +534,8 @@ export default function AdminDashboard() {
               <div className="space-y-6">
                 
                 {/* Interactive Evaluation Form */}
-                <div className="bg-slate-900/40 border border-slate-900 rounded-2xl p-6 space-y-4">
-                  <h3 className="text-sm font-bold text-white tracking-tight">📝 Biểu Mẫu Đánh Giá Năng Lực Đối Tác</h3>
+                <div className="glass-panel rounded-2xl p-6 space-y-4 shadow-2xl">
+                  <h3 className="text-sm font-bold text-white tracking-tight border-b border-slate-900 pb-3">📝 Biểu Mẫu Đánh Giá Năng Lực Đối Tác</h3>
                   
                   {formSuccess && (
                     <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs p-3.5 rounded-xl">
@@ -544,7 +549,7 @@ export default function AdminDashboard() {
                       <select
                         value={selectedSubId}
                         onChange={(e) => setSelectedSubId(e.target.value)}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none"
+                        className="w-full bg-slate-950 border border-slate-850 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500"
                       >
                         {subcontractorsList.map(sub => (
                           <option key={sub.id} value={sub.id}>{sub.full_name}</option>
@@ -559,7 +564,7 @@ export default function AdminDashboard() {
                         min="0"
                         value={formReworks}
                         onChange={(e) => setFormReworks(e.target.value)}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none"
+                        className="w-full bg-slate-950 border border-slate-850 rounded-xl px-3 py-1.5 text-xs text-slate-205 focus:outline-none focus:border-amber-500"
                       />
                     </div>
 
@@ -572,7 +577,7 @@ export default function AdminDashboard() {
                         max="10"
                         value={formQuality}
                         onChange={(e) => setFormQuality(Number(e.target.value))}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none"
+                        className="w-full bg-slate-950 border border-slate-850 rounded-xl px-3 py-1.5 text-xs text-slate-205 focus:outline-none focus:border-amber-500"
                       />
                     </div>
 
@@ -585,7 +590,7 @@ export default function AdminDashboard() {
                         max="10"
                         value={formSpeed}
                         onChange={(e) => setFormSpeed(Number(e.target.value))}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none"
+                        className="w-full bg-slate-950 border border-slate-850 rounded-xl px-3 py-1.5 text-xs text-slate-205 focus:outline-none focus:border-amber-500"
                       />
                     </div>
 
@@ -597,7 +602,7 @@ export default function AdminDashboard() {
                         value={formNotes}
                         onChange={(e) => setFormNotes(e.target.value)}
                         placeholder="Nhận xét chi tiết về tác phong công nghiệp, chất lượng gỗ, sơn bả của nhà thầu..."
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 placeholder-slate-600 focus:outline-none"
+                        className="w-full bg-slate-950 border border-slate-850 rounded-xl p-3 text-xs text-slate-205 placeholder-slate-600 focus:outline-none focus:border-amber-500"
                       ></textarea>
                     </div>
 
@@ -614,11 +619,11 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Historical Evaluations Table */}
-                <div className="bg-slate-900/40 border border-slate-900 rounded-2xl p-6 space-y-4">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Danh sách nhật ký năng lực</h3>
+                <div className="glass-panel rounded-2xl p-6 space-y-4 shadow-2xl">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-slate-900 pb-3">Danh sách nhật ký năng lực</h3>
                   <div className="space-y-3">
                     {scorecards.map((vendor, idx) => (
-                      <div key={idx} className="bg-slate-950/40 border border-slate-900 p-3 rounded-xl text-xs space-y-2">
+                      <div key={idx} className="bg-slate-950/30 border border-slate-900 p-3 rounded-xl text-xs space-y-2">
                         <div className="flex justify-between items-center">
                           <span className="font-bold text-slate-200">{vendor.name}</span>
                           <span className="text-[10px] bg-slate-900 border border-slate-800 px-2 py-0.5 rounded text-amber-500 font-bold">
@@ -640,12 +645,12 @@ export default function AdminDashboard() {
           <div className="lg:col-span-4 space-y-6">
             
             {/* Vendor Scorecard Summary */}
-            <div className="bg-slate-900/40 border border-slate-900 rounded-2xl p-6 space-y-4">
-              <h3 className="text-sm font-bold text-white tracking-tight">🏆 Bảng Xếp Hạng Đối Tác & Thầu (Vendor Scorecard)</h3>
+            <div className="glass-panel gold-glow rounded-2xl p-6 space-y-4 shadow-2xl">
+              <h3 className="text-sm font-bold text-white tracking-tight border-b border-slate-900 pb-3">🏆 Bảng Xếp Hạng Đối Tác & Thầu (Vendor Scorecard)</h3>
               
               <div className="space-y-4">
                 {scorecards.map((vendor, idx) => (
-                  <div key={idx} className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-4 space-y-2">
+                  <div key={idx} className="bg-slate-950/40 border border-slate-900 rounded-xl p-4 space-y-2 hover:border-amber-500/20 transition duration-300">
                     <div className="flex justify-between items-start">
                       <div>
                         <div className="text-xs font-bold text-slate-200">{vendor.name}</div>
@@ -658,15 +663,15 @@ export default function AdminDashboard() {
 
                     <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-900 text-center">
                       <div>
-                        <div className="text-[9px] text-slate-600">Chất lượng</div>
+                        <div className="text-[9px] text-slate-500">Chất lượng</div>
                         <div className="text-xs font-bold text-white mt-0.5">{vendor.score}</div>
                       </div>
                       <div>
-                        <div className="text-[9px] text-slate-600">Tiến độ</div>
+                        <div className="text-[9px] text-slate-500">Tiến độ</div>
                         <div className="text-xs font-bold text-white mt-0.5">{vendor.speed}</div>
                       </div>
                       <div>
-                        <div className="text-[9px] text-slate-600">Lỗi Rework</div>
+                        <div className="text-[9px] text-slate-500">Lỗi Rework</div>
                         <div className="text-xs font-bold text-red-400 mt-0.5">{vendor.reworks}</div>
                       </div>
                     </div>
