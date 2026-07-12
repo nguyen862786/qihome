@@ -8,7 +8,7 @@ export default function SalesDashboard() {
   const router = useRouter();
   const [profile, setProfile] = useState(null);
   const [isLive, setIsLive] = useState(false);
-  const [activeTab, setActiveTab] = useState('affiliate'); // 'affiliate' | 'clients' | 'kyc'
+  const [activeTab, setActiveTab] = useState('affiliate'); // 'affiliate' | 'clients' | 'kyc' | 'payout_history'
 
   // Date filters states
   const [startDate, setStartDate] = useState('');
@@ -45,6 +45,9 @@ export default function SalesDashboard() {
   // Referred clients table
   const [clients, setClients] = useState([]);
 
+  // Payout History state
+  const [payoutHistory, setPayoutHistory] = useState([]);
+
   // Fallback mock data for sales sandbox spanning multiple months
   const MOCK_CLIENTS = [
     { id: '1', name: 'Phan Văn Trị', unit: 'Căn 1205 - Golden Silk', boqValue: 350000000, commission: 7000000, status: 'pending', date: '2026-07-12', customerStatus: 'ĐANG TƯ VẤN' },
@@ -52,6 +55,13 @@ export default function SalesDashboard() {
     { id: '3', name: 'Nguyễn Thị Bình', unit: 'Căn 1502 - Golden Silk', boqValue: 600000000, commission: 12000000, status: 'approved', date: '2026-07-08', customerStatus: 'ĐÃ BÀN GIAO' },
     { id: '4', name: 'Trần Văn Tám', unit: 'Biệt thự BT-04 - Hậu Nghĩa', boqValue: 800000000, commission: 16000000, status: 'paid', date: '2026-06-15', customerStatus: 'ĐÃ BÀN GIAO' },
     { id: '5', name: 'Phạm Minh Trí', unit: 'Căn S2.01-1002 - Grand Park', boqValue: 300000000, commission: 6000000, status: 'pending', date: '2026-05-20', customerStatus: 'ĐANG TƯ VẤN' }
+  ];
+
+  // Default shared commissions list for simulated backoffice
+  const DEFAULT_SHARED_COMMISSIONS = [
+    { id: 'COM-2026-001', projectCode: 'PRJ-HAUNGHIA-101', clientName: 'Phan Văn Trị', gross: 7000000, status: 'paid', date: '10/07/2026', expectedDate: '10/07/2026' },
+    { id: 'COM-2026-002', projectCode: 'PRJ-HAUNGHIA-102', clientName: 'Hoàng Thị Hoa', gross: 9000000, status: 'approved', date: '---', expectedDate: '18/07/2026' },
+    { id: 'COM-2026-003', projectCode: 'PRJ-GRANDPARK-201', clientName: 'Nguyễn Thị Bình', gross: 12000000, status: 'pending', date: '---', expectedDate: '' }
   ];
 
   useEffect(() => {
@@ -92,6 +102,14 @@ export default function SalesDashboard() {
     
     const isProfileComplete = user.kyc_status === 'verified' && user.is_contract_signed && user.tax_code;
 
+    // Retrieve or initialize shared commissions from localStorage
+    let storedComms = localStorage.getItem('qihome_shared_commissions');
+    if (!storedComms) {
+      localStorage.setItem('qihome_shared_commissions', JSON.stringify(DEFAULT_SHARED_COMMISSIONS));
+      storedComms = JSON.stringify(DEFAULT_SHARED_COMMISSIONS);
+    }
+    const commsArray = JSON.parse(storedComms);
+
     if (isConfigured) {
       await loadLiveSalesData(user.id, isProfileComplete);
     } else {
@@ -122,7 +140,7 @@ export default function SalesDashboard() {
       const mappedClients = filtered.map(c => {
         let disbursementStatus = c.status;
         if (!isProfileComplete && (c.status === 'pending' || c.status === 'approved')) {
-          disbursementStatus = 'YÊU CẦU BỔ SÚNG HỒ SƠ PHÁP LÝ';
+          disbursementStatus = 'YÊU CẦU BỔ SUNG HỒ SƠ PHÁP LÝ';
         }
         return {
           ...c,
@@ -140,6 +158,32 @@ export default function SalesDashboard() {
         commissionsEarned,
         commissionsPaid
       });
+
+      // Load Payout History from Shared commissions array (with simulated tax logic)
+      const mappedHistory = commsArray.map(item => {
+        // Calculate tax based on tax ID existence
+        const taxRate = user.tax_code ? 0.10 : 0.0;
+        const taxAmount = Math.round(item.gross * taxRate);
+        const netAmount = item.gross - taxAmount;
+
+        let payoutStatus = item.status;
+        if (!isProfileComplete && (item.status === 'pending' || item.status === 'approved')) {
+          payoutStatus = 'blocked';
+        }
+
+        return {
+          id: item.id,
+          title: `Hoa hồng đợt 1 - Căn hộ ${item.clientName}`,
+          gross: item.gross,
+          tax: taxAmount,
+          taxLabel: user.tax_code ? '10%' : 'KHÔNG KHẤU TRỪ',
+          net: netAmount,
+          date: item.status === 'paid' ? item.date : item.expectedDate ? `Dự kiến: ${item.expectedDate}` : '---',
+          expectedDate: item.expectedDate,
+          status: payoutStatus
+        };
+      });
+      setPayoutHistory(mappedHistory);
     }
   };
 
@@ -203,7 +247,7 @@ export default function SalesDashboard() {
         // Apply guardrail blocking based on KYC and contract signing
         let disbursementStatus = comm ? comm.status : 'pending';
         if (!isProfileComplete && (disbursementStatus === 'pending' || disbursementStatus === 'approved')) {
-          disbursementStatus = 'YÊU CẦU BỔ SÚNG HỒ SƠ PHÁP LÝ';
+          disbursementStatus = 'YÊU CẦU BỔ SUNG HỒ SƠ PHÁP LÝ';
         }
 
         return {
@@ -226,6 +270,34 @@ export default function SalesDashboard() {
         commissionsEarned,
         commissionsPaid
       });
+
+      // Parse live commissions into payout history
+      const parsedHistory = (commissions || []).map(item => {
+        const matchingProj = projects?.find(p => p.id === item.project_id);
+        const clientName = matchingProj ? matchingProj.client_name : 'Cư dân';
+
+        const taxRate = mst ? 0.10 : 0.0;
+        const taxAmount = Math.round(item.amount * taxRate);
+        const netAmount = item.amount - taxAmount;
+
+        let payoutStatus = item.status;
+        if (!isProfileComplete && (item.status === 'pending' || item.status === 'approved')) {
+          payoutStatus = 'blocked';
+        }
+
+        return {
+          id: `COM-${item.id.slice(0, 5).toUpperCase()}`,
+          title: `Hoa hồng đợt 1 - Căn hộ ${clientName}`,
+          gross: item.amount,
+          tax: taxAmount,
+          taxLabel: mst ? '10%' : 'KHÔNG KHẤU TRỪ',
+          net: netAmount,
+          date: item.status === 'paid' ? new Date(item.updated_at || item.created_at).toLocaleDateString('vi-VN') : item.expected_payment_date ? `Dự kiến: ${new Date(item.expected_payment_date).toLocaleDateString('vi-VN')}` : '---',
+          expectedDate: item.expected_payment_date,
+          status: payoutStatus
+        };
+      });
+      setPayoutHistory(parsedHistory);
 
     } catch (err) {
       console.error('Error loading live sales dashboard:', err);
@@ -386,22 +458,7 @@ export default function SalesDashboard() {
     alert('🔧 [Developer Mode] Đã chuyển đổi trạng thái KYC tài khoản sang: ĐÃ XÁC THỰC để mở khóa ký E-Contract.');
   };
 
-  const getReferralUrl = () => {
-    if (typeof window !== 'undefined') {
-      const code = profile?.affiliate_code || 'SALE-NAM86';
-      return `${window.location.origin}/?aff=${code}`;
-    }
-    return 'http://localhost:3000/?aff=SALE-NAM86';
-  };
-
-  const copyReferralUrl = () => {
-    navigator.clipboard.writeText(getReferralUrl());
-    alert('📋 Đã sao chép đường link Affiliate của bạn!');
-  };
-
   if (!profile) return null;
-
-  const isProfileComplete = kycStatus === 'verified' && isContractSigned && mst;
 
   return (
     <div className="min-h-screen text-slate-800 flex flex-col md:flex-row relative overflow-hidden bg-[#faf8f5]">
@@ -455,6 +512,18 @@ export default function SalesDashboard() {
           </button>
 
           <button
+            onClick={() => setActiveTab('payout_history')}
+            className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-bold transition duration-200 ${
+              activeTab === 'payout_history' 
+                ? 'bg-[#c49a62] text-white shadow-lg shadow-[#c49a62]/20' 
+                : 'text-slate-400 hover:text-white hover:bg-slate-900/40'
+            }`}
+          >
+            <span>💵</span>
+            <span>Lịch Sử Thanh Toán</span>
+          </button>
+
+          <button
             onClick={() => setActiveTab('kyc')}
             className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-bold transition duration-200 ${
               activeTab === 'kyc' 
@@ -486,7 +555,6 @@ export default function SalesDashboard() {
           </div>
           
           <div className="flex items-center space-x-4">
-            {/* Guardrail alert badge in header */}
             {!isProfileComplete ? (
               <span className="text-[9px] font-black uppercase bg-red-500/10 text-red-600 border border-red-500/20 px-2 py-1 rounded">
                 ⚠️ Bổ sung Hồ Sơ Pháp Lý
@@ -668,7 +736,7 @@ export default function SalesDashboard() {
                               <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
                                 client.status === 'paid' ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' : 
                                 client.status === 'approved' ? 'bg-amber-500/10 text-amber-600 border border-amber-500/20' : 
-                                'bg-slate-100 text-slate-550 border border-slate-200'
+                                'bg-slate-100 text-slate-500 border border-slate-200'
                               }`}>
                                 {client.status === 'paid' ? 'Đã thanh toán' : client.status === 'approved' ? 'Chờ chi' : 'Chờ Vin duyệt'}
                               </span>
@@ -692,7 +760,76 @@ export default function SalesDashboard() {
             </div>
           )}
 
-          {/* NEW TAB: Tab 3: KYC & Pháp Lý (kyc) */}
+          {/* NEW TAB: Tab 4: Lịch Sử Thanh Toán (payout_history) */}
+          {activeTab === 'payout_history' && (
+            <div className="bg-white border border-[#ebdcb9] rounded-2xl p-6 space-y-4 shadow-sm text-slate-800 animate-fadeIn">
+              <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 className="text-sm font-bold text-slate-900">💵 Lịch Sử Thanh Toán Hoa Hồng</h3>
+                <span className="text-xs px-2.5 py-0.5 bg-[#c49a62]/10 text-[#c49a62] border border-[#c49a62]/20 rounded-full font-bold">
+                  {payoutHistory.length} Giao dịch đối soát
+                </span>
+              </div>
+
+              <div className="overflow-x-auto pt-2">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="border-b border-[#ebdcb9] text-slate-500 font-semibold">
+                      <th className="py-3 px-2">Mã Lệnh Chi</th>
+                      <th className="py-3 px-2">Kỳ Thanh Toán / Nội dung</th>
+                      <th className="py-3 px-2 text-right">Tổng phát sinh (Gross)</th>
+                      <th className="py-3 px-2 text-center">Thuế TNCN (Tax)</th>
+                      <th className="py-3 px-2 text-right">Thực nhận (Net)</th>
+                      <th className="py-3 px-2 text-center">Ngày Chi / Dự kiến</th>
+                      <th className="py-3 px-2 text-right">Tình Trạng</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 text-slate-700">
+                    {payoutHistory.length === 0 ? (
+                      <tr>
+                        <td colSpan="7" className="py-6 text-center text-slate-450 text-xs">
+                          Chưa ghi nhận lịch sử giao dịch nào.
+                        </td>
+                      </tr>
+                    ) : (
+                      payoutHistory.map((payout, idx) => (
+                        <tr key={idx} className="hover:bg-slate-50/50">
+                          <td className="py-3 px-2 font-mono font-bold text-slate-800">{payout.id}</td>
+                          <td className="py-3 px-2 font-semibold text-slate-700">{payout.title}</td>
+                          <td className="py-3 px-2 text-right font-bold">{payout.gross.toLocaleString('vi-VN')}đ</td>
+                          <td className="py-3 px-2 text-center text-red-500 font-medium">
+                            {payout.tax > 0 ? `-${payout.tax.toLocaleString('vi-VN')}đ` : '0đ'}
+                            <span className="text-[8px] bg-red-50 border border-red-100 text-red-500 rounded px-1 ml-1">
+                              {payout.taxLabel}
+                            </span>
+                          </td>
+                          <td className="py-3 px-2 text-right font-black text-emerald-600">{payout.net.toLocaleString('vi-VN')}đ</td>
+                          <td className="py-3 px-2 text-center font-bold text-slate-600">{payout.date}</td>
+                          <td className="py-3 px-2 text-right">
+                            {payout.status === 'blocked' ? (
+                              <span className="px-2 py-0.5 rounded text-[8px] font-black bg-red-100 border border-red-200 text-red-600">
+                                YÊU CẦU BỔ SUNG HỒ SƠ PHÁP LÝ
+                              </span>
+                            ) : (
+                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                                payout.status === 'paid' ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' : 
+                                payout.status === 'approved' ? 'bg-blue-500/10 text-blue-600 border border-blue-500/20' : 
+                                'bg-slate-100 text-slate-500 border border-slate-200'
+                              }`}>
+                                {payout.status === 'paid' ? 'Đã thanh toán' : 
+                                 payout.status === 'approved' ? 'Dự kiến chi' : 'Chờ kế toán duyệt'}
+                              </span>
+                            )}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Tab 3: KYC & Pháp Lý (kyc) */}
           {activeTab === 'kyc' && (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start animate-fadeIn">
               
@@ -701,7 +838,6 @@ export default function SalesDashboard() {
                 <div className="bg-white border border-[#ebdcb9] rounded-2xl p-6 space-y-4 shadow-sm text-slate-800">
                   <h3 className="text-sm font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center justify-between">
                     <span>👤 Hồ Sơ Cá Nhân & Thông Tin Tài Khoản</span>
-                    {/* Developer bypass button */}
                     <button
                       type="button"
                       onClick={devBypassVerify}
@@ -937,7 +1073,6 @@ export default function SalesDashboard() {
                   <h3 className="text-sm font-bold text-slate-900 border-b border-slate-100 pb-3">📸 Tải Lên Giấy Tờ Xác Minh (CCCD)</h3>
                   
                   <div className="space-y-4">
-                    {/* Front CCCD */}
                     <div className="space-y-1">
                       <div className="text-[10px] text-slate-500 font-semibold uppercase">Mặt trước CCCD</div>
                       {!frontImage ? (
@@ -957,7 +1092,6 @@ export default function SalesDashboard() {
                       )}
                     </div>
 
-                    {/* Back CCCD */}
                     <div className="space-y-1">
                       <div className="text-[10px] text-slate-500 font-semibold uppercase">Mặt sau CCCD</div>
                       {!backImage ? (

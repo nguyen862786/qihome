@@ -8,7 +8,7 @@ export default function AccountingDashboard() {
   const router = useRouter();
   const [profile, setProfile] = useState(null);
   const [isLive, setIsLive] = useState(false);
-  const [activeTab, setActiveTab] = useState('ledger'); // 'ledger' | 'sign_payout'
+  const [activeTab, setActiveTab] = useState('ledger'); // 'ledger' | 'sign_payout' | 'sales_commissions'
   
   // Financial ledger states
   const [ledger, setLedger] = useState([]);
@@ -22,6 +22,10 @@ export default function AccountingDashboard() {
   const [submittingPayout, setSubmittingPayout] = useState(false);
   const [success, setSuccess] = useState('');
 
+  // Shared commissions list for Backoffice approval flow
+  const [sharedComms, setSharedComms] = useState([]);
+  const [expectedDates, setExpectedDates] = useState({});
+
   // Fallback static ledger data
   const MOCK_LEDGER = [
     { id: 'tx-1', type: 'in', category: 'Vin 6%', project: 'PRJ-HAUNGHIA-104', title: 'Quyết toán 6% tài trợ đợt cuối', amount: 48000000, status: 'completed', date: 'Hôm qua' },
@@ -29,6 +33,12 @@ export default function AccountingDashboard() {
     { id: 'tx-3', type: 'out', category: 'Thầu phụ', project: 'PRJ-HAUNGHIA-103', title: 'Thanh toán công lắp thô (Hùng Vương)', amount: 25000000, status: 'pending_approval', date: '3 ngày trước' },
     { id: 'tx-4', type: 'out', category: 'Nhà cung cấp', project: 'PRJ-HAUNGHIA-102', title: 'Thanh toán mua gỗ An Cường đợt 1', amount: 63000000, status: 'pending_approval', date: 'Vừa xong' },
     { id: 'tx-5', type: 'in', category: 'Khách cọc', project: 'PRJ-HAUNGHIA-101', title: 'Khách hàng Phan Văn Trị đặt cọc 30%', amount: 105000000, status: 'completed', date: 'Hôm nay' }
+  ];
+
+  const DEFAULT_SHARED_COMMISSIONS = [
+    { id: 'COM-2026-001', projectCode: 'PRJ-HAUNGHIA-101', clientName: 'Phan Văn Trị', gross: 7000000, status: 'paid', date: '10/07/2026', expectedDate: '10/07/2026' },
+    { id: 'COM-2026-002', projectCode: 'PRJ-HAUNGHIA-102', clientName: 'Hoàng Thị Hoa', gross: 9000000, status: 'approved', date: '---', expectedDate: '18/07/2026' },
+    { id: 'COM-2026-003', projectCode: 'PRJ-GRANDPARK-201', clientName: 'Nguyễn Thị Bình', gross: 12000000, status: 'pending', date: '---', expectedDate: '' }
   ];
 
   useEffect(() => {
@@ -51,6 +61,15 @@ export default function AccountingDashboard() {
                          !process.env.NEXT_PUBLIC_SUPABASE_URL.includes('your-project-id');
     setIsLive(isConfigured);
     
+    // Load shared commissions from localStorage
+    let storedComms = localStorage.getItem('qihome_shared_commissions');
+    if (!storedComms) {
+      localStorage.setItem('qihome_shared_commissions', JSON.stringify(DEFAULT_SHARED_COMMISSIONS));
+      storedComms = JSON.stringify(DEFAULT_SHARED_COMMISSIONS);
+    }
+    const parsedComms = JSON.parse(storedComms);
+    setSharedComms(parsedComms);
+
     if (isConfigured) {
       await loadLiveLedger();
     } else {
@@ -256,7 +275,89 @@ export default function AccountingDashboard() {
     }
   };
 
+  // Backoffice approval action: Set payment expected date
+  const handleSchedulePayout = async (id) => {
+    const selectedDate = expectedDates[id];
+    if (!selectedDate) {
+      alert('⚠️ Vui lòng chọn Ngày dự kiến thanh toán!');
+      return;
+    }
+
+    const formattedDate = new Date(selectedDate).toLocaleDateString('vi-VN');
+
+    try {
+      if (isLive) {
+        // Update expected date on live DB commission item
+        const numericId = id.replace('COM-2026-', '');
+        const { error } = await supabase
+          .from('commissions')
+          .update({ 
+            status: 'approved',
+            expected_payment_date: selectedDate 
+          })
+          .eq('id', numericId);
+        
+        if (error) throw error;
+        alert('📅 Đã xác nhận lịch chi và đồng bộ sang Cổng Sales CTV!');
+        await loadLiveLedger();
+      } else {
+        // Local simulation update
+        const updated = sharedComms.map(item => {
+          if (item.id === id) {
+            return { ...item, status: 'approved', expectedDate: formattedDate };
+          }
+          return item;
+        });
+        localStorage.setItem('qihome_shared_commissions', JSON.stringify(updated));
+        setSharedComms(updated);
+        alert('📅 Đã xác nhận lịch chi thành công! Trạng thái đã chuyển sang DỰ KIẾN CHI trên Cổng Sales.');
+      }
+    } catch (err) {
+      alert('Lỗi cập nhật lịch chi: ' + err.message);
+    }
+  };
+
+  // Backoffice approval action: Confirm payment done
+  const handleConfirmPaid = async (id) => {
+    const todayStr = new Date().toLocaleDateString('vi-VN');
+    try {
+      if (isLive) {
+        const numericId = id.replace('COM-2026-', '');
+        const { error } = await supabase
+          .from('commissions')
+          .update({ 
+            status: 'paid',
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', numericId);
+        
+        if (error) throw error;
+        alert('💸 Đã chuyển khoản và đổi trạng thái sang ĐÃ THANH TOÁN!');
+        await loadLiveLedger();
+      } else {
+        const updated = sharedComms.map(item => {
+          if (item.id === id) {
+            return { ...item, status: 'paid', date: todayStr };
+          }
+          return item;
+        });
+        localStorage.setItem('qihome_shared_commissions', JSON.stringify(updated));
+        setSharedComms(updated);
+        alert('💸 Đã xác nhận chuyển khoản thành công! Trạng thái đã chuyển sang ĐÃ THANH TOÁN trên Cổng Sales.');
+      }
+    } catch (err) {
+      alert('Lỗi xác nhận đã chi: ' + err.message);
+    }
+  };
+
   if (!profile) return null;
+
+  // Retrieve sales partner KYC status from localStorage
+  const salesProfile = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('qihome_user_profile') || '{}') : {};
+  const hasMST = salesProfile?.tax_code;
+  const isKYC = salesProfile?.kyc_status === 'verified';
+  const isSigned = salesProfile?.is_contract_signed;
+  const isProfileComplete = isKYC && isSigned && hasMST;
 
   return (
     <div className="min-h-screen text-slate-800 flex flex-col md:flex-row relative overflow-hidden bg-[#faf8f5]">
@@ -315,6 +416,18 @@ export default function AccountingDashboard() {
               </span>
             )}
           </button>
+
+          <button
+            onClick={() => setActiveTab('sales_commissions')}
+            className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-bold transition duration-200 ${
+              activeTab === 'sales_commissions' 
+                ? 'bg-[#c49a62] text-white shadow-lg shadow-[#c49a62]/20' 
+                : 'text-slate-400 hover:text-white hover:bg-slate-900/40'
+            }`}
+          >
+            <span>🤝</span>
+            <span>Duyệt Chi Sales CTV</span>
+          </button>
         </nav>
 
         {/* Logout / Exit at Bottom */}
@@ -352,7 +465,7 @@ export default function AccountingDashboard() {
           {/* Financial KPI Row */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div className="bg-white border border-[#ebdcb9] rounded-2xl p-5 shadow-sm">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Tổng thu lũy kế</div>
+              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Tổng thu luỹ kế</div>
               <div className="text-xl font-black mt-2 text-[#c49a62]">{summary.totalIn.toLocaleString('vi-VN')}đ</div>
               <div className="text-[9px] text-[#c49a62] font-semibold mt-1">✓ Đã đối soát khớp tiền về</div>
             </div>
@@ -450,7 +563,7 @@ export default function AccountingDashboard() {
 
                 <div className="lg:col-span-4">
                   <div className="bg-[#f4ebd9] border border-[#e2d5c3] rounded-2xl p-6 space-y-4 shadow-sm text-xs text-slate-850">
-                    <h3 className="text-sm font-bold text-slate-900 border-b border-[#e2d5c3] pb-3">💡 Quy trình đối soát</h3>
+                    <h3 className="text-sm font-bold text-slate-900 border-b border-slate-100 pb-3">💡 Quy trình đối soát</h3>
                     <p className="text-slate-600 leading-relaxed">
                       Mọi khoản chi chỉ được thực hiện khi tổ giám sát hiện trường đánh giá chất lượng thi công đạt tiêu chuẩn nghiệm thu và báo cáo hình ảnh lỗi đã được thợ khắc phục.
                     </p>
@@ -458,6 +571,124 @@ export default function AccountingDashboard() {
                 </div>
               </>
             )}
+
+            {/* NEW TAB: Tab 3: Duyệt Chi Sales CTV (sales_commissions) */}
+            {activeTab === 'sales_commissions' && (
+              <div className="lg:col-span-12 space-y-6">
+                <div className="bg-white border border-[#ebdcb9] rounded-2xl p-6 space-y-4 shadow-sm text-slate-800 animate-fadeIn">
+                  <h3 className="text-sm font-bold text-slate-900 border-b border-slate-100 pb-3 flex justify-between items-center">
+                    <span>🤝 Quản Lý & Duyệt Chi Hoa Hồng Sales Affiliate</span>
+                    <span className="text-xs text-[#c49a62] font-black">Backoffice Approval System</span>
+                  </h3>
+
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs border-collapse">
+                      <thead>
+                        <tr className="border-b border-[#ebdcb9] text-slate-500 font-semibold uppercase">
+                          <th className="py-3 px-2">Căn Hộ</th>
+                          <th className="py-3 px-2">Tên Sales</th>
+                          <th className="py-3 px-2 text-right">Hoa hồng (Gross)</th>
+                          <th className="py-3 px-2 text-center">Thuế TNCN (10%)</th>
+                          <th className="py-3 px-2 text-right">Thực nhận (Net)</th>
+                          <th className="py-3 px-2 text-center">Nhập Lịch Chi / Trạng thái</th>
+                          <th className="py-3 px-2 text-right">Hành động</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 text-slate-700">
+                        {sharedComms.length === 0 ? (
+                          <tr>
+                            <td colSpan="7" className="py-6 text-center text-slate-400">Không có dữ liệu hoa hồng.</td>
+                          </tr>
+                        ) : (
+                          sharedComms.map((item) => {
+                            // Calculate tax based on sales MST existence in simulated database
+                            const taxRate = hasMST ? 0.10 : 0.0;
+                            const taxAmount = Math.round(item.gross * taxRate);
+                            const netAmount = item.gross - taxAmount;
+
+                            return (
+                              <tr key={item.id} className="hover:bg-slate-50/50">
+                                <td className="py-3 px-2 font-mono font-bold text-slate-900">{item.projectCode}</td>
+                                <td className="py-3 px-2">
+                                  <div className="font-semibold text-slate-800">{salesProfile?.full_name || 'Lê Thu Trang'}</div>
+                                  <div className="text-[9px] text-slate-400">MST: {hasMST || 'CHƯA CUNG CẤP MST'}</div>
+                                </td>
+                                <td className="py-3 px-2 text-right font-bold">{item.gross.toLocaleString('vi-VN')}đ</td>
+                                <td className="py-3 px-2 text-center text-red-500 font-semibold">
+                                  {hasMST ? `-${taxAmount.toLocaleString('vi-VN')}đ (10%)` : '0đ (Không khấu trừ)'}
+                                </td>
+                                <td className="py-3 px-2 text-right font-black text-emerald-600">{netAmount.toLocaleString('vi-VN')}đ</td>
+                                <td className="py-3 px-2 text-center">
+                                  {item.status === 'pending' && isProfileComplete && (
+                                    <div className="flex items-center justify-center space-x-1">
+                                      <input
+                                        type="date"
+                                        value={expectedDates[item.id] || ''}
+                                        onChange={(e) => setExpectedDates({ ...expectedDates, [item.id]: e.target.value })}
+                                        className="bg-white border border-[#ebdcb9] rounded px-1.5 py-1 text-[10px] text-slate-800"
+                                      />
+                                    </div>
+                                  )}
+                                  
+                                  {item.status === 'approved' && (
+                                    <span className="text-[10px] text-blue-600 font-bold bg-blue-50 border border-blue-100 px-2 py-0.5 rounded">
+                                      Dự kiến chi: {item.expectedDate}
+                                    </span>
+                                  )}
+
+                                  {item.status === 'paid' && (
+                                    <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded">
+                                      Đã chi: {item.date}
+                                    </span>
+                                  )}
+
+                                  {item.status === 'pending' && !isProfileComplete && (
+                                    <span className="text-[9px] font-black bg-red-100 border border-red-200 text-red-600 px-2 py-0.5 rounded">
+                                      YÊU CẦU BỔ SUNG HỒ SƠ PHÁP LÝ
+                                    </span>
+                                  )}
+                                </td>
+                                <td className="py-3 px-2 text-right space-x-2">
+                                  {/* Guardrail blocking actions */}
+                                  {!isProfileComplete ? (
+                                    <span className="text-[9px] text-slate-400 italic">Bị khoá do thiếu KYC/MST</span>
+                                  ) : (
+                                    <>
+                                      {item.status === 'pending' && (
+                                        <button
+                                          onClick={() => handleSchedulePayout(item.id)}
+                                          className="bg-[#c49a62] hover:bg-[#b08752] text-white font-bold px-2.5 py-1 rounded text-[10px] transition"
+                                        >
+                                          ✓ Xác nhận lịch chi
+                                        </button>
+                                      )}
+                                      
+                                      {item.status === 'approved' && (
+                                        <button
+                                          onClick={() => handleConfirmPaid(item.id)}
+                                          className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-2.5 py-1 rounded text-[10px] transition"
+                                        >
+                                          💸 Xác nhận đã chi
+                                        </button>
+                                      )}
+
+                                      {item.status === 'paid' && (
+                                        <span className="text-[10px] text-slate-400">Hoàn tất đối soát</span>
+                                      )}
+                                    </>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )}
+
           </div>
         </main>
       </div>
