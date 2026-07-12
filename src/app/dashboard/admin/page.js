@@ -23,6 +23,12 @@ export default function AdminDashboard() {
   const [scorecards, setScorecards] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // Filters for Project Health Tab
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterStage, setFilterStage] = useState('All');
+  const [filterType, setFilterType] = useState('All');
+  const [filterVinhomes, setFilterVinhomes] = useState('All');
+
   // New Vendor Evaluation Form states
   const [subcontractorsList, setSubcontractorsList] = useState([]);
   const [selectedSubId, setSelectedSubId] = useState('');
@@ -46,10 +52,10 @@ export default function AdminDashboard() {
   ];
 
   const MOCK_HEALTH = [
-    { code: 'PRJ-HAUNGHIA-101', client: 'Phan Văn Trị', progress: 10, status: 'pending_design', alert: 'green', desc: 'Đã ký HĐ, đang chuẩn bị concept phối cảnh AI.' },
-    { code: 'PRJ-HAUNGHIA-102', client: 'Hoàng Thị Hoa', progress: 45, status: 'in_production', alert: 'green', desc: 'Hàng đã về kho vệ tinh, đang tiến hành lắp đặt.' },
-    { code: 'PRJ-HAUNGHIA-103', client: 'Nguyễn Thị Bình', progress: 85, status: 'qc_inspection', alert: 'yellow', desc: 'Đang làm kiểm tra QC checklist gỗ liền tường.' },
-    { code: 'PRJ-HAUNGHIA-104', client: 'Trịnh Quốc Bảo', progress: 100, status: 'completed', alert: 'green', desc: 'Công trình đã bàn giao hoàn thiện, đạt QC.' }
+    { code: 'PRJ-HAUNGHIA-101', client: 'Phan Văn Trị', progress: 10, status: 'pending_design', alert: 'green', desc: 'Đã ký HĐ, đang chuẩn bị concept phối cảnh AI.', type: 'Chung cư', vinhomes: 'Vinhomes Hậu Nghĩa' },
+    { code: 'PRJ-HAUNGHIA-102', client: 'Hoàng Thị Hoa', progress: 45, status: 'in_production', alert: 'green', desc: 'Hàng đã về kho vệ tinh, đang tiến hành lắp đặt.', type: 'Nhà phố', vinhomes: 'Vinhomes Hậu Nghĩa' },
+    { code: 'PRJ-GRANDPARK-201', client: 'Nguyễn Thị Bình', progress: 85, status: 'qc_inspection', alert: 'yellow', desc: 'Đang làm kiểm tra QC checklist gỗ liền tường.', type: 'Chung cư', vinhomes: 'Vinhomes Grand Park' },
+    { code: 'PRJ-OCEANPARK-301', client: 'Trịnh Quốc Bảo', progress: 100, status: 'completed', alert: 'green', desc: 'Công trình đã bàn giao hoàn thiện, đạt QC.', type: 'Biệt thự', vinhomes: 'Vinhomes Ocean Park' }
   ];
 
   const MOCK_SCORECARDS = [
@@ -162,13 +168,23 @@ export default function AdminDashboard() {
             desc = 'Dự án đã bàn giao nghiệm thu hoàn tất cho khách hàng.';
           }
 
+          let type = 'Chung cư';
+          if (p.vinhomes_floor_căn?.toLowerCase().includes('biệt thự') || p.vinhomes_floor_căn?.toLowerCase().includes('bt')) {
+            type = 'Biệt thự';
+          } else if (p.vinhomes_floor_căn?.toLowerCase().includes('nhà phố') || p.vinhomes_floor_căn?.toLowerCase().includes('np') || p.vinhomes_floor_căn?.toLowerCase().includes('shophouse')) {
+            type = 'Nhà phố';
+          }
+          let vinhomes = p.vinhomes_block || 'Vinhomes Hậu Nghĩa';
+
           healthList.push({
             code: p.project_code,
             client: p.client_name,
             progress,
             status: p.status,
             alert,
-            desc
+            desc,
+            type,
+            vinhomes
           });
         });
       }
@@ -427,44 +443,123 @@ export default function AdminDashboard() {
           <div className="lg:col-span-8 space-y-6">
             
             {/* Tab 1: Project Health */}
-            {activeTab === 'health' && (
-              <div className="glass-panel rounded-2xl p-6 space-y-5 shadow-2xl">
-                <h3 className="text-sm font-bold text-white tracking-tight border-b border-slate-900 pb-3">🚦 Báo Cáo Sức Khỏe Dự Án (Global Project Health)</h3>
+            {activeTab === 'health' && (() => {
+              const filteredProjects = projectHealth.filter(proj => {
+                const matchesSearch = proj.client.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                                      proj.code.toLowerCase().includes(searchQuery.toLowerCase());
+                const matchesStage = filterStage === 'All' || proj.status === filterStage;
+                const matchesType = filterType === 'All' || proj.type === filterType;
+                const matchesVinhomes = filterVinhomes === 'All' || proj.vinhomes === filterVinhomes;
                 
-                <div className="divide-y divide-slate-900 space-y-4 max-h-[500px] overflow-y-auto pr-1">
-                  {projectHealth.length === 0 ? (
-                    <div className="text-center text-xs text-slate-500 py-6">
-                      Chưa có dự án thi công nào trên cơ sở dữ liệu.
-                    </div>
-                  ) : (
-                    projectHealth.map((proj, idx) => (
-                      <div key={idx} className="pt-4 first:pt-0 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div className="space-y-1.5">
-                          <div className="flex items-center space-x-2">
-                            <span className={`w-2.5 h-2.5 rounded-full ${
-                              proj.alert === 'green' ? 'bg-emerald-500' : proj.alert === 'yellow' ? 'bg-amber-500' : 'bg-red-500'
-                            } shadow-[0_0_8px_rgba(16,185,129,0.4)]`}></span>
-                            <strong className="text-xs text-white">{proj.code}</strong>
-                            <span className="text-[10px] text-slate-500">Khách hàng: {proj.client}</span>
-                          </div>
-                          <p className="text-xs text-slate-400">{proj.desc}</p>
-                        </div>
+                return matchesSearch && matchesStage && matchesType && matchesVinhomes;
+              });
 
-                        <div className="flex items-center space-x-4">
-                          <div className="w-24 bg-slate-950 border border-slate-900 h-2 rounded-full overflow-hidden">
-                            <div className="bg-gradient-to-r from-amber-500 to-amber-300 h-full rounded-full shadow-[0_0_8px_rgba(245,158,11,0.5)]" style={{ width: `${proj.progress}%` }}></div>
-                          </div>
-                          <span className="text-[10px] font-mono text-slate-300 font-bold">{proj.progress}%</span>
-                          <span className="text-[9px] font-bold uppercase px-2 py-0.5 bg-slate-900 text-slate-400 border border-slate-800 rounded">
-                            {proj.status}
-                          </span>
-                        </div>
+              return (
+                <div className="glass-panel rounded-2xl p-6 space-y-5 shadow-2xl">
+                  <h3 className="text-sm font-bold text-white tracking-tight border-b border-slate-900 pb-3">🚦 Báo Cáo Sức Khỏe Dự Án (Global Project Health)</h3>
+                  
+                  {/* Search & Filters Row */}
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-3 bg-slate-950/20 p-3 rounded-xl border border-slate-900 text-xs">
+                    {/* Search query */}
+                    <div className="space-y-1">
+                      <label className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Tìm kiếm dự án / khách</label>
+                      <input
+                        type="text"
+                        placeholder="Tên khách, mã..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full bg-slate-950 border border-slate-850 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-amber-500"
+                      />
+                    </div>
+
+                    {/* Project Location/Vinhomes */}
+                    <div className="space-y-1">
+                      <label className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Dự án Vinhomes</label>
+                      <select
+                        value={filterVinhomes}
+                        onChange={(e) => setFilterVinhomes(e.target.value)}
+                        className="w-full bg-slate-950 border border-slate-850 rounded-lg px-2 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500"
+                      >
+                        <option value="All">Tất cả dự án</option>
+                        <option value="Vinhomes Hậu Nghĩa">Vinhomes Hậu Nghĩa</option>
+                        <option value="Vinhomes Grand Park">Vinhomes Grand Park</option>
+                        <option value="Vinhomes Ocean Park">Vinhomes Ocean Park</option>
+                      </select>
+                    </div>
+
+                    {/* Stage/Status */}
+                    <div className="space-y-1">
+                      <label className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Giai đoạn tiến độ</label>
+                      <select
+                        value={filterStage}
+                        onChange={(e) => setFilterStage(e.target.value)}
+                        className="w-full bg-slate-950 border border-slate-850 rounded-lg px-2 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500"
+                      >
+                        <option value="All">Tất cả giai đoạn</option>
+                        <option value="pending_design">Concept phối cảnh AI</option>
+                        <option value="in_production">Đang thi công lắp đặt</option>
+                        <option value="qc_inspection">Đang chấm điểm QC</option>
+                        <option value="completed">Đã hoàn thành bàn giao</option>
+                      </select>
+                    </div>
+
+                    {/* Property type */}
+                    <div className="space-y-1">
+                      <label className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Loại hình nhà</label>
+                      <select
+                        value={filterType}
+                        onChange={(e) => setFilterType(e.target.value)}
+                        className="w-full bg-slate-950 border border-slate-850 rounded-lg px-2 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500"
+                      >
+                        <option value="All">Tất cả loại hình</option>
+                        <option value="Chung cư">Chung cư</option>
+                        <option value="Nhà phố">Nhà phố</option>
+                        <option value="Biệt thự">Biệt thự</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="divide-y divide-slate-900 space-y-4 max-h-[500px] overflow-y-auto pr-1">
+                    {filteredProjects.length === 0 ? (
+                      <div className="text-center text-xs text-slate-500 py-6">
+                        Không tìm thấy dự án nào khớp với bộ lọc.
                       </div>
-                    ))
-                  )}
+                    ) : (
+                      filteredProjects.map((proj, idx) => (
+                        <div key={idx} className="pt-4 first:pt-0 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                          <div className="space-y-1.5">
+                            <div className="flex items-center space-x-2 flex-wrap gap-y-1">
+                              <span className={`w-2.5 h-2.5 rounded-full ${
+                                proj.alert === 'green' ? 'bg-emerald-500' : proj.alert === 'yellow' ? 'bg-amber-500' : 'bg-red-500'
+                              } shadow-[0_0_8px_rgba(16,185,129,0.4)]`}></span>
+                              <strong className="text-xs text-white">{proj.code}</strong>
+                              <span className="text-[10px] text-slate-500 mr-2">Khách hàng: {proj.client}</span>
+                              <span className="text-[9px] uppercase px-1.5 py-0.5 bg-slate-900 border border-slate-800 rounded font-semibold text-slate-400">
+                                {proj.vinhomes}
+                              </span>
+                              <span className="text-[9px] uppercase px-1.5 py-0.5 bg-amber-500/10 border border-amber-500/20 rounded font-bold text-amber-500">
+                                {proj.type}
+                              </span>
+                            </div>
+                            <p className="text-xs text-slate-400">{proj.desc}</p>
+                          </div>
+
+                          <div className="flex items-center space-x-4">
+                            <div className="w-24 bg-slate-950 border border-slate-900 h-2 rounded-full overflow-hidden">
+                              <div className="bg-gradient-to-r from-amber-500 to-amber-300 h-full rounded-full shadow-[0_0_8px_rgba(245,158,11,0.5)]" style={{ width: `${proj.progress}%` }}></div>
+                            </div>
+                            <span className="text-[10px] font-mono text-slate-300 font-bold">{proj.progress}%</span>
+                            <span className="text-[9px] font-bold uppercase px-2 py-0.5 bg-slate-900 text-slate-400 border border-slate-800 rounded">
+                              {proj.status}
+                            </span>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
                 </div>
-              </div>
-            )}
+              );
+            })()}
 
             {/* Tab 2: Over Budget Approval Center */}
             {activeTab === 'requests' && (
