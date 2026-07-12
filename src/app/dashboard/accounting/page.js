@@ -260,9 +260,9 @@ export default function AccountingDashboard() {
   if (!profile) return null;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+    <div className="min-h-screen text-slate-100 flex flex-col">
       {/* Top Navbar */}
-      <nav className="border-b border-slate-900 bg-slate-900/60 p-4 sticky top-0 z-20 backdrop-blur">
+      <nav className="border-b border-slate-900 bg-slate-900/30 p-4 sticky top-0 z-20 backdrop-blur">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-3">
             <span className="font-bold text-2xl tracking-wider text-amber-500 bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-xl">Qi</span>

@@ -313,9 +313,9 @@ export default function SubcontractorDashboard() {
   if (!profile) return null;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center">
+    <div className="min-h-screen text-slate-100 flex flex-col items-center">
       {/* Header */}
-      <div className="w-full max-w-md bg-slate-900 border-b border-slate-800 p-4 sticky top-0 z-20 flex justify-between items-center shadow-lg">
+      <div className="w-full max-w-md glass-panel p-4 sticky top-0 z-20 flex justify-between items-center shadow-lg">
         <div className="flex items-center space-x-2">
           <span className="font-bold text-amber-500 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-lg text-sm">Qi</span>
           <span className="font-bold text-sm text-white">Thợ Thi Công Hiện Trường {isLive && '🟢'}</span>

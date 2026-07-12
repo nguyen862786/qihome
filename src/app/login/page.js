@@ -132,12 +132,12 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex-1 min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-center items-center p-4">
+    <div className="flex-1 min-h-screen text-slate-100 flex flex-col justify-center items-center p-4">
       {/* Background Glows */}
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-[100px] pointer-events-none"></div>
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-amber-600/10 rounded-full blur-[100px] pointer-events-none"></div>
 
-      <div className="w-full max-w-md bg-slate-900/60 border border-slate-800 rounded-2xl p-8 backdrop-blur-xl shadow-2xl relative z-10">
+      <div className="w-full max-w-md glass-panel rounded-2xl p-8 shadow-2xl relative z-10">
         {/* Logo and Brand */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-500 font-bold text-3xl mb-3 tracking-wider">
