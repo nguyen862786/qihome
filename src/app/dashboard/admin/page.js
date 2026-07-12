@@ -358,428 +358,631 @@ export default function AdminDashboard() {
   if (!profile) return null;
 
   return (
-    <div className="min-h-screen text-slate-100 flex flex-col relative overflow-hidden">
-      {/* Ambient background decorative light orbs (Wow factor) */}
-      <div className="absolute top-10 left-10 w-96 h-96 bg-amber-500/10 rounded-full blur-[130px] pointer-events-none z-0"></div>
-      <div className="absolute top-1/3 right-1/4 w-[450px] h-[450px] bg-indigo-500/[0.04] rounded-full blur-[150px] pointer-events-none z-0"></div>
-      <div className="absolute bottom-10 left-1/3 w-80 h-80 bg-emerald-500/[0.03] rounded-full blur-[100px] pointer-events-none z-0"></div>
+    <div className="min-h-screen text-slate-100 flex flex-col md:flex-row relative overflow-hidden bg-[#070a13]">
+      {/* Background ambient lighting glows */}
+      <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-amber-500/[0.03] rounded-full blur-[150px] pointer-events-none z-0"></div>
+      <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-indigo-500/[0.03] rounded-full blur-[150px] pointer-events-none z-0"></div>
 
-      {/* Top Admin Navbar */}
-      <nav className="border-b border-slate-900 bg-slate-950/20 p-4 sticky top-0 z-20 backdrop-blur-xl relative">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div className="flex items-center space-x-3">
-            <span className="font-bold text-2xl tracking-wider text-amber-500 bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-xl">Qi</span>
-            <span className="font-bold text-lg text-white tracking-tight">Trung Tâm Quản Trị Tối Cao {isLive && '🟢'}</span>
-          </div>
-          <div className="flex items-center space-x-4">
-            <span className="text-xs text-amber-400 font-semibold uppercase bg-amber-500/5 px-3 py-1 rounded border border-amber-500/20">
-              Chủ tịch: Nguyễn Duy Quang
-            </span>
-            <button onClick={() => router.push('/')} className="text-xs text-slate-400 hover:text-white transition">
-              Quay lại Storefront
-            </button>
-          </div>
+      {/* LEFT SIDEBAR PANEL (Matching the reference screenshots) */}
+      <aside className="w-full md:w-64 bg-slate-950/70 border-r border-slate-900 flex flex-col z-10 relative backdrop-blur-xl">
+        {/* Brand Header Logo */}
+        <div className="p-6 border-b border-slate-900 flex items-center space-x-3">
+          <span className="font-bold text-2xl tracking-wider text-amber-500 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-xl">Qi</span>
+          <span className="font-bold text-base text-white tracking-tight">QiHome.vn</span>
         </div>
-      </nav>
 
-      {/* Main Grid Content */}
-      <main className="max-w-7xl mx-auto w-full p-6 space-y-8 relative z-10">
-        
-        {/* KPI Financial Overview Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="glass-panel gold-glow rounded-2xl p-5 shadow-2xl relative overflow-hidden group hover:border-amber-500/30 transition duration-300">
-            <div className="text-xs font-semibold uppercase tracking-wider text-slate-400">Doanh thu dự án lũy kế</div>
-            <div className="text-2xl font-black mt-2 gold-text-gradient">{financials.totalRevenue.toLocaleString('vi-VN')}đ</div>
-            <div className="text-[10px] text-emerald-400 mt-1">Hợp đồng tay ba đã ký kết</div>
+        {/* User profile section */}
+        <div className="px-6 py-6 border-b border-slate-900 flex items-center space-x-3">
+          <div className="w-10 h-10 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center font-bold text-amber-500 text-sm">
+            QD
           </div>
-          <div className="glass-panel rounded-2xl p-5 shadow-2xl relative overflow-hidden group hover:border-amber-500/30 transition duration-300">
-            <div className="text-xs font-semibold uppercase tracking-wider text-slate-400">Dòng vốn tài trợ Vin 6%</div>
-            <div className="text-2xl font-black text-amber-500 mt-2">{financials.vinSubsidy.toLocaleString('vi-VN')}đ</div>
-            <div className="text-[10px] text-slate-500 mt-1">Đã đối soát với Vin Accounting</div>
-          </div>
-          <div className="glass-panel rounded-2xl p-5 shadow-2xl relative overflow-hidden group hover:border-amber-500/30 transition duration-300">
-            <div className="text-xs font-semibold uppercase tracking-wider text-slate-400">Ngân hàng giải ngân (TCB)</div>
-            <div className="text-2xl font-black text-blue-400 mt-2">{financials.bankDisbursed.toLocaleString('vi-VN')}đ</div>
-            <div className="text-[10px] text-slate-500 mt-1">Tín chấp bảo lãnh dự án</div>
-          </div>
-          <div className="glass-panel rounded-2xl p-5 shadow-2xl relative overflow-hidden group hover:border-amber-500/30 transition duration-300">
-            <div className="text-xs font-semibold uppercase tracking-wider text-slate-400">Lợi nhuận gộp mục tiêu</div>
-            <div className="text-2xl font-black text-emerald-400 mt-2">{financials.profitGross.toLocaleString('vi-VN')}đ</div>
-            <div className="text-[10px] text-emerald-500/80 mt-1">Biên lợi nhuận định mức 15%</div>
+          <div>
+            <div className="text-xs font-bold text-white">Nguyễn Duy Quang</div>
+            <div className="text-[10px] text-slate-500">Founder & Chairman</div>
           </div>
         </div>
 
-        {/* Tab Navigator */}
-        <div className="flex glass-panel p-1 rounded-xl max-w-lg">
+        {/* Stacked Vertical Menu Navigation */}
+        <nav className="flex-1 px-4 py-6 space-y-2.5">
+          <div className="text-[10px] uppercase font-bold text-slate-600 px-3 mb-2 tracking-wider">
+            Quản trị & Giám sát
+          </div>
+          
           <button
             onClick={() => setActiveTab('health')}
-            className={`flex-1 py-2 text-center text-xs font-bold rounded-lg transition duration-200 ${
-              activeTab === 'health' ? 'bg-amber-500 text-slate-950 shadow-md font-extrabold gold-glow' : 'text-slate-400 hover:text-slate-200'
+            className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-bold transition duration-200 ${
+              activeTab === 'health' 
+                ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/10 gold-glow' 
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/50'
             }`}
           >
-            🚦 Sức Khỏe Dự Án
+            <span>🚦</span>
+            <span>Sức Khỏe Dự Án</span>
           </button>
+
           <button
             onClick={() => setActiveTab('requests')}
-            className={`flex-1 py-2 text-center text-xs font-bold rounded-lg transition duration-200 ${
-              activeTab === 'requests' ? 'bg-amber-500 text-slate-950 shadow-md font-extrabold gold-glow' : 'text-slate-400 hover:text-slate-200'
+            className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-bold transition duration-200 ${
+              activeTab === 'requests' 
+                ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/10 gold-glow' 
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/50'
             }`}
           >
-            🔔 Đơn Vượt BOM ({overBudgetRequests.length})
+            <span>🔔</span>
+            <span className="flex-1 text-left">Đơn Cần Duyệt</span>
+            {overBudgetRequests.length > 0 && (
+              <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-black ${
+                activeTab === 'requests' ? 'bg-slate-950 text-amber-500' : 'bg-red-500/20 text-red-400'
+              }`}>
+                {overBudgetRequests.length}
+              </span>
+            )}
           </button>
+
           <button
             onClick={() => setActiveTab('vendors')}
-            className={`flex-1 py-2 text-center text-xs font-bold rounded-lg transition duration-200 ${
-              activeTab === 'vendors' ? 'bg-amber-500 text-slate-950 shadow-md font-extrabold gold-glow' : 'text-slate-400 hover:text-slate-200'
+            className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-bold transition duration-200 ${
+              activeTab === 'vendors' 
+                ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/10 gold-glow' 
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/50'
             }`}
           >
-            🏆 Đánh Giá Đối Tác & Thầu
+            <span>🏆</span>
+            <span>Đánh Giá Đối Tác</span>
+          </button>
+
+          <div className="pt-4 text-[10px] uppercase font-bold text-slate-600 px-3 mb-2 tracking-wider">
+            Báo cáo hệ thống
+          </div>
+
+          <button
+            onClick={() => setActiveTab('financial_report')}
+            className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-bold transition duration-200 ${
+              activeTab === 'financial_report' 
+                ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/10 gold-glow' 
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/50'
+            }`}
+          >
+            <span>📊</span>
+            <span>Báo Cáo Tài Chính</span>
+          </button>
+        </nav>
+
+        {/* Logout / Exit at Bottom */}
+        <div className="p-4 border-t border-slate-900">
+          <button
+            onClick={() => router.push('/')}
+            className="w-full bg-slate-900/40 hover:bg-slate-900 border border-slate-800 rounded-xl py-2.5 text-xs font-bold text-slate-400 hover:text-white transition flex items-center justify-center space-x-2"
+          >
+            <span>Quay lại Storefront</span>
           </button>
         </div>
+      </aside>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-fadeIn">
-          
-          {/* Left Column: Active tab content */}
-          <div className="lg:col-span-8 space-y-6">
+      {/* RIGHT CONTENT AREA */}
+      <div className="flex-1 flex flex-col min-h-screen overflow-y-auto z-10 relative">
+        {/* Top Header Search & Notifications bar */}
+        <header className="h-16 border-b border-slate-900 bg-slate-950/20 px-8 flex justify-between items-center backdrop-blur-xl sticky top-0 z-20">
+          {/* Mock Search input matching the reference screenshots */}
+          <div className="relative w-80 hidden md:block">
+            <span className="absolute left-3 top-2.5 text-slate-500 text-xs">🔍</span>
+            <input
+              type="text"
+              placeholder="Search projects, clients..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-slate-900/50 border border-slate-800 rounded-xl pl-9 pr-4 py-1.5 text-xs text-slate-300 placeholder-slate-600 focus:outline-none focus:border-amber-500"
+            />
+          </div>
+
+          <div className="flex items-center space-x-4">
+            <span className="text-[10px] font-bold text-slate-500 uppercase flex items-center space-x-1.5 px-2.5 py-1 bg-slate-900 border border-slate-800 rounded-lg">
+              <span className={`w-2 h-2 rounded-full ${isLive ? 'bg-emerald-500 shadow-[0_0_8px_#10b981]' : 'bg-amber-500 animate-pulse'}`}></span>
+              <span>{isLive ? 'Live DB Connection' : 'Sandbox Cache Mode'}</span>
+            </span>
+
+            <div className="relative cursor-pointer">
+              <span className="text-slate-400 hover:text-white transition">🔔</span>
+              {overBudgetRequests.length > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[8px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                  {overBudgetRequests.length}
+                </span>
+              )}
+            </div>
+
+            <div className="w-px h-6 bg-slate-900"></div>
+
+            <div className="flex items-center space-x-2 text-xs">
+              <span className="text-slate-400 font-medium">Nguyễn Duy Quang</span>
+              <span className="text-[9px] uppercase px-1.5 py-0.5 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded font-black">Admin</span>
+            </div>
+          </div>
+        </header>
+
+        {/* Content Body */}
+        <main className="p-8 space-y-6 flex-1">
+          {/* Welcome Dashboard Banner */}
+          <div className="bg-gradient-to-r from-amber-600/10 via-indigo-600/5 to-transparent border border-amber-500/10 rounded-3xl p-6 relative overflow-hidden shadow-2xl">
+            <div className="relative z-10 space-y-1">
+              <h2 className="text-lg font-black text-white">Chào mừng trở lại, Chủ tịch Nguyễn Duy Quang</h2>
+              <p className="text-xs text-slate-400 leading-relaxed max-w-xl">
+                Hệ thống số hóa QiHome.vn đang vận hành ổn định. Dưới đây là phân tích hiệu suất tổng quát của các công trình và nhà cung cấp.
+              </p>
+            </div>
+            <div className="absolute right-6 top-4 text-6xl font-black text-amber-500/[0.03] select-none pointer-events-none tracking-wider">
+              QI PRIME
+            </div>
+          </div>
+
+          {/* KPI Financial Cards (Arranged dynamically on top) */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="glass-panel gold-glow rounded-2xl p-5 shadow-2xl relative overflow-hidden group hover:border-amber-500/30 transition duration-300">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Doanh thu lũy kế</div>
+              <div className="text-xl font-black mt-2 gold-text-gradient">{financials.totalRevenue.toLocaleString('vi-VN')}đ</div>
+              <div className="text-[9px] text-emerald-400 mt-1 flex items-center space-x-1">
+                <span>✓</span> <span>Hợp đồng ba bên</span>
+              </div>
+            </div>
+            <div className="glass-panel rounded-2xl p-5 shadow-2xl relative overflow-hidden group hover:border-amber-500/30 transition duration-300">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Vin tài trợ 6%</div>
+              <div className="text-xl font-black text-amber-500 mt-2">{financials.vinSubsidy.toLocaleString('vi-VN')}đ</div>
+              <div className="text-[9px] text-slate-500 mt-1">Đã đối soát Vin Accounting</div>
+            </div>
+            <div className="glass-panel rounded-2xl p-5 shadow-2xl relative overflow-hidden group hover:border-amber-500/30 transition duration-300">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Giải ngân TCB</div>
+              <div className="text-xl font-black text-blue-400 mt-2">{financials.bankDisbursed.toLocaleString('vi-VN')}đ</div>
+              <div className="text-[9px] text-slate-500 mt-1">Tín chấp bảo lãnh dự án</div>
+            </div>
+            <div className="glass-panel rounded-2xl p-5 shadow-2xl relative overflow-hidden group hover:border-amber-500/30 transition duration-300">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Lợi nhuận gộp</div>
+              <div className="text-xl font-black text-emerald-400 mt-2">{financials.profitGross.toLocaleString('vi-VN')}đ</div>
+              <div className="text-[9px] text-emerald-500/80 mt-1">Biên định mức 15%</div>
+            </div>
+          </div>
+
+          {/* MAIN TAB SWITCHER GRIDS */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start animate-fadeIn">
             
             {/* Tab 1: Project Health */}
-            {activeTab === 'health' && (() => {
-              const filteredProjects = projectHealth.filter(proj => {
-                const matchesSearch = proj.client.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                                      proj.code.toLowerCase().includes(searchQuery.toLowerCase());
-                const matchesStage = filterStage === 'All' || proj.status === filterStage;
-                const matchesType = filterType === 'All' || proj.type === filterType;
-                const matchesVinhomes = filterVinhomes === 'All' || proj.vinhomes === filterVinhomes;
-                
-                return matchesSearch && matchesStage && matchesType && matchesVinhomes;
-              });
+            {activeTab === 'health' && (
+              <>
+                {/* Left part: list of projects (col-span-8) */}
+                <div className="lg:col-span-8">
+                  {(() => {
+                    const filteredProjects = projectHealth.filter(proj => {
+                      const matchesSearch = proj.client.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                                            proj.code.toLowerCase().includes(searchQuery.toLowerCase());
+                      const matchesStage = filterStage === 'All' || proj.status === filterStage;
+                      const matchesType = filterType === 'All' || proj.type === filterType;
+                      const matchesVinhomes = filterVinhomes === 'All' || proj.vinhomes === filterVinhomes;
+                      
+                      return matchesSearch && matchesStage && matchesType && matchesVinhomes;
+                    });
 
-              return (
-                <div className="glass-panel rounded-2xl p-6 space-y-5 shadow-2xl">
-                  <h3 className="text-sm font-bold text-white tracking-tight border-b border-slate-900 pb-3">🚦 Báo Cáo Sức Khỏe Dự Án (Global Project Health)</h3>
-                  
-                  {/* Search & Filters Row */}
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-3 bg-slate-950/20 p-3 rounded-xl border border-slate-900 text-xs">
-                    {/* Search query */}
-                    <div className="space-y-1">
-                      <label className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Tìm kiếm dự án / khách</label>
-                      <input
-                        type="text"
-                        placeholder="Tên khách, mã..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full bg-slate-950 border border-slate-850 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-amber-500"
-                      />
-                    </div>
-
-                    {/* Project Location/Vinhomes */}
-                    <div className="space-y-1">
-                      <label className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Dự án Vinhomes</label>
-                      <select
-                        value={filterVinhomes}
-                        onChange={(e) => setFilterVinhomes(e.target.value)}
-                        className="w-full bg-slate-950 border border-slate-850 rounded-lg px-2 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500"
-                      >
-                        <option value="All">Tất cả dự án</option>
-                        <option value="Vinhomes Hậu Nghĩa">Vinhomes Hậu Nghĩa</option>
-                        <option value="Vinhomes Grand Park">Vinhomes Grand Park</option>
-                        <option value="Vinhomes Ocean Park">Vinhomes Ocean Park</option>
-                      </select>
-                    </div>
-
-                    {/* Stage/Status */}
-                    <div className="space-y-1">
-                      <label className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Giai đoạn tiến độ</label>
-                      <select
-                        value={filterStage}
-                        onChange={(e) => setFilterStage(e.target.value)}
-                        className="w-full bg-slate-950 border border-slate-850 rounded-lg px-2 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500"
-                      >
-                        <option value="All">Tất cả giai đoạn</option>
-                        <option value="pending_design">Concept phối cảnh AI</option>
-                        <option value="in_production">Đang thi công lắp đặt</option>
-                        <option value="qc_inspection">Đang chấm điểm QC</option>
-                        <option value="completed">Đã hoàn thành bàn giao</option>
-                      </select>
-                    </div>
-
-                    {/* Property type */}
-                    <div className="space-y-1">
-                      <label className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Loại hình nhà</label>
-                      <select
-                        value={filterType}
-                        onChange={(e) => setFilterType(e.target.value)}
-                        className="w-full bg-slate-950 border border-slate-850 rounded-lg px-2 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500"
-                      >
-                        <option value="All">Tất cả loại hình</option>
-                        <option value="Chung cư">Chung cư</option>
-                        <option value="Nhà phố">Nhà phố</option>
-                        <option value="Biệt thự">Biệt thự</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="divide-y divide-slate-900 space-y-4 max-h-[500px] overflow-y-auto pr-1">
-                    {filteredProjects.length === 0 ? (
-                      <div className="text-center text-xs text-slate-500 py-6">
-                        Không tìm thấy dự án nào khớp với bộ lọc.
-                      </div>
-                    ) : (
-                      filteredProjects.map((proj, idx) => (
-                        <div key={idx} className="pt-4 first:pt-0 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                          <div className="space-y-1.5">
-                            <div className="flex items-center space-x-2 flex-wrap gap-y-1">
-                              <span className={`w-2.5 h-2.5 rounded-full ${
-                                proj.alert === 'green' ? 'bg-emerald-500' : proj.alert === 'yellow' ? 'bg-amber-500' : 'bg-red-500'
-                              } shadow-[0_0_8px_rgba(16,185,129,0.4)]`}></span>
-                              <strong className="text-xs text-white">{proj.code}</strong>
-                              <span className="text-[10px] text-slate-500 mr-2">Khách hàng: {proj.client}</span>
-                              <span className="text-[9px] uppercase px-1.5 py-0.5 bg-slate-900 border border-slate-800 rounded font-semibold text-slate-400">
-                                {proj.vinhomes}
-                              </span>
-                              <span className="text-[9px] uppercase px-1.5 py-0.5 bg-amber-500/10 border border-amber-500/20 rounded font-bold text-amber-500">
-                                {proj.type}
-                              </span>
-                            </div>
-                            <p className="text-xs text-slate-400">{proj.desc}</p>
+                    return (
+                      <div className="glass-panel rounded-2xl p-6 space-y-5 shadow-2xl">
+                        <h3 className="text-sm font-bold text-white tracking-tight border-b border-slate-900 pb-3">🚦 Báo Cáo Sức Khỏe Dự Án (Global Project Health)</h3>
+                        
+                        {/* Search & Filters Row */}
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-3 bg-slate-950/20 p-3 rounded-xl border border-slate-900 text-xs">
+                          <div className="space-y-1">
+                            <label className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Tìm kiếm dự án / khách</label>
+                            <input
+                              type="text"
+                              placeholder="Tên khách, mã..."
+                              value={searchQuery}
+                              onChange={(e) => setSearchQuery(e.target.value)}
+                              className="w-full bg-slate-950 border border-slate-850 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-amber-500"
+                            />
                           </div>
 
-                          <div className="flex items-center space-x-4">
-                            <div className="w-24 bg-slate-950 border border-slate-900 h-2 rounded-full overflow-hidden">
-                              <div className="bg-gradient-to-r from-amber-500 to-amber-300 h-full rounded-full shadow-[0_0_8px_rgba(245,158,11,0.5)]" style={{ width: `${proj.progress}%` }}></div>
-                            </div>
-                            <span className="text-[10px] font-mono text-slate-300 font-bold">{proj.progress}%</span>
-                            <span className="text-[9px] font-bold uppercase px-2 py-0.5 bg-slate-900 text-slate-400 border border-slate-800 rounded">
-                              {proj.status}
-                            </span>
+                          <div className="space-y-1">
+                            <label className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Dự án Vinhomes</label>
+                            <select
+                              value={filterVinhomes}
+                              onChange={(e) => setFilterVinhomes(e.target.value)}
+                              className="w-full bg-slate-950 border border-slate-850 rounded-lg px-2 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500"
+                            >
+                              <option value="All">Tất cả dự án</option>
+                              <option value="Vinhomes Hậu Nghĩa">Vinhomes Hậu Nghĩa</option>
+                              <option value="Vinhomes Grand Park">Vinhomes Grand Park</option>
+                              <option value="Vinhomes Ocean Park">Vinhomes Ocean Park</option>
+                            </select>
+                          </div>
+
+                          <div className="space-y-1">
+                            <label className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Giai đoạn tiến độ</label>
+                            <select
+                              value={filterStage}
+                              onChange={(e) => setFilterStage(e.target.value)}
+                              className="w-full bg-slate-950 border border-slate-850 rounded-lg px-2 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500"
+                            >
+                              <option value="All">Tất cả giai đoạn</option>
+                              <option value="pending_design">Concept phối cảnh AI</option>
+                              <option value="in_production">Đang thi công lắp đặt</option>
+                              <option value="qc_inspection">Đang chấm điểm QC</option>
+                              <option value="completed">Đã hoàn thành bàn giao</option>
+                            </select>
+                          </div>
+
+                          <div className="space-y-1">
+                            <label className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Loại hình nhà</label>
+                            <select
+                              value={filterType}
+                              onChange={(e) => setFilterType(e.target.value)}
+                              className="w-full bg-slate-950 border border-slate-850 rounded-lg px-2 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500"
+                            >
+                              <option value="All">Tất cả loại hình</option>
+                              <option value="Chung cư">Chung cư</option>
+                              <option value="Nhà phố">Nhà phố</option>
+                              <option value="Biệt thự">Biệt thự</option>
+                            </select>
                           </div>
                         </div>
-                      ))
-                    )}
+
+                        <div className="divide-y divide-slate-900 space-y-4 max-h-[500px] overflow-y-auto pr-1">
+                          {filteredProjects.length === 0 ? (
+                            <div className="text-center text-xs text-slate-500 py-6">
+                              Không tìm thấy dự án nào khớp với bộ lọc.
+                            </div>
+                          ) : (
+                            filteredProjects.map((proj, idx) => (
+                              <div key={idx} className="pt-4 first:pt-0 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                <div className="space-y-1.5">
+                                  <div className="flex items-center space-x-2 flex-wrap gap-y-1">
+                                    <span className={`w-2.5 h-2.5 rounded-full ${
+                                      proj.alert === 'green' ? 'bg-emerald-500' : proj.alert === 'yellow' ? 'bg-amber-500' : 'bg-red-500'
+                                    } shadow-[0_0_8px_rgba(16,185,129,0.4)]`}></span>
+                                    <strong className="text-xs text-white">{proj.code}</strong>
+                                    <span className="text-[10px] text-slate-500 mr-2">Khách hàng: {proj.client}</span>
+                                    <span className="text-[9px] uppercase px-1.5 py-0.5 bg-slate-900 border border-slate-800 rounded font-semibold text-slate-400">
+                                      {proj.vinhomes}
+                                    </span>
+                                    <span className="text-[9px] uppercase px-1.5 py-0.5 bg-amber-500/10 border border-amber-500/20 rounded font-bold text-amber-500">
+                                      {proj.type}
+                                    </span>
+                                  </div>
+                                  <p className="text-xs text-slate-400">{proj.desc}</p>
+                                </div>
+
+                                <div className="flex items-center space-x-4">
+                                  <div className="w-24 bg-slate-950 border border-slate-900 h-2 rounded-full overflow-hidden">
+                                    <div className="bg-gradient-to-r from-amber-500 to-amber-300 h-full rounded-full shadow-[0_0_8px_rgba(245,158,11,0.5)]" style={{ width: `${proj.progress}%` }}></div>
+                                  </div>
+                                  <span className="text-[10px] font-mono text-slate-300 font-bold">{proj.progress}%</span>
+                                  <span className="text-[9px] font-bold uppercase px-2 py-0.5 bg-slate-900 text-slate-400 border border-slate-800 rounded">
+                                    {proj.status}
+                                  </span>
+                                </div>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+
+                {/* Right part: Vendor Scorecard ranking (col-span-4) */}
+                <div className="lg:col-span-4">
+                  <div className="glass-panel gold-glow rounded-2xl p-6 space-y-4 shadow-2xl">
+                    <h3 className="text-sm font-bold text-white tracking-tight border-b border-slate-900 pb-3">🏆 Bảng Xếp Hạng Đối Tác</h3>
+                    
+                    <div className="space-y-4">
+                      {scorecards.map((vendor, idx) => (
+                        <div key={idx} className="bg-slate-950/40 border border-slate-900 rounded-xl p-4 space-y-2 hover:border-amber-500/20 transition duration-300">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <div className="text-xs font-bold text-slate-200">{vendor.name}</div>
+                              <div className="text-[10px] text-slate-500 mt-0.5">{vendor.type}</div>
+                            </div>
+                            <span className="text-[10px] font-bold px-2 py-0.5 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded">
+                              {vendor.rating}
+                            </span>
+                          </div>
+
+                          <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-900 text-center">
+                            <div>
+                              <div className="text-[9px] text-slate-500">Chất lượng</div>
+                              <div className="text-xs font-bold text-white mt-0.5">{vendor.score}</div>
+                            </div>
+                            <div>
+                              <div className="text-[9px] text-slate-500">Tiến độ</div>
+                              <div className="text-xs font-bold text-white mt-0.5">{vendor.speed}</div>
+                            </div>
+                            <div>
+                              <div className="text-[9px] text-slate-500">Rework</div>
+                              <div className="text-xs font-bold text-red-400 mt-0.5">{vendor.reworks}</div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
-              );
-            })()}
+              </>
+            )}
 
             {/* Tab 2: Over Budget Approval Center */}
             {activeTab === 'requests' && (
-              <div className="glass-panel rounded-2xl p-6 space-y-4 shadow-2xl">
-                <h3 className="text-sm font-bold text-white tracking-tight flex items-center justify-between border-b border-slate-900 pb-3">
-                  <span>🔔 Phê Duyệt Phát Sinh Ngoài Định Mức</span>
-                  <span className="text-xs font-medium px-2.5 py-0.5 bg-red-500/10 text-red-400 border border-red-500/20 rounded-full">
-                    {overBudgetRequests.length} Đơn chờ duyệt
-                  </span>
-                </h3>
+              <>
+                <div className="lg:col-span-8">
+                  <div className="glass-panel rounded-2xl p-6 space-y-4 shadow-2xl">
+                    <h3 className="text-sm font-bold text-white tracking-tight flex items-center justify-between border-b border-slate-900 pb-3">
+                      <span>🔔 Phê Duyệt Phát Sinh Ngoài Định Mức</span>
+                      <span className="text-xs font-medium px-2.5 py-0.5 bg-red-500/10 text-red-400 border border-red-500/20 rounded-full">
+                        {overBudgetRequests.length} Đơn chờ duyệt
+                      </span>
+                    </h3>
 
-                {overBudgetRequests.length === 0 ? (
-                  <div className="text-center text-xs text-slate-500 py-6">
-                    Không có yêu cầu vượt định mức nào đang chờ duyệt.
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {overBudgetRequests.map((req) => (
-                      <div key={req.id} className="bg-slate-950/40 border border-slate-900 rounded-xl p-4 space-y-3">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <div className="text-xs font-bold text-slate-200">{req.projectCode} - {req.contractor}</div>
-                            <div className="text-[10px] text-slate-500 mt-0.5">
-                              Yêu cầu cấp thêm: <strong className="text-slate-300">{req.qty} đơn vị</strong> ({req.item})
+                    {overBudgetRequests.length === 0 ? (
+                      <div className="text-center text-xs text-slate-500 py-6">
+                        Không có yêu cầu vượt định mức nào đang chờ duyệt.
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {overBudgetRequests.map((req) => (
+                          <div key={req.id} className="bg-slate-950/40 border border-slate-900 rounded-xl p-4 space-y-3">
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <div className="text-xs font-bold text-slate-200">{req.projectCode} - {req.contractor}</div>
+                                <div className="text-[10px] text-slate-500 mt-0.5">
+                                  Yêu cầu cấp thêm: <strong className="text-slate-300">{req.qty} đơn vị</strong> ({req.item})
+                                </div>
+                              </div>
+                              <span className="text-[9px] uppercase font-bold tracking-wide px-2 py-0.5 bg-red-500/10 text-red-400 border border-red-500/20 rounded">
+                                Vượt BOM
+                              </span>
+                            </div>
+                            
+                            <div className="text-xs bg-slate-950/60 p-2.5 rounded border border-slate-900 text-slate-400 leading-relaxed">
+                              📝 {req.reason}
+                            </div>
+
+                            {req.image && (
+                              <div className="text-[10px] text-amber-500 font-semibold underline cursor-pointer">
+                                🔍 Xem ảnh bằng chứng lỗi hỏng
+                              </div>
+                            )}
+
+                            <div className="flex justify-end space-x-3 pt-2">
+                              <button
+                                disabled={loading}
+                                onClick={() => handleApproveRequest(req.id, false)}
+                                className="bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 text-xs px-3.5 py-1.5 rounded-lg transition"
+                              >
+                                Từ chối
+                              </button>
+                              <button
+                                disabled={loading}
+                                onClick={() => handleApproveRequest(req.id, true)}
+                                className="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs px-4 py-1.5 rounded-lg font-bold transition shadow-md shadow-amber-500/10"
+                              >
+                                ✓ Duyệt Cấp Phát
+                              </button>
                             </div>
                           </div>
-                          <span className="text-[9px] uppercase font-bold tracking-wide px-2 py-0.5 bg-red-500/10 text-red-400 border border-red-500/20 rounded">
-                            Vượt BOM
-                          </span>
-                        </div>
-                        
-                        <div className="text-xs bg-slate-950/60 p-2.5 rounded border border-slate-900 text-slate-400 leading-relaxed">
-                          📝 {req.reason}
-                        </div>
-
-                        {req.image && (
-                          <div className="text-[10px] text-amber-500 font-semibold underline cursor-pointer">
-                            🔍 Xem ảnh bằng chứng lỗi hỏng
-                          </div>
-                        )}
-
-                        <div className="flex justify-end space-x-3 pt-2">
-                          <button
-                            disabled={loading}
-                            onClick={() => handleApproveRequest(req.id, false)}
-                            className="bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 text-xs px-3.5 py-1.5 rounded-lg transition"
-                          >
-                            Từ chối
-                          </button>
-                          <button
-                            disabled={loading}
-                            onClick={() => handleApproveRequest(req.id, true)}
-                            className="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs px-4 py-1.5 rounded-lg font-bold transition shadow-md shadow-amber-500/10"
-                          >
-                            ✓ Duyệt Cấp Phát
-                          </button>
-                        </div>
+                        ))}
                       </div>
-                    ))}
+                    )}
                   </div>
-                )}
-              </div>
+                </div>
+
+                <div className="lg:col-span-4">
+                  <div className="glass-panel rounded-2xl p-6 space-y-4 shadow-2xl text-xs">
+                    <h3 className="text-sm font-bold text-white tracking-tight border-b border-slate-900 pb-3">ℹ Quyền Phê Duyệt</h3>
+                    <p className="text-slate-400 leading-relaxed">
+                      Để hạn chế thất thoát vật tư, mọi yêu cầu vượt định mức của thầu phụ hoặc thợ thi công đều phải được trình lên Chủ tịch kiểm duyệt.
+                    </p>
+                    <div className="p-3 bg-amber-500/5 border border-amber-500/10 text-amber-500/90 rounded-xl space-y-1 mt-2">
+                      <strong>Lưu ý:</strong> Vui lòng kiểm tra kỹ hình ảnh hiện trạng thợ gửi lên trước khi đồng ý giải ngân xuất vật tư bổ sung.
+                    </div>
+                  </div>
+                </div>
+              </>
             )}
 
             {/* Tab 3: Vendor & Supplier Evaluations */}
             {activeTab === 'vendors' && (
-              <div className="space-y-6">
-                
-                {/* Interactive Evaluation Form */}
-                <div className="glass-panel rounded-2xl p-6 space-y-4 shadow-2xl">
-                  <h3 className="text-sm font-bold text-white tracking-tight border-b border-slate-900 pb-3">📝 Biểu Mẫu Đánh Giá Năng Lực Đối Tác</h3>
-                  
-                  {formSuccess && (
-                    <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs p-3.5 rounded-xl">
-                      {formSuccess}
-                    </div>
-                  )}
-
-                  <form onSubmit={handleSubmitEvaluation} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Chọn Thầu phụ / Đối tác</label>
-                      <select
-                        value={selectedSubId}
-                        onChange={(e) => setSelectedSubId(e.target.value)}
-                        className="w-full bg-slate-950 border border-slate-850 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500"
-                      >
-                        {subcontractorsList.map(sub => (
-                          <option key={sub.id} value={sub.id}>{sub.full_name}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Số lần Rework (Sửa lỗi hoàn thiện)</label>
-                      <input
-                        type="number"
-                        min="0"
-                        value={formReworks}
-                        onChange={(e) => setFormReworks(e.target.value)}
-                        className="w-full bg-slate-950 border border-slate-850 rounded-xl px-3 py-1.5 text-xs text-slate-205 focus:outline-none focus:border-amber-500"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Điểm Chất lượng thi công (0 - 10)</label>
-                      <input
-                        type="number"
-                        step="0.1"
-                        min="0"
-                        max="10"
-                        value={formQuality}
-                        onChange={(e) => setFormQuality(Number(e.target.value))}
-                        className="w-full bg-slate-950 border border-slate-850 rounded-xl px-3 py-1.5 text-xs text-slate-205 focus:outline-none focus:border-amber-500"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Điểm Tiến độ bàn giao (0 - 10)</label>
-                      <input
-                        type="number"
-                        step="0.1"
-                        min="0"
-                        max="10"
-                        value={formSpeed}
-                        onChange={(e) => setFormSpeed(Number(e.target.value))}
-                        className="w-full bg-slate-950 border border-slate-850 rounded-xl px-3 py-1.5 text-xs text-slate-205 focus:outline-none focus:border-amber-500"
-                      />
-                    </div>
-
-                    <div className="md:col-span-2">
-                      <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Ghi chú nhận xét năng lực</label>
-                      <textarea
-                        required
-                        rows="2"
-                        value={formNotes}
-                        onChange={(e) => setFormNotes(e.target.value)}
-                        placeholder="Nhận xét chi tiết về tác phong công nghiệp, chất lượng gỗ, sơn bả của nhà thầu..."
-                        className="w-full bg-slate-950 border border-slate-850 rounded-xl p-3 text-xs text-slate-205 placeholder-slate-600 focus:outline-none focus:border-amber-500"
-                      ></textarea>
-                    </div>
-
-                    <div className="md:col-span-2 flex justify-end">
-                      <button
-                        type="submit"
-                        disabled={loading}
-                        className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-6 py-2.5 rounded-xl transition text-xs shadow-lg shadow-amber-500/10"
-                      >
-                        {loading ? 'Đang gửi...' : 'Gửi Đánh Giá KPI'}
-                      </button>
-                    </div>
-                  </form>
-                </div>
-
-                {/* Historical Evaluations Table */}
-                <div className="glass-panel rounded-2xl p-6 space-y-4 shadow-2xl">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-slate-900 pb-3">Danh sách nhật ký năng lực</h3>
-                  <div className="space-y-3">
-                    {scorecards.map((vendor, idx) => (
-                      <div key={idx} className="bg-slate-950/30 border border-slate-900 p-3 rounded-xl text-xs space-y-2">
-                        <div className="flex justify-between items-center">
-                          <span className="font-bold text-slate-200">{vendor.name}</span>
-                          <span className="text-[10px] bg-slate-900 border border-slate-800 px-2 py-0.5 rounded text-amber-500 font-bold">
-                            {vendor.rating}
-                          </span>
-                        </div>
-                        <p className="text-slate-400 italic">" {vendor.notes} "</p>
+              <>
+                <div className="lg:col-span-8 space-y-6">
+                  {/* Interactive Evaluation Form */}
+                  <div className="glass-panel rounded-2xl p-6 space-y-4 shadow-2xl">
+                    <h3 className="text-sm font-bold text-white tracking-tight border-b border-slate-900 pb-3">📝 Biểu Mẫu Đánh Giá Năng Lực Đối Tác</h3>
+                    
+                    {formSuccess && (
+                      <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs p-3.5 rounded-xl">
+                        {formSuccess}
                       </div>
-                    ))}
+                    )}
+
+                    <form onSubmit={handleSubmitEvaluation} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Chọn Thầu phụ / Đối tác</label>
+                        <select
+                          value={selectedSubId}
+                          onChange={(e) => setSelectedSubId(e.target.value)}
+                          className="w-full bg-slate-950 border border-slate-850 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500"
+                        >
+                          {subcontractorsList.map(sub => (
+                            <option key={sub.id} value={sub.id}>{sub.full_name}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Số lần Rework (Sửa lỗi hoàn thiện)</label>
+                        <input
+                          type="number"
+                          min="0"
+                          value={formReworks}
+                          onChange={(e) => setFormReworks(e.target.value)}
+                          className="w-full bg-slate-950 border border-slate-850 rounded-xl px-3 py-1.5 text-xs text-slate-205 focus:outline-none focus:border-amber-500"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Điểm Chất lượng thi công (0 - 10)</label>
+                        <input
+                          type="number"
+                          step="0.1"
+                          min="0"
+                          max="10"
+                          value={formQuality}
+                          onChange={(e) => setFormQuality(Number(e.target.value))}
+                          className="w-full bg-slate-950 border border-slate-850 rounded-xl px-3 py-1.5 text-xs text-slate-205 focus:outline-none focus:border-amber-500"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Điểm Tiến độ bàn giao (0 - 10)</label>
+                        <input
+                          type="number"
+                          step="0.1"
+                          min="0"
+                          max="10"
+                          value={formSpeed}
+                          onChange={(e) => setFormSpeed(Number(e.target.value))}
+                          className="w-full bg-slate-950 border border-slate-850 rounded-xl px-3 py-1.5 text-xs text-slate-205 focus:outline-none focus:border-amber-500"
+                        />
+                      </div>
+
+                      <div className="md:col-span-2">
+                        <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Ghi chú nhận xét năng lực</label>
+                        <textarea
+                          required
+                          rows="2"
+                          value={formNotes}
+                          onChange={(e) => setFormNotes(e.target.value)}
+                          placeholder="Nhận xét chi tiết về tác phong công nghiệp, chất lượng gỗ, sơn bả của nhà thầu..."
+                          className="w-full bg-slate-950 border border-slate-850 rounded-xl p-3 text-xs text-slate-205 placeholder-slate-600 focus:outline-none focus:border-amber-500"
+                        ></textarea>
+                      </div>
+
+                      <div className="md:col-span-2 flex justify-end">
+                        <button
+                          type="submit"
+                          disabled={loading}
+                          className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-6 py-2.5 rounded-xl transition text-xs shadow-lg shadow-amber-500/10"
+                        >
+                          {loading ? 'Đang gửi...' : 'Gửi Đánh Giá KPI'}
+                        </button>
+                      </div>
+                    </form>
                   </div>
                 </div>
 
-              </div>
+                <div className="lg:col-span-4">
+                  {/* Historical Evaluations Table */}
+                  <div className="glass-panel rounded-2xl p-6 space-y-4 shadow-2xl">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-slate-900 pb-3">Nhật ký đánh giá năng lực</h3>
+                    <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1">
+                      {scorecards.map((vendor, idx) => (
+                        <div key={idx} className="bg-slate-950/30 border border-slate-900 p-3 rounded-xl text-xs space-y-2">
+                          <div className="flex justify-between items-center">
+                            <span className="font-bold text-slate-200">{vendor.name}</span>
+                            <span className="text-[10px] bg-slate-900 border border-slate-800 px-2 py-0.5 rounded text-amber-500 font-bold">
+                              {vendor.rating}
+                            </span>
+                          </div>
+                          <p className="text-slate-400 italic">" {vendor.notes} "</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* NEW TAB: Tab 4: Financial Report (Arranging details on right matching layout) */}
+            {activeTab === 'financial_report' && (
+              <>
+                <div className="lg:col-span-8">
+                  <div className="glass-panel rounded-2xl p-6 space-y-4 shadow-2xl">
+                    <h3 className="text-sm font-bold text-white tracking-tight border-b border-slate-900 pb-3">📊 Báo Cáo Doanh Thu Chi Tiết Dự Án</h3>
+                    
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-xs text-left border-collapse">
+                        <thead>
+                          <tr className="border-b border-slate-900 text-slate-500 font-semibold uppercase">
+                            <th className="py-3 px-2">Dự Án</th>
+                            <th className="py-3 px-2">Khách Hàng</th>
+                            <th className="py-3 px-2">Giá Trị HĐ</th>
+                            <th className="py-3 px-2">Cọc Vin 6%</th>
+                            <th className="py-3 px-2">Giải Ngân TCB</th>
+                            <th className="py-3 px-2">LN Định Mức</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-900">
+                          {projectHealth.map((proj, idx) => {
+                            const contractVal = proj.code.includes('HAUNGHIA-101') ? 500000000 : 
+                                               proj.code.includes('HAUNGHIA-102') ? 450000000 : 
+                                               proj.code.includes('GRANDPARK') ? 600000000 : 650000000;
+                            const vin6 = contractVal * 0.06;
+                            const tcbVal = contractVal * 0.7 - vin6;
+                            const profit15 = contractVal * 0.15;
+                            
+                            return (
+                              <tr key={idx} className="hover:bg-slate-900/10">
+                                <td className="py-3 px-2 font-mono font-bold text-white">{proj.code}</td>
+                                <td className="py-3 px-2 text-slate-300">{proj.client}</td>
+                                <td className="py-3 px-2 text-amber-500 font-bold">{contractVal.toLocaleString('vi-VN')}đ</td>
+                                <td className="py-3 px-2 text-slate-400">{vin6.toLocaleString('vi-VN')}đ</td>
+                                <td className="py-3 px-2 text-blue-400">{tcbVal.toLocaleString('vi-VN')}đ</td>
+                                <td className="py-3 px-2 text-emerald-400">{profit15.toLocaleString('vi-VN')}đ</td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="lg:col-span-4">
+                  <div className="glass-panel gold-glow rounded-2xl p-6 space-y-4 shadow-2xl text-xs">
+                    <h3 className="text-sm font-bold text-white tracking-tight border-b border-slate-900 pb-3">📈 Cơ Cấu Dòng Tiền Dự Án</h3>
+                    <div className="space-y-3.5">
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-slate-400 text-[10px]">
+                          <span>Tiền Cọc Thu Cư Dân (30%):</span>
+                          <span className="text-white font-bold">{(financials.totalRevenue * 0.3).toLocaleString('vi-VN')}đ</span>
+                        </div>
+                        <div className="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden">
+                          <div className="bg-amber-500 h-full w-[30%]"></div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-slate-400 text-[10px]">
+                          <span>Ngân hàng TCB Giải Ngân (70%):</span>
+                          <span className="text-white font-bold">{(financials.totalRevenue * 0.7).toLocaleString('vi-VN')}đ</span>
+                        </div>
+                        <div className="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden">
+                          <div className="bg-blue-500 h-full w-[70%]"></div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-slate-400 text-[10px]">
+                          <span>Vin Hỗ Trợ Đợt 1 (6% Căn Hộ):</span>
+                          <span className="text-white font-bold">{financials.vinSubsidy.toLocaleString('vi-VN')}đ</span>
+                        </div>
+                        <div className="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden">
+                          <div className="bg-emerald-500 h-full w-[60%]"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </>
             )}
 
           </div>
 
-          {/* Right Column: Scorecards overview (Fixed Summary) */}
-          <div className="lg:col-span-4 space-y-6">
-            
-            {/* Vendor Scorecard Summary */}
-            <div className="glass-panel gold-glow rounded-2xl p-6 space-y-4 shadow-2xl">
-              <h3 className="text-sm font-bold text-white tracking-tight border-b border-slate-900 pb-3">🏆 Bảng Xếp Hạng Đối Tác & Thầu (Vendor Scorecard)</h3>
-              
-              <div className="space-y-4">
-                {scorecards.map((vendor, idx) => (
-                  <div key={idx} className="bg-slate-950/40 border border-slate-900 rounded-xl p-4 space-y-2 hover:border-amber-500/20 transition duration-300">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <div className="text-xs font-bold text-slate-200">{vendor.name}</div>
-                        <div className="text-[10px] text-slate-500 mt-0.5">{vendor.type}</div>
-                      </div>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded`}>
-                        {vendor.rating}
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-900 text-center">
-                      <div>
-                        <div className="text-[9px] text-slate-500">Chất lượng</div>
-                        <div className="text-xs font-bold text-white mt-0.5">{vendor.score}</div>
-                      </div>
-                      <div>
-                        <div className="text-[9px] text-slate-500">Tiến độ</div>
-                        <div className="text-xs font-bold text-white mt-0.5">{vendor.speed}</div>
-                      </div>
-                      <div>
-                        <div className="text-[9px] text-slate-500">Lỗi Rework</div>
-                        <div className="text-xs font-bold text-red-400 mt-0.5">{vendor.reworks}</div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-          </div>
-
-        </div>
-
-      </main>
+        </main>
+      </div>
     </div>
   );
 }
+
