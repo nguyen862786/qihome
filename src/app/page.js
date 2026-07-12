@@ -243,9 +243,9 @@ function StorefrontContent() {
   const brandsList = ['All', ...Array.from(new Set(products.map(p => p.brand)))];
 
   return (
-    <div className="flex-1 bg-slate-950 text-slate-100 flex flex-col min-h-screen">
+    <div className="flex-1 text-slate-100 flex flex-col min-h-screen">
       {/* Navigation */}
-      <nav className="border-b border-slate-900 bg-slate-950/80 backdrop-blur sticky top-0 z-30">
+      <nav className="border-b border-slate-900 bg-slate-950/30 backdrop-blur sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center space-x-3">
