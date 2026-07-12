@@ -10,6 +10,11 @@ export default function SalesDashboard() {
   const [isLive, setIsLive] = useState(false);
   const [activeTab, setActiveTab] = useState('affiliate'); // 'affiliate' | 'clients'
 
+  // Date filters states
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [quickPeriod, setQuickPeriod] = useState('All'); // 'month' | 'last_month' | 'quarter' | 'year' | 'All'
+
   // Affiliate performance stats
   const [stats, setStats] = useState({
     referredClients: 0,
@@ -22,19 +27,13 @@ export default function SalesDashboard() {
   // Referred clients table
   const [clients, setClients] = useState([]);
 
-  // Fallback mock data for sales sandbox
-  const MOCK_STATS = {
-    referredClients: 4,
-    signedContracts: 3,
-    totalSalesValue: 1400000000,
-    commissionsEarned: 28000000,
-    commissionsPaid: 16000000
-  };
-
+  // Fallback mock data for sales sandbox spanning multiple months
   const MOCK_CLIENTS = [
-    { id: '1', name: 'Phan Văn Trị', unit: 'Căn 1205 - Golden Silk', boqValue: 350000000, commission: 7000000, status: 'pending', date: '12/07/2026' },
-    { id: '2', name: 'Hoàng Thị Hoa', unit: 'Căn 08A1 - Ruby Plaza', boqValue: 450000000, commission: 9000000, status: 'pending', date: '11/07/2026' },
-    { id: '3', name: 'Nguyễn Thị Bình', unit: 'Căn 1502 - Golden Silk', boqValue: 600000000, commission: 12000000, status: 'approved', date: '08/07/2026' }
+    { id: '1', name: 'Phan Văn Trị', unit: 'Căn 1205 - Golden Silk', boqValue: 350000000, commission: 7000000, status: 'pending', date: '2026-07-12', customerStatus: 'ĐANG TƯ VẤN' },
+    { id: '2', name: 'Hoàng Thị Hoa', unit: 'Căn 08A1 - Ruby Plaza', boqValue: 450000000, commission: 9000000, status: 'pending', date: '2026-07-11', customerStatus: 'ĐÃ KÝ HỢP ĐỒNG' },
+    { id: '3', name: 'Nguyễn Thị Bình', unit: 'Căn 1502 - Golden Silk', boqValue: 600000000, commission: 12000000, status: 'approved', date: '2026-07-08', customerStatus: 'ĐÃ BÀN GIAO' },
+    { id: '4', name: 'Trần Văn Tám', unit: 'Biệt thự BT-04 - Hậu Nghĩa', boqValue: 800000000, commission: 16000000, status: 'paid', date: '2026-06-15', customerStatus: 'ĐÃ BÀN GIAO' },
+    { id: '5', name: 'Phạm Minh Trí', unit: 'Căn S2.01-1002 - Grand Park', boqValue: 300000000, commission: 6000000, status: 'pending', date: '2026-05-20', customerStatus: 'ĐANG TƯ VẤN' }
   ];
 
   useEffect(() => {
@@ -49,8 +48,12 @@ export default function SalesDashboard() {
       return;
     }
     setProfile(user);
-    checkConnection(user);
   }, [router]);
+
+  useEffect(() => {
+    if (!profile) return;
+    checkConnection(profile);
+  }, [profile, startDate, endDate]);
 
   const checkConnection = async (user) => {
     const isConfigured = process.env.NEXT_PUBLIC_SUPABASE_URL && 
@@ -60,20 +63,61 @@ export default function SalesDashboard() {
     if (isConfigured) {
       await loadLiveSalesData(user.id);
     } else {
-      setStats(MOCK_STATS);
-      setClients(MOCK_CLIENTS);
+      // Sandbox mode filtering
+      let filtered = [...MOCK_CLIENTS];
+      if (startDate) {
+        filtered = filtered.filter(c => c.date >= startDate);
+      }
+      if (endDate) {
+        filtered = filtered.filter(c => c.date <= endDate);
+      }
+
+      // Re-calculate mock stats dynamically
+      let totalSalesValue = 0;
+      let commissionsEarned = 0;
+      let commissionsPaid = 0;
+      const signedContracts = filtered.filter(c => c.customerStatus !== 'ĐANG TƯ VẤN').length;
+
+      filtered.forEach(c => {
+        totalSalesValue += c.boqValue;
+        commissionsEarned += c.commission;
+        if (c.status === 'paid') {
+          commissionsPaid += c.commission;
+        }
+      });
+
+      setClients(filtered.map(c => ({
+        ...c,
+        date: new Date(c.date).toLocaleDateString('vi-VN')
+      })));
+
+      setStats({
+        referredClients: filtered.length,
+        signedContracts,
+        totalSalesValue,
+        commissionsEarned,
+        commissionsPaid
+      });
     }
   };
 
   // Load real commission ledger and referrers from Supabase
   const loadLiveSalesData = async (salesId) => {
     try {
-      // 1. Fetch projects referred by this sales agent
-      const { data: projects, error: pError } = await supabase
+      // 1. Fetch projects referred by this sales agent with Date Range Filters
+      let query = supabase
         .from('projects')
         .select('id, client_name, vinhomes_block, vinhomes_floor_căn, total_amount, status, created_at')
         .eq('sales_id', salesId);
 
+      if (startDate) {
+        query = query.gte('created_at', startDate);
+      }
+      if (endDate) {
+        query = query.lte('created_at', endDate);
+      }
+
+      const { data: projects, error: pError } = await query;
       if (pError) throw pError;
 
       // 2. Fetch commission ledger from DB
@@ -88,9 +132,9 @@ export default function SalesDashboard() {
       let totalSalesValue = 0;
       let commissionsEarned = 0;
       let commissionsPaid = 0;
-      const signedContracts = projects ? projects.length : 0;
+      const signedContracts = projects ? projects.filter(p => p.status !== 'pending_design').length : 0;
 
-      const clientList = (projects || []).map((p, idx) => {
+      const clientList = (projects || []).map((p) => {
         totalSalesValue += Number(p.total_amount);
         
         // Find corresponding commission log
@@ -103,7 +147,15 @@ export default function SalesDashboard() {
             commissionsPaid += commAmt;
           }
         } else {
-          commissionsEarned += commAmt; // assume pending if not logged yet
+          commissionsEarned += commAmt;
+        }
+
+        // Map status to "Tình trạng khách hàng"
+        let customerStatus = 'ĐANG TƯ VẤN';
+        if (p.status === 'in_production' || p.status === 'qc_inspection') {
+          customerStatus = 'ĐÃ KÝ HỢP ĐỒNG';
+        } else if (p.status === 'completed') {
+          customerStatus = 'ĐÃ BÀN GIAO';
         }
 
         return {
@@ -113,13 +165,14 @@ export default function SalesDashboard() {
           boqValue: p.total_amount,
           commission: commAmt,
           status: comm ? comm.status : 'pending',
+          customerStatus,
           date: new Date(p.created_at).toLocaleDateString('vi-VN')
         };
       });
 
       setClients(clientList);
       setStats({
-        referredClients: signedContracts + 1, // Referred include signed + active leads
+        referredClients: projects ? projects.length : 0,
         signedContracts,
         totalSalesValue,
         commissionsEarned,
@@ -128,9 +181,40 @@ export default function SalesDashboard() {
 
     } catch (err) {
       console.error('Error loading live sales dashboard:', err);
-      setStats(MOCK_STATS);
-      setClients(MOCK_CLIENTS);
     }
+  };
+
+  // Quick Period Dropdown handler
+  const handleQuickPeriodChange = (period) => {
+    setQuickPeriod(period);
+    const now = new Date('2026-07-12'); // Mock relative baseline
+    let start = '';
+    let end = '';
+
+    if (period === 'month') {
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      start = `${year}-${month}-01`;
+      end = `${year}-${month}-31`;
+    } else if (period === 'last_month') {
+      const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const year = lastMonthDate.getFullYear();
+      const month = String(lastMonthDate.getMonth() + 1).padStart(2, '0');
+      start = `${year}-${month}-01`;
+      end = `${year}-${month}-31`;
+    } else if (period === 'quarter') {
+      const year = now.getFullYear();
+      const quarterStartMonth = Math.floor(now.getMonth() / 3) * 3 + 1;
+      const month = String(quarterStartMonth).padStart(2, '0');
+      start = `${year}-${month}-01`;
+      end = `${year}-12-31`;
+    } else if (period === 'year') {
+      start = `${now.getFullYear()}-01-01`;
+      end = `${now.getFullYear()}-12-31`;
+    }
+
+    setStartDate(start);
+    setEndDate(end);
   };
 
   const getReferralUrl = () => {
@@ -150,7 +234,7 @@ export default function SalesDashboard() {
 
   return (
     <div className="min-h-screen text-slate-800 flex flex-col md:flex-row relative overflow-hidden bg-[#faf8f5]">
-      {/* LEFT SIDEBAR PANEL (Matching the Admin/Chairman design) */}
+      {/* LEFT SIDEBAR PANEL */}
       <aside className="w-full md:w-64 bg-[#14151b] border-r border-[#262832] flex flex-col z-10 relative">
         {/* Brand Header Logo */}
         <div className="p-6 border-b border-[#262832] flex items-center space-x-3">
@@ -196,7 +280,7 @@ export default function SalesDashboard() {
             }`}
           >
             <span>👥</span>
-            <span>Danh Sách Cư Dân</span>
+            <span>Danh Sách Khách Hàng</span>
           </button>
         </nav>
 
@@ -301,9 +385,58 @@ export default function SalesDashboard() {
 
           {activeTab === 'clients' && (
             <div className="bg-white border border-[#ebdcb9] rounded-2xl p-6 space-y-4 shadow-sm text-slate-800">
-              <h3 className="text-sm font-bold text-slate-900 border-b border-slate-100 pb-3">Danh sách Khách hàng của bạn</h3>
+              <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 className="text-sm font-bold text-slate-900">Danh Sách Khách Hàng</h3>
+                <span className="text-xs font-mono text-[#c49a62] font-extrabold bg-[#c49a62]/10 border border-[#c49a62]/20 px-2 py-0.5 rounded">
+                  Bộ lọc thời gian
+                </span>
+              </div>
+
+              {/* Filter controls row */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-[#faf8f5] p-4 rounded-xl border border-[#ebdcb9] text-xs">
+                <div className="space-y-1">
+                  <label className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Khoảng thời gian nhanh</label>
+                  <select
+                    value={quickPeriod}
+                    onChange={(e) => handleQuickPeriodChange(e.target.value)}
+                    className="w-full bg-white border border-[#ebdcb9] rounded-lg px-2 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-[#c49a62] font-bold"
+                  >
+                    <option value="All">Tất cả thời gian</option>
+                    <option value="month">Tháng này</option>
+                    <option value="last_month">Tháng trước</option>
+                    <option value="quarter">Quý này</option>
+                    <option value="year">Năm nay</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Từ ngày (StartDate)</label>
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => {
+                      setStartDate(e.target.value);
+                      setQuickPeriod('All');
+                    }}
+                    className="w-full bg-white border border-[#ebdcb9] rounded-lg px-2.5 py-1.5 text-xs text-slate-850 focus:outline-none focus:border-[#c49a62]"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Đến ngày (EndDate)</label>
+                  <input
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => {
+                      setEndDate(e.target.value);
+                      setQuickPeriod('All');
+                    }}
+                    className="w-full bg-white border border-[#ebdcb9] rounded-lg px-2.5 py-1.5 text-xs text-slate-850 focus:outline-none focus:border-[#c49a62]"
+                  />
+                </div>
+              </div>
               
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto pt-2">
                 <table className="w-full text-left text-xs border-collapse">
                   <thead>
                     <tr className="border-b border-[#ebdcb9] text-slate-500 font-semibold">
@@ -312,14 +445,15 @@ export default function SalesDashboard() {
                       <th className="py-3 px-2">Giá trị gói BOQ</th>
                       <th className="py-3 px-2">Hoa hồng nhận (2%)</th>
                       <th className="py-3 px-2">Thời gian</th>
-                      <th className="py-3 px-2 text-right">Trạng thái giải ngân</th>
+                      <th className="py-3 px-2">Trạng thái giải ngân</th>
+                      <th className="py-3 px-2 text-right">Tình trạng khách hàng</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 text-slate-700">
                     {clients.length === 0 ? (
                       <tr>
-                        <td colSpan="6" className="py-6 text-center text-slate-450 text-xs">
-                          Chưa có khách hàng nào truy cập qua đường link của bạn.
+                        <td colSpan="7" className="py-6 text-center text-slate-450 text-xs">
+                          Chưa có khách hàng nào truy cập qua đường link của bạn hoặc nằm ngoài khoảng thời gian lọc.
                         </td>
                       </tr>
                     ) : (
@@ -330,13 +464,22 @@ export default function SalesDashboard() {
                           <td className="py-3 px-2 font-mono">{client.boqValue.toLocaleString('vi-VN')}đ</td>
                           <td className="py-3 px-2 font-mono text-emerald-600 font-semibold">+{client.commission.toLocaleString('vi-VN')}đ</td>
                           <td className="py-3 px-2 text-slate-500">{client.date}</td>
-                          <td className="py-3 px-2 text-right">
+                          <td className="py-3 px-2">
                             <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
                               client.status === 'paid' ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' : 
                               client.status === 'approved' ? 'bg-amber-500/10 text-amber-600 border border-amber-500/20' : 
                               'bg-slate-100 text-slate-500 border border-slate-200'
                             }`}>
                               {client.status === 'paid' ? 'Đã thanh toán' : client.status === 'approved' ? 'Chờ chi' : 'Chờ Vin duyệt'}
+                            </span>
+                          </td>
+                          <td className="py-3 px-2 text-right">
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                              client.customerStatus === 'ĐÃ BÀN GIAO' ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' :
+                              client.customerStatus === 'ĐÃ KÝ HỢP ĐỒNG' ? 'bg-amber-500/10 text-amber-600 border border-amber-500/20' :
+                              'bg-slate-100 text-slate-500 border border-slate-200'
+                            }`}>
+                              {client.customerStatus}
                             </span>
                           </td>
                         </tr>
