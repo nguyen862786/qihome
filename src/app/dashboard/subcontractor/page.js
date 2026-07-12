@@ -91,7 +91,6 @@ export default function SubcontractorDashboard() {
         setProjects(data);
         setSelectedProjectId(data[0].id);
       } else {
-        // Fallback if no projects assigned
         setProjects(MOCK_PROJECTS);
         setSelectedProjectId(MOCK_PROJECTS[0].id);
       }
@@ -165,7 +164,6 @@ export default function SubcontractorDashboard() {
 
     try {
       if (isLive) {
-        // 1. Create a request in Database
         const { data: request, error: rError } = await supabase
           .from('material_requests')
           .insert([
@@ -184,7 +182,6 @@ export default function SubcontractorDashboard() {
 
         if (rError) throw rError;
 
-        // 2. If approved (within budget), call API to generate QR token
         if (!overBudget) {
           const response = await fetch('/api/materials/qr-gen', {
             method: 'POST',
@@ -201,7 +198,6 @@ export default function SubcontractorDashboard() {
             setQrToken(data.token);
             setQrDetails(data.payload);
 
-            // Update QR token directly in DB for verification
             await supabase
               .from('material_requests')
               .update({ qr_code_token: data.token })
@@ -213,7 +209,6 @@ export default function SubcontractorDashboard() {
           alert('⚠️ Yêu cầu vượt hạn mức BOM đã được gửi lên hệ thống. Đang đợi Chủ tịch phê duyệt tại Admin Dashboard.');
         }
       } else {
-        // Fallback Mock API
         const response = await fetch('/api/materials/qr-gen', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -258,7 +253,6 @@ export default function SubcontractorDashboard() {
         setGpsLoading(false);
       },
       (error) => {
-        // Mock coordinates for demo
         setGps({
           lat: '10.879122',
           lng: '106.541240',
@@ -281,7 +275,6 @@ export default function SubcontractorDashboard() {
     
     try {
       if (isLive) {
-        // Insert report log to live database
         const { error } = await supabase
           .from('site_reports')
           .insert([
@@ -313,31 +306,33 @@ export default function SubcontractorDashboard() {
   if (!profile) return null;
 
   return (
-    <div className="min-h-screen text-slate-100 flex flex-col items-center">
+    <div className="min-h-screen text-slate-800 flex flex-col items-center bg-[#faf8f5]">
       {/* Header */}
-      <div className="w-full max-w-md glass-panel p-4 sticky top-0 z-20 flex justify-between items-center shadow-lg">
+      <div className="w-full max-w-md bg-white border-b border-[#ebdcb9] p-4 sticky top-0 z-20 flex justify-between items-center shadow-sm">
         <div className="flex items-center space-x-2">
-          <span className="font-bold text-amber-500 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-lg text-sm">Qi</span>
-          <span className="font-bold text-sm text-white">Thợ Thi Công Hiện Trường {isLive && '🟢'}</span>
+          <span className="font-bold text-[#c49a62] bg-[#c49a62]/10 border border-[#c49a62]/20 px-2 py-0.5 rounded-lg text-sm">Qi</span>
+          <span className="font-bold text-sm text-slate-900">Thợ Thi Công Hiện Trường {isLive && '🟢'}</span>
         </div>
-        <button onClick={() => router.push('/')} className="text-xs text-slate-400 hover:text-white transition">
+        <button onClick={() => router.push('/')} className="text-xs text-slate-500 hover:text-slate-900 transition font-semibold">
           Đóng
         </button>
       </div>
 
       <div className="w-full max-w-md p-4 space-y-6">
         {/* User Card */}
-        <div className="bg-gradient-to-r from-amber-500/10 to-amber-600/[0.03] border border-amber-500/20 rounded-2xl p-4">
-          <div className="text-[10px] uppercase font-bold text-amber-500">Đơn vị thi công</div>
-          <div className="text-base font-bold text-white mt-1">{profile.name}</div>
+        <div className="bg-white border border-[#ebdcb9] rounded-2xl p-4 shadow-sm space-y-3">
+          <div>
+            <div className="text-[10px] uppercase font-bold text-slate-500">Đơn vị thi công</div>
+            <div className="text-base font-bold text-slate-900 mt-1">{profile.name}</div>
+          </div>
           
           {/* Project selector */}
-          <div className="mt-3 flex items-center space-x-2">
-            <span className="text-xs text-slate-400">Chọn căn hộ:</span>
+          <div className="flex items-center space-x-2">
+            <span className="text-xs text-slate-500">Chọn căn hộ:</span>
             <select
               value={selectedProjectId}
               onChange={(e) => setSelectedProjectId(e.target.value)}
-              className="bg-slate-950 border border-slate-800 text-xs text-slate-200 px-2 py-1 rounded focus:outline-none focus:border-amber-500"
+              className="bg-[#faf8f5] border border-[#ebdcb9] text-xs text-[#c49a62] px-2 py-1 rounded focus:outline-none focus:border-[#c49a62] font-bold"
             >
               {projects.map(p => (
                 <option key={p.id} value={p.id}>{p.project_code} ({p.vinhomes_floor_căn})</option>
@@ -347,19 +342,19 @@ export default function SubcontractorDashboard() {
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex bg-slate-900/60 p-1.5 rounded-xl border border-slate-900">
+        <div className="flex bg-[#f4ebd9] p-1.5 rounded-xl border border-[#e2d5c3] shadow-sm">
           <button
             onClick={() => { setActiveTab('materials'); setQrToken(''); }}
-            className={`flex-1 py-2.5 text-center text-xs font-bold rounded-lg transition ${
-              activeTab === 'materials' ? 'bg-amber-500 text-slate-950 shadow-md' : 'text-slate-400 hover:text-slate-200'
+            className={`flex-1 py-2 text-center text-xs font-bold rounded-lg transition ${
+              activeTab === 'materials' ? 'bg-[#c49a62] text-white shadow-sm' : 'text-slate-500 hover:text-slate-900'
             }`}
           >
             📦 Gọi Vật Tư (QR)
           </button>
           <button
             onClick={() => { setActiveTab('report'); setReportSuccess(''); }}
-            className={`flex-1 py-2.5 text-center text-xs font-bold rounded-lg transition ${
-              activeTab === 'report' ? 'bg-amber-500 text-slate-950 shadow-md' : 'text-slate-400 hover:text-slate-200'
+            className={`flex-1 py-2 text-center text-xs font-bold rounded-lg transition ${
+              activeTab === 'report' ? 'bg-[#c49a62] text-white shadow-sm' : 'text-slate-500 hover:text-slate-900'
             }`}
           >
             📸 Báo Tiến Độ (GPS)
@@ -368,11 +363,11 @@ export default function SubcontractorDashboard() {
 
         {/* Tab 1: Materials Request QR */}
         {activeTab === 'materials' && (
-          <div className="bg-slate-900/40 border border-slate-900 rounded-2xl p-5 space-y-6">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Yêu cầu Cấp vật tư</h3>
+          <div className="bg-white border border-[#ebdcb9] rounded-2xl p-5 space-y-6 shadow-sm">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">Yêu cầu Cấp vật tư</h3>
             
             {bomItems.length === 0 ? (
-              <div className="text-center text-xs text-slate-500 py-6">
+              <div className="text-center text-xs text-slate-400 py-6">
                 Chưa có định mức vật tư (BOM) được nạp cho căn hộ này.
               </div>
             ) : !qrToken ? (
@@ -386,7 +381,7 @@ export default function SubcontractorDashboard() {
                       setSelectedSku(e.target.value);
                       handleQtyChange(requestQty, e.target.value);
                     }}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-slate-300 focus:outline-none"
+                    className="w-full bg-[#faf8f5] border border-[#ebdcb9] rounded-xl px-3 py-2.5 text-xs text-slate-800 focus:outline-none"
                   >
                     {bomItems.map(b => (
                       <option key={b.sku} value={b.sku}>
@@ -404,13 +399,13 @@ export default function SubcontractorDashboard() {
                     value={requestQty}
                     min="1"
                     onChange={(e) => handleQtyChange(e.target.value, selectedSku)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none"
+                    className="w-full bg-[#faf8f5] border border-[#ebdcb9] rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none"
                   />
                 </div>
 
                 {/* Over Budget Notice */}
                 {overBudget && (
-                  <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-xs p-3.5 rounded-xl space-y-3">
+                  <div className="bg-red-500/10 border border-red-500/20 text-red-600 text-xs p-3.5 rounded-xl space-y-3">
                     <div>
                       ⚠️ <strong>Vượt hạn mức BOM!</strong> Yêu cầu này cần gửi ảnh bằng chứng và lý do hao hụt để Giám đốc Dự án duyệt thủ công.
                     </div>
@@ -420,7 +415,7 @@ export default function SubcontractorDashboard() {
                       placeholder="Link ảnh bằng chứng lỗi..."
                       value={evidenceUrl}
                       onChange={(e) => setEvidenceUrl(e.target.value)}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs placeholder-slate-600 focus:outline-none focus:border-red-500 text-slate-200"
+                      className="w-full bg-white border border-[#ebdcb9] rounded-lg px-2.5 py-1.5 text-xs placeholder-slate-400 focus:outline-none focus:border-red-500 text-slate-800"
                     />
                   </div>
                 )}
@@ -428,14 +423,14 @@ export default function SubcontractorDashboard() {
                 <button
                   type="submit"
                   disabled={submittingMaterial}
-                  className="w-full bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-slate-950 font-bold py-3 rounded-xl transition text-center text-xs"
+                  className="w-full bg-[#c49a62] hover:bg-[#b08752] disabled:opacity-50 text-white font-bold py-3 rounded-xl transition text-center text-xs shadow-sm"
                 >
                   {submittingMaterial ? 'Đang tạo lệnh...' : 'Tạo mã QR Nhận hàng'}
                 </button>
               </form>
             ) : (
               <div className="text-center space-y-6 py-4 animate-fadeIn">
-                <div className="inline-block bg-white p-4 rounded-2xl shadow-xl">
+                <div className="inline-block bg-white p-4 rounded-2xl shadow-md border border-[#ebdcb9]">
                   {/* Mock QR Rendering */}
                   <div className="w-48 h-48 bg-slate-100 border-4 border-white flex flex-col justify-center items-center relative">
                     <div className="grid grid-cols-6 gap-0.5 w-40 h-40 opacity-80">
@@ -452,21 +447,21 @@ export default function SubcontractorDashboard() {
                   </div>
                 </div>
 
-                <div className="bg-slate-950/80 border border-slate-800 rounded-xl p-4 text-xs text-left space-y-2">
-                  <div className="text-amber-500 font-bold text-center border-b border-slate-800 pb-1.5 mb-2">
+                <div className="bg-[#faf8f5] border border-[#ebdcb9] rounded-xl p-4 text-xs text-left space-y-2">
+                  <div className="text-[#c49a62] font-bold text-center border-b border-[#ebdcb9] pb-1.5 mb-2">
                     LỆNH XUẤT KHO ĐÃ MÃ HOÁ
                   </div>
-                  <div>- Dự án: <strong className="text-white">{qrDetails?.projectCode}</strong></div>
-                  <div>- Vật tư SKU: <strong className="text-white">{qrDetails?.sku}</strong></div>
-                  <div>- Số lượng: <strong className="text-white">{qrDetails?.quantity}</strong></div>
-                  <div className="text-red-400 font-medium mt-2 text-center text-[10px]">
+                  <div>- Dự án: <strong className="text-slate-800">{qrDetails?.projectCode}</strong></div>
+                  <div>- Vật tư SKU: <strong className="text-slate-800">{qrDetails?.sku}</strong></div>
+                  <div>- Số lượng: <strong className="text-slate-800">{qrDetails?.quantity}</strong></div>
+                  <div className="text-red-500 font-medium mt-2 text-center text-[10px]">
                     ⏱️ Hết hạn trong: 60 phút (Quét tại kho vệ tinh)
                   </div>
                 </div>
 
                 <button
                   onClick={() => setQrToken('')}
-                  className="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-semibold py-2.5 rounded-xl transition text-xs"
+                  className="w-full bg-[#faf8f5] hover:bg-slate-100 border border-[#ebdcb9] text-slate-700 font-semibold py-2.5 rounded-xl transition text-xs"
                 >
                   Tạo yêu cầu mới
                 </button>
@@ -477,11 +472,11 @@ export default function SubcontractorDashboard() {
 
         {/* Tab 2: Daily Progress Visual Report */}
         {activeTab === 'report' && (
-          <div className="bg-slate-900/40 border border-slate-900 rounded-2xl p-5 space-y-6">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Nhật ký Tiến độ & GPS</h3>
+          <div className="bg-white border border-[#ebdcb9] rounded-2xl p-5 space-y-6 shadow-sm">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">Nhật ký Tiến độ & GPS</h3>
 
             {reportSuccess && (
-              <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs p-3.5 rounded-xl leading-relaxed">
+              <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 text-xs p-3.5 rounded-xl leading-relaxed">
                 {reportSuccess}
               </div>
             )}
@@ -490,18 +485,18 @@ export default function SubcontractorDashboard() {
               {/* Geolocation check */}
               <div>
                 <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-2">
-                  Xác thực GPS tại Vinhomes Hậu Nghĩa
+                  Xác thực GPS tại Vinhomes
                 </label>
                 {!gps ? (
                   <button
                     type="button"
                     onClick={handleGetLocation}
                     disabled={gpsLoading}
-                    className="w-full bg-slate-950 hover:bg-slate-800/80 border border-slate-800 hover:border-amber-500/30 rounded-xl py-3 px-4 text-xs font-bold text-amber-500 flex items-center justify-center space-x-2 transition"
+                    className="w-full bg-[#faf8f5] hover:bg-slate-50 border border-[#ebdcb9] hover:border-[#c49a62]/30 rounded-xl py-3 px-4 text-xs font-bold text-[#c49a62] flex items-center justify-center space-x-2 transition"
                   >
                     {gpsLoading ? (
                       <>
-                        <span className="animate-spin rounded-full h-3.5 w-3.5 border-2 border-amber-500 border-t-transparent"></span>
+                        <span className="animate-spin rounded-full h-3.5 w-3.5 border-2 border-[#c49a62] border-t-transparent"></span>
                         <span>Đang định vị vệ tinh...</span>
                       </>
                     ) : (
@@ -511,14 +506,14 @@ export default function SubcontractorDashboard() {
                     )}
                   </button>
                 ) : (
-                  <div className="bg-slate-950 border border-emerald-500/20 text-slate-300 text-xs p-3 rounded-xl flex items-center justify-between">
+                  <div className="bg-[#faf8f5] border border-emerald-500/25 text-slate-700 text-xs p-3 rounded-xl flex items-center justify-between">
                     <div>
-                      <div className="font-semibold text-emerald-400 flex items-center space-x-1">
+                      <div className="font-semibold text-emerald-600 flex items-center space-x-1">
                         <span>●</span> <span>Đã khoá GPS thành công</span>
                       </div>
                       <div className="text-[10px] text-slate-500 mt-0.5">Lat: {gps.lat} | Lng: {gps.lng}</div>
                     </div>
-                    <span className="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded font-medium">
+                    <span className="text-[10px] bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 px-2 py-0.5 rounded font-medium">
                       Sai số {gps.accuracy}m
                     </span>
                   </div>
@@ -531,10 +526,10 @@ export default function SubcontractorDashboard() {
                   Chụp ảnh thi công (Khóa tải thư viện)
                 </label>
                 <div className="flex items-center justify-center w-full">
-                  <label className="w-full bg-slate-950 border border-slate-800 hover:border-slate-700 rounded-xl px-4 py-6 text-center cursor-pointer transition flex flex-col items-center">
+                  <label className="w-full bg-[#faf8f5] border border-[#ebdcb9] hover:border-[#c49a62]/55 rounded-xl px-4 py-6 text-center cursor-pointer transition flex flex-col items-center">
                     <span className="text-2xl mb-1">📸</span>
-                    <span className="text-xs text-slate-400 font-semibold">Chụp hình trực tiếp bằng Camera điện thoại</span>
-                    <span className="text-[9px] text-slate-600 mt-1">Bắt buộc theo chuẩn audit của Vingroup</span>
+                    <span className="text-xs text-[#c49a62] font-bold">Chụp hình trực tiếp bằng Camera điện thoại</span>
+                    <span className="text-[9px] text-slate-550 mt-1">Bắt buộc theo chuẩn audit của Vingroup</span>
                     <input 
                       type="file" 
                       accept="image/*" 
@@ -546,7 +541,7 @@ export default function SubcontractorDashboard() {
                   </label>
                 </div>
                 {imageFile && (
-                  <div className="text-xs text-emerald-400 font-medium mt-2 flex items-center space-x-1.5">
+                  <div className="text-xs text-emerald-600 font-medium mt-2 flex items-center space-x-1.5">
                     <span>✓</span> <span>Đã chọn ảnh: {imageFile.name} ({(imageFile.size / 1024 / 1024).toFixed(2)} MB)</span>
                   </div>
                 )}
@@ -560,15 +555,15 @@ export default function SubcontractorDashboard() {
                   rows="3"
                   value={reportText}
                   onChange={(e) => setReportText(e.target.value)}
-                  placeholder="Mô tả công việc đã hoàn thành (Ví dụ: Đã sơn lót trần thạch cao phòng ngủ chính căn 1205...)"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 placeholder-slate-600 focus:outline-none"
+                  placeholder="Mô tả công việc đã hoàn thành (Ví dụ: Đã sơn lót trần thạch cao phòng ngủ chính...)"
+                  className="w-full bg-[#faf8f5] border border-[#ebdcb9] rounded-xl p-3 text-xs text-slate-800 placeholder-slate-400 focus:outline-none"
                 ></textarea>
               </div>
 
               <button
                 type="submit"
                 disabled={submittingReport}
-                className="w-full bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-slate-950 font-bold py-3 rounded-xl transition text-center text-xs shadow-lg shadow-amber-500/10"
+                className="w-full bg-[#c49a62] hover:bg-[#b08752] disabled:opacity-50 text-white font-bold py-3 rounded-xl transition text-center text-xs shadow-sm"
               >
                 {submittingReport ? 'Đang tải lên...' : 'Gửi Báo cáo Bàn giao Tiến độ'}
               </button>

@@ -8,6 +8,7 @@ export default function AccountingDashboard() {
   const router = useRouter();
   const [profile, setProfile] = useState(null);
   const [isLive, setIsLive] = useState(false);
+  const [activeTab, setActiveTab] = useState('ledger'); // 'ledger' | 'sign_payout'
   
   // Financial ledger states
   const [ledger, setLedger] = useState([]);
@@ -222,9 +223,7 @@ export default function AccountingDashboard() {
         
         if (cError) throw cError;
 
-        // In a real system, we'd insert a payout ledger request in a 'weekly_payouts' table.
-        // For MVP, we update the status of projects to completed if site reports are passed.
-        // We'll write to audit log
+        // Write to audit log
         await supabase
           .from('audit_logs')
           .insert([
@@ -260,145 +259,208 @@ export default function AccountingDashboard() {
   if (!profile) return null;
 
   return (
-    <div className="min-h-screen text-slate-100 flex flex-col">
-      {/* Top Navbar */}
-      <nav className="border-b border-slate-900 bg-slate-900/30 p-4 sticky top-0 z-20 backdrop-blur">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
+    <div className="min-h-screen text-slate-800 flex flex-col md:flex-row relative overflow-hidden bg-[#faf8f5]">
+      {/* LEFT SIDEBAR PANEL (Matching the Admin/Chairman design) */}
+      <aside className="w-full md:w-64 bg-[#14151b] border-r border-[#262832] flex flex-col z-10 relative">
+        {/* Brand Header Logo */}
+        <div className="p-6 border-b border-[#262832] flex items-center space-x-3">
+          <span className="font-bold text-2xl tracking-wider text-[#c49a62] bg-[#c49a62]/10 border border-[#c49a62]/20 px-2 py-0.5 rounded-xl">Qi</span>
+          <span className="font-bold text-base text-white tracking-tight">QiHome.vn</span>
+        </div>
+
+        {/* User profile section */}
+        <div className="px-6 py-6 border-b border-[#262832] flex items-center space-x-3 text-white">
+          <div className="w-10 h-10 rounded-full bg-[#c49a62]/20 border border-[#c49a62]/40 flex items-center justify-center font-bold text-[#c49a62] text-sm">
+            KT
+          </div>
+          <div>
+            <div className="text-xs font-bold text-white">Lê Kế Toán</div>
+            <div className="text-[10px] text-slate-500">Project Accountant</div>
+          </div>
+        </div>
+
+        {/* Stacked Vertical Menu Navigation */}
+        <nav className="flex-1 px-4 py-6 space-y-2.5">
+          <div className="text-[10px] uppercase font-bold text-slate-500 px-3 mb-2 tracking-wider">
+            Nghiệp vụ Kế toán
+          </div>
+          
+          <button
+            onClick={() => setActiveTab('ledger')}
+            className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-bold transition duration-200 ${
+              activeTab === 'ledger' 
+                ? 'bg-[#c49a62] text-white shadow-lg shadow-[#c49a62]/20' 
+                : 'text-slate-400 hover:text-white hover:bg-slate-900/40'
+            }`}
+          >
+            <span>💵</span>
+            <span>Đối Soát Thu Chi</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('sign_payout')}
+            className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-bold transition duration-200 ${
+              activeTab === 'sign_payout' 
+                ? 'bg-[#c49a62] text-white shadow-lg shadow-[#c49a62]/20' 
+                : 'text-slate-400 hover:text-white hover:bg-slate-900/40'
+            }`}
+          >
+            <span>✍️</span>
+            <span className="flex-1 text-left">Đề Xuất Lệnh Chi</span>
+            {summary.payoutProposal > 0 && (
+              <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-black ${
+                activeTab === 'sign_payout' ? 'bg-[#14151b] text-[#c49a62]' : 'bg-red-500/20 text-red-400'
+              }`}>
+                Đang đề xuất
+              </span>
+            )}
+          </button>
+        </nav>
+
+        {/* Logout / Exit at Bottom */}
+        <div className="p-4 border-t border-[#262832]">
+          <button
+            onClick={() => router.push('/')}
+            className="w-full bg-[#1c1d25] hover:bg-slate-900 border border-slate-800 rounded-xl py-2.5 text-xs font-bold text-slate-400 hover:text-white transition flex items-center justify-center space-x-2"
+          >
+            <span>Quay lại Storefront</span>
+          </button>
+        </div>
+      </aside>
+
+      {/* RIGHT CONTENT AREA */}
+      <div className="flex-1 flex flex-col min-h-screen overflow-y-auto z-10 relative">
+        <header className="h-16 border-b border-[#ebdcb9] bg-white px-8 flex justify-between items-center sticky top-0 z-20">
           <div className="flex items-center space-x-3">
-            <span className="font-bold text-2xl tracking-wider text-amber-500 bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-xl">Qi</span>
-            <span className="font-bold text-lg text-white tracking-tight">Dashboard Kế Toán Dự Án {isLive && '🟢'}</span>
+            <h1 className="font-bold text-sm text-slate-800">Sổ Cái & Giải Ngân Kế Toán</h1>
           </div>
           <div className="flex items-center space-x-4">
-            <span className="text-xs text-amber-400 font-semibold uppercase bg-amber-500/5 px-3 py-1 rounded border border-amber-500/20">
-              Nhân sự: Lê Kế Toán
+            <span className="text-[10px] font-bold text-slate-500 uppercase flex items-center space-x-1.5 px-2.5 py-1 bg-[#faf8f5] border border-[#ebdcb9] rounded-lg">
+              <span className={`w-2 h-2 rounded-full ${isLive ? 'bg-emerald-500 shadow-[0_0_8px_#10b981]' : 'bg-amber-500 animate-pulse'}`}></span>
+              <span>{isLive ? 'Live DB Connection' : 'Sandbox Cache Mode'}</span>
             </span>
-            <button onClick={() => router.push('/')} className="text-xs text-slate-400 hover:text-white transition">
-              Quay lại Storefront
-            </button>
           </div>
-        </div>
-      </nav>
+        </header>
 
-      {/* Main Grid Content */}
-      <main className="max-w-6xl mx-auto w-full p-6 space-y-8">
-        
-        {/* Success Alert */}
-        {success && (
-          <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs p-3.5 rounded-xl leading-relaxed">
-            {success}
-          </div>
-        )}
-
-        {/* Financial KPI Dashboard */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="bg-slate-900/40 border border-slate-900 rounded-2xl p-5 backdrop-blur shadow">
-            <div className="text-xs font-semibold uppercase tracking-wider text-slate-500">Tổng thu lũy kế (Tất cả nguồn)</div>
-            <div className="text-xl font-bold text-white mt-2">{summary.totalIn.toLocaleString('vi-VN')}đ</div>
-            <div className="text-[10px] text-emerald-400 mt-1">Đã đối soát khớp tiền về</div>
-          </div>
-          <div className="bg-slate-900/40 border border-slate-900 rounded-2xl p-5 backdrop-blur shadow">
-            <div className="text-xs font-semibold uppercase tracking-wider text-slate-500">Khoản thu Vin 6% thực tế</div>
-            <div className="text-xl font-bold text-amber-500 mt-2">{summary.vinSubsidy.toLocaleString('vi-VN')}đ</div>
-            <div className="text-[10px] text-slate-500 mt-1">Reconciled với Vinhomes Accounting</div>
-          </div>
-          <div className="bg-slate-900/40 border border-slate-900 rounded-2xl p-5 backdrop-blur shadow">
-            <div className="text-xs font-semibold uppercase tracking-wider text-slate-500">Khách ngân hàng hỗ trợ (TCB)</div>
-            <div className="text-xl font-bold text-white mt-2">{summary.bankDisbursed.toLocaleString('vi-VN')}đ</div>
-            <div className="text-[10px] text-slate-500 mt-1">Hạn mức vay tín chấp đã giải ngân</div>
-          </div>
-          <div className="bg-slate-900/40 border border-slate-900 rounded-2xl p-5 backdrop-blur shadow">
-            <div className="text-xs font-semibold uppercase tracking-wider text-slate-500">Đề xuất chi tuần này</div>
-            <div className="text-xl font-bold text-red-400 mt-2">{summary.payoutProposal.toLocaleString('vi-VN')}đ</div>
-            <div className="text-[10px] text-red-400 mt-1">Chờ Chủ tịch phê duyệt lệnh chi</div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          
-          {/* Left Column: Ledger and pending payments */}
-          <div className="lg:col-span-8 space-y-6">
-            
-            {/* Reconciliation ledger */}
-            <div className="bg-slate-900/40 border border-slate-900 rounded-2xl p-6 space-y-4">
-              <div className="flex justify-between items-center border-b border-slate-800/80 pb-3">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Nhật ký đối soát dòng tiền real-time</h3>
-                <span className="text-[10px] text-slate-500">Tổng cộng: {ledger.length} giao dịch</span>
-              </div>
-
-              <div className="divide-y divide-slate-900 space-y-4 max-h-[500px] overflow-y-auto pr-1">
-                {ledger.length === 0 ? (
-                  <div className="text-center text-xs text-slate-500 py-6">
-                    Chưa phát sinh giao dịch nào trên cơ sở dữ liệu.
-                  </div>
-                ) : (
-                  ledger.map((tx) => (
-                    <div key={tx.id} className="pt-4 first:pt-0 flex items-center justify-between">
-                      <div>
-                        <div className="flex items-center space-x-2">
-                          <span className={`text-[9px] font-bold px-2 py-0.5 rounded ${
-                            tx.type === 'in' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'
-                          }`}>
-                            {tx.type === 'in' ? 'THU' : 'CHI'}
-                          </span>
-                          <strong className="text-xs text-white">{tx.project}</strong>
-                          <span className="text-[10px] text-slate-500">{tx.category}</span>
-                        </div>
-                        <p className="text-xs text-slate-300 mt-1">{tx.title}</p>
-                        <span className="text-[9px] text-slate-600">{tx.date}</span>
-                      </div>
-
-                      <div className="text-right">
-                        <div className={`text-sm font-bold ${tx.type === 'in' ? 'text-emerald-400' : 'text-red-400'}`}>
-                          {tx.type === 'in' ? '+' : '-'}{tx.amount.toLocaleString('vi-VN')}đ
-                        </div>
-                        <span className={`text-[9px] font-bold uppercase ${
-                          tx.status === 'completed' ? 'text-emerald-500' : 'text-amber-500'
-                        }`}>
-                          {tx.status === 'completed' ? 'Đã chi/thu' : 'Chờ duyệt'}
-                        </span>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
+        <main className="p-8 space-y-6 flex-1">
+          {success && (
+            <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 text-xs p-3.5 rounded-xl">
+              {success}
             </div>
+          )}
 
+          {/* Financial KPI Row */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="bg-white border border-[#ebdcb9] rounded-2xl p-5 shadow-sm">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Tổng thu lũy kế</div>
+              <div className="text-xl font-black mt-2 text-[#c49a62]">{summary.totalIn.toLocaleString('vi-VN')}đ</div>
+              <div className="text-[9px] text-[#c49a62] font-semibold mt-1">✓ Đã đối soát khớp tiền về</div>
+            </div>
+            <div className="bg-white border border-[#ebdcb9] rounded-2xl p-5 shadow-sm">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Vin 6% thực tế</div>
+              <div className="text-xl font-black text-[#c49a62] mt-2">{summary.vinSubsidy.toLocaleString('vi-VN')}đ</div>
+              <div className="text-[9px] text-slate-500 mt-1">Reconciled với Vinhomes Account</div>
+            </div>
+            <div className="bg-white border border-[#ebdcb9] rounded-2xl p-5 shadow-sm">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Giải ngân TCB</div>
+              <div className="text-xl font-black text-[#c49a62] mt-2">{summary.bankDisbursed.toLocaleString('vi-VN')}đ</div>
+              <div className="text-[9px] text-slate-500 mt-1">Hạn mức giải ngân tín chấp</div>
+            </div>
+            <div className="bg-white border border-[#ebdcb9] rounded-2xl p-5 shadow-sm">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Chi tuần này</div>
+              <div className="text-xl font-black text-red-500 mt-2">{summary.payoutProposal.toLocaleString('vi-VN')}đ</div>
+              <div className="text-[9px] text-slate-500 mt-1">Đề xuất chuyển Chủ tịch duyệt</div>
+            </div>
           </div>
 
-          {/* Right Column: Weekly payout action */}
-          <div className="lg:col-span-4 space-y-6">
-            
-            {/* Payment Proposal Box */}
-            <div className="bg-slate-900/40 border border-slate-900 rounded-2xl p-6 space-y-4 shadow-xl">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Ký duyệt chi lương/vật tư</h3>
-              
-              <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-4 space-y-3 text-xs">
-                <div className="text-slate-400">Dự kiến chi tiền đợt tuần này:</div>
-                
-                <div className="flex justify-between items-center text-sm pt-2 font-bold text-white border-t border-slate-900">
-                  <span>Tổng tiền đề xuất:</span>
-                  <span className="text-red-400">{summary.payoutProposal.toLocaleString('vi-VN')}đ</span>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            {activeTab === 'ledger' && (
+              <div className="lg:col-span-12">
+                <div className="bg-white border border-[#ebdcb9] rounded-2xl p-6 space-y-4 shadow-sm text-slate-800">
+                  <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+                    <h3 className="text-sm font-bold text-slate-900">Nhật ký đối soát dòng tiền real-time</h3>
+                    <span className="text-xs text-slate-500 font-bold">Tổng cộng: {ledger.length} giao dịch</span>
+                  </div>
+
+                  <div className="divide-y divide-slate-100 space-y-4 max-h-[500px] overflow-y-auto pr-1">
+                    {ledger.length === 0 ? (
+                      <div className="text-center text-xs text-slate-400 py-6">
+                        Chưa phát sinh giao dịch nào trên cơ sở dữ liệu.
+                      </div>
+                    ) : (
+                      ledger.map((tx) => (
+                        <div key={tx.id} className="pt-4 first:pt-0 flex items-center justify-between">
+                          <div>
+                            <div className="flex items-center space-x-2">
+                              <span className={`text-[9px] font-bold px-2 py-0.5 rounded ${
+                                tx.type === 'in' ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' : 'bg-red-500/10 text-red-600 border border-red-500/20'
+                              }`}>
+                                {tx.type === 'in' ? 'THU' : 'CHI'}
+                              </span>
+                              <strong className="text-xs text-slate-900">{tx.project}</strong>
+                              <span className="text-[10px] text-slate-500">{tx.category}</span>
+                            </div>
+                            <p className="text-xs text-slate-600 mt-1">{tx.title}</p>
+                            <span className="text-[9px] text-slate-400">{tx.date}</span>
+                          </div>
+
+                          <div className="text-right">
+                            <div className={`text-sm font-bold ${tx.type === 'in' ? 'text-emerald-600' : 'text-red-600'}`}>
+                              {tx.type === 'in' ? '+' : '-'}{tx.amount.toLocaleString('vi-VN')}đ
+                            </div>
+                            <span className={`text-[9px] font-bold uppercase ${
+                              tx.status === 'completed' ? 'text-emerald-600' : 'text-amber-500'
+                            }`}>
+                              {tx.status === 'completed' ? 'Đã duyệt chi/thu' : 'Chờ duyệt'}
+                            </span>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
                 </div>
               </div>
+            )}
 
-              <p className="text-[10px] text-slate-500 leading-relaxed">
-                * Toàn bộ đề xuất sẽ tự động lấy từ dữ liệu nghiệm thu đạt QC hiện trường của thợ thi công và báo cáo hoa hồng của Sales để tối ưu quy trình đối soát thủ công.
-              </p>
+            {activeTab === 'sign_payout' && (
+              <>
+                <div className="lg:col-span-8">
+                  <div className="bg-white border border-[#ebdcb9] rounded-2xl p-6 space-y-4 shadow-sm text-slate-800">
+                    <h3 className="text-sm font-bold text-slate-900 border-b border-slate-100 pb-3">✍️ Đề Xuất Lệnh Chi Tiền Tuần</h3>
+                    <p className="text-xs text-slate-600 leading-relaxed">
+                      Lập báo cáo đề xuất chuyển cho Chủ tịch phê duyệt lệnh chi cho thầu phụ, hoa hồng sales và nhà cung cấp dựa trên dữ liệu nghiệm thu thực tế của giám sát hiện trường.
+                    </p>
+                    <div className="bg-[#faf8f5] border border-[#ebdcb9] rounded-xl p-5 space-y-3">
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="text-slate-500 font-semibold">Hoa hồng Sales + Thầu phụ chờ duyệt chi:</span>
+                        <strong className="text-slate-800 text-sm">{summary.payoutProposal.toLocaleString('vi-VN')}đ</strong>
+                      </div>
+                      <div className="border-t border-[#ebdcb9] pt-3 flex justify-end">
+                        <button
+                          onClick={handleCreatePayoutProposal}
+                          disabled={submittingPayout || summary.payoutProposal === 0}
+                          className="bg-[#c49a62] hover:bg-[#b08752] disabled:opacity-50 text-white font-bold px-6 py-2.5 rounded-xl transition text-xs shadow-sm"
+                        >
+                          {submittingPayout ? 'Đang gửi...' : '✓ Xác nhận & Lập Lệnh Chi Tuần'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
-              <button
-                onClick={handleCreatePayoutProposal}
-                disabled={submittingPayout || summary.payoutProposal === 0}
-                className="w-full bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-slate-950 font-bold py-3 rounded-xl transition text-center text-xs shadow-lg shadow-amber-500/10"
-              >
-                {submittingPayout ? 'Đang gửi...' : 'Lập Lệnh Chi Tiền Tuần'}
-              </button>
-            </div>
-
+                <div className="lg:col-span-4">
+                  <div className="bg-[#f4ebd9] border border-[#e2d5c3] rounded-2xl p-6 space-y-4 shadow-sm text-xs text-slate-850">
+                    <h3 className="text-sm font-bold text-slate-900 border-b border-[#e2d5c3] pb-3">💡 Quy trình đối soát</h3>
+                    <p className="text-slate-600 leading-relaxed">
+                      Mọi khoản chi chỉ được thực hiện khi tổ giám sát hiện trường đánh giá chất lượng thi công đạt tiêu chuẩn nghiệm thu và báo cáo hình ảnh lỗi đã được thợ khắc phục.
+                    </p>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
-
-        </div>
-
-      </main>
+        </main>
+      </div>
     </div>
   );
 }

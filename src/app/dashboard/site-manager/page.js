@@ -145,10 +145,10 @@ export default function SiteManagerDashboard() {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
-    ctx.strokeStyle = '#ffffff';
+    ctx.strokeStyle = '#14151b'; // dark stroke
     ctx.lineWidth = 2.5;
     ctx.lineCap = 'round';
-    ctx.fillStyle = '#0f172a'; // slate-900 background
+    ctx.fillStyle = '#faf8f5'; // light cream background
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   };
 
@@ -222,7 +222,6 @@ export default function SiteManagerDashboard() {
         if (rError) throw rError;
 
         // 2. Update project status dynamically
-        // If passed, we set project status to completed. If failed, it remains in production (requires rework).
         const nextProjectStatus = qcStatus === 'passed' ? 'completed' : 'in_production';
         const { error: pError } = await supabase
           .from('projects')
@@ -274,32 +273,32 @@ export default function SiteManagerDashboard() {
   if (!profile) return null;
 
   return (
-    <div className="min-h-screen text-slate-100 flex flex-col items-center">
-      {/* Navbar Header */}
-      <div className="w-full max-w-lg glass-panel p-4 sticky top-0 z-20 flex justify-between items-center shadow-lg">
+    <div className="min-h-screen text-slate-800 flex flex-col items-center bg-[#faf8f5]">
+      {/* Navbar Header matching style */}
+      <div className="w-full max-w-lg bg-white border-b border-[#ebdcb9] p-4 sticky top-0 z-20 flex justify-between items-center shadow-sm">
         <div className="flex items-center space-x-2">
-          <span className="font-bold text-amber-500 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-lg text-sm">Qi</span>
-          <span className="font-bold text-sm text-white">Giám Sát Công Trình {isLive && '🟢'}</span>
+          <span className="font-bold text-[#c49a62] bg-[#c49a62]/10 border border-[#c49a62]/20 px-2 py-0.5 rounded-lg text-sm">Qi</span>
+          <span className="font-bold text-sm text-slate-900">Giám Sát Công Trình {isLive && '🟢'}</span>
         </div>
-        <button onClick={() => router.push('/')} className="text-xs text-slate-400 hover:text-white transition">
+        <button onClick={() => router.push('/')} className="text-xs text-slate-500 hover:text-slate-900 transition font-semibold">
           Đóng
         </button>
       </div>
 
       <div className="w-full max-w-lg p-4 space-y-6">
         {/* User context card */}
-        <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 flex justify-between items-center">
+        <div className="bg-white border border-[#ebdcb9] rounded-2xl p-4 flex justify-between items-center shadow-sm">
           <div>
-            <div className="text-[10px] uppercase font-bold text-slate-400">Giám sát phụ trách</div>
-            <div className="text-sm font-bold text-white mt-1">{profile.name}</div>
+            <div className="text-[10px] uppercase font-bold text-slate-500">Giám sát phụ trách</div>
+            <div className="text-sm font-bold text-slate-900 mt-1">{profile.name}</div>
           </div>
           
           <div className="flex items-center space-x-2">
-            <span className="text-xs text-slate-400">Dự án:</span>
+            <span className="text-xs text-slate-500">Dự án:</span>
             <select
               value={selectedProjectId}
               onChange={(e) => setSelectedProjectId(e.target.value)}
-              className="bg-slate-950 border border-slate-800 text-xs text-amber-500 px-2 py-1 rounded focus:outline-none"
+              className="bg-[#faf8f5] border border-[#ebdcb9] text-xs text-[#c49a62] px-2 py-1 rounded focus:outline-none font-bold"
             >
               {projects.map(p => (
                 <option key={p.id} value={p.id}>{p.project_code} ({p.vinhomes_floor_căn})</option>
@@ -310,21 +309,21 @@ export default function SiteManagerDashboard() {
 
         {/* Success Alert */}
         {success && (
-          <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs p-3.5 rounded-xl leading-relaxed">
+          <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 text-xs p-3.5 rounded-xl leading-relaxed">
             {success}
           </div>
         )}
 
         {/* Digital Checklist Form */}
-        <form onSubmit={handleSubmitQC} className="bg-slate-900/40 border border-slate-900 rounded-2xl p-5 space-y-6">
-          <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Cổng Nghiệm thu QA/QC</h3>
+        <form onSubmit={handleSubmitQC} className="bg-white border border-[#ebdcb9] rounded-2xl p-5 space-y-6 shadow-sm">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800">Cổng Nghiệm thu QA/QC</h3>
             
             {pendingReports.length > 0 && (
               <select
                 value={selectedReportId}
                 onChange={(e) => setSelectedReportId(e.target.value)}
-                className="bg-slate-950 border border-slate-800 rounded px-2 py-1 text-[10px] text-slate-300 focus:outline-none"
+                className="bg-[#faf8f5] border border-[#ebdcb9] rounded px-2 py-1 text-[10px] text-slate-700 focus:outline-none"
               >
                 {pendingReports.map(rep => (
                   <option key={rep.id} value={rep.id}>
@@ -339,7 +338,7 @@ export default function SiteManagerDashboard() {
           {pendingReports.length > 0 && (
             <div className="space-y-2">
               <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-500">Ảnh Nhật ký báo cáo chờ duyệt</label>
-              <div className="relative rounded-xl overflow-hidden border border-slate-800 aspect-video bg-slate-950">
+              <div className="relative rounded-xl overflow-hidden border border-[#ebdcb9] aspect-video bg-[#faf8f5]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={pendingReports.find(r => r.id === selectedReportId)?.image_url || '/images/3ba7aecadbb591ec3ea1c15a853362f5.jpg'}
@@ -354,34 +353,34 @@ export default function SiteManagerDashboard() {
           <div className="space-y-4">
             {/* Category 1: Woodwork */}
             <div>
-              <div className="text-[10px] font-bold uppercase tracking-wider text-amber-500/80 mb-2">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-[#c49a62] mb-2">
                 Hạng mục 1: Đồ gỗ liền tường (Tủ bếp, tủ quần áo, tivi)
               </div>
-              <div className="space-y-2 bg-slate-950/40 p-3 rounded-xl border border-slate-900">
-                <label className="flex items-start space-x-2.5 text-xs text-slate-300 cursor-pointer">
+              <div className="space-y-2 bg-[#faf8f5] p-3 rounded-xl border border-[#ebdcb9]">
+                <label className="flex items-start space-x-2.5 text-xs text-slate-700 cursor-pointer">
                   <input 
                     type="checkbox" 
                     checked={checklist.woodGap}
                     onChange={() => handleCheckToggle('woodGap')}
-                    className="mt-0.5 rounded accent-amber-500" 
+                    className="mt-0.5 rounded accent-[#c49a62]" 
                   />
-                  <span>Độ khít: Khe hở cánh tủ ≤ 1.5mm, không vênh lệch.</span>
+                  <span>Đo khít: Khe hở cánh tủ ≤ 1.5mm, không vênh lệch.</span>
                 </label>
-                <label className="flex items-start space-x-2.5 text-xs text-slate-300 cursor-pointer">
+                <label className="flex items-start space-x-2.5 text-xs text-slate-700 cursor-pointer">
                   <input 
                     type="checkbox"
                     checked={checklist.woodSurface}
                     onChange={() => handleCheckToggle('woodSurface')}
-                    className="mt-0.5 rounded accent-amber-500" 
+                    className="mt-0.5 rounded accent-[#c49a62]" 
                   />
                   <span>Bề mặt: Phủ Melamine/Acrylic An Cường không trầy, dán nẹp khít.</span>
                 </label>
-                <label className="flex items-start space-x-2.5 text-xs text-slate-300 cursor-pointer">
+                <label className="flex items-start space-x-2.5 text-xs text-slate-700 cursor-pointer">
                   <input 
                     type="checkbox"
                     checked={checklist.woodFittings}
                     onChange={() => handleCheckToggle('woodFittings')}
-                    className="mt-0.5 rounded accent-amber-500" 
+                    className="mt-0.5 rounded accent-[#c49a62]" 
                   />
                   <span>Phụ kiện: Bản lề, ray trượt giảm chấn Blum trơn tru, không ồn.</span>
                 </label>
@@ -390,25 +389,25 @@ export default function SiteManagerDashboard() {
 
             {/* Category 2: Paint */}
             <div>
-              <div className="text-[10px] font-bold uppercase tracking-wider text-amber-500/80 mb-2">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-[#c49a62] mb-2">
                 Hạng mục 2: Phần sơn bả & Trần thạch cao
               </div>
-              <div className="space-y-2 bg-slate-950/40 p-3 rounded-xl border border-slate-900">
-                <label className="flex items-start space-x-2.5 text-xs text-slate-300 cursor-pointer">
+              <div className="space-y-2 bg-[#faf8f5] p-3 rounded-xl border border-[#ebdcb9]">
+                <label className="flex items-start space-x-2.5 text-xs text-slate-700 cursor-pointer">
                   <input 
                     type="checkbox"
                     checked={checklist.paintSurface}
                     onChange={() => handleCheckToggle('paintSurface')}
-                    className="mt-0.5 rounded accent-amber-500" 
+                    className="mt-0.5 rounded accent-[#c49a62]" 
                   />
                   <span>Bề mặt trần/tường: Đèn quét phẳng khít, sơn Dulux không loang màu.</span>
                 </label>
-                <label className="flex items-start space-x-2.5 text-xs text-slate-300 cursor-pointer">
+                <label className="flex items-start space-x-2.5 text-xs text-slate-700 cursor-pointer">
                   <input 
                     type="checkbox"
                     checked={checklist.paintAngles}
                     onChange={() => handleCheckToggle('paintAngles')}
-                    className="mt-0.5 rounded accent-amber-500" 
+                    className="mt-0.5 rounded accent-[#c49a62]" 
                   />
                   <span>Góc cạnh: Góc tường, góc thạch cao vuông góc 90 độ, không sứt mẻ.</span>
                 </label>
@@ -417,25 +416,25 @@ export default function SiteManagerDashboard() {
 
             {/* Category 3: Electric */}
             <div>
-              <div className="text-[10px] font-bold uppercase tracking-wider text-amber-500/80 mb-2">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-[#c49a62] mb-2">
                 Hạng mục 3: Hệ thống điện - Đèn chiếu sáng
               </div>
-              <div className="space-y-2 bg-slate-950/40 p-3 rounded-xl border border-slate-900">
-                <label className="flex items-start space-x-2.5 text-xs text-slate-300 cursor-pointer">
+              <div className="space-y-2 bg-[#faf8f5] p-3 rounded-xl border border-[#ebdcb9]">
+                <label className="flex items-start space-x-2.5 text-xs text-slate-700 cursor-pointer">
                   <input 
                     type="checkbox"
                     checked={checklist.electricOutlet}
                     onChange={() => handleCheckToggle('electricOutlet')}
-                    className="mt-0.5 rounded accent-amber-500" 
+                    className="mt-0.5 rounded accent-[#c49a62]" 
                   />
                   <span>Ổ cắm âm tường: Nguồn điện ổn định, đo kiểm đạt chuẩn an toàn.</span>
                 </label>
-                <label className="flex items-start space-x-2.5 text-xs text-slate-300 cursor-pointer">
+                <label className="flex items-start space-x-2.5 text-xs text-slate-700 cursor-pointer">
                   <input 
                     type="checkbox"
                     checked={checklist.electricDevices}
                     onChange={() => handleCheckToggle('electricDevices')}
-                    className="mt-0.5 rounded accent-amber-500" 
+                    className="mt-0.5 rounded accent-[#c49a62]" 
                   />
                   <span>Thiết bị: Đèn led, chùm bật sáng đồng bộ theo phối cảnh AI.</span>
                 </label>
@@ -450,20 +449,20 @@ export default function SiteManagerDashboard() {
               <select
                 value={qcStatus}
                 onChange={(e) => setQcStatus(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-semibold text-slate-200 focus:outline-none"
+                className="w-full bg-[#faf8f5] border border-[#ebdcb9] rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#c49a62]"
               >
                 <option value="passed">🟢 ĐẠT (Passed)</option>
                 <option value="failed">🔴 KHÔNG ĐẠT (Rework)</option>
               </select>
             </div>
             <div>
-              <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Ghi chú QC/Yêu cầu sửa lỗi</label>
+              <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Ghi chú QC / Lỗi sửa</label>
               <input
                 type="text"
-                placeholder="Ghi chú chi tiết vị trí lỗi..."
+                placeholder="Ghi chú vị trí lỗi..."
                 value={qcNotes}
                 onChange={(e) => setQcNotes(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none"
+                className="w-full bg-[#faf8f5] border border-[#ebdcb9] rounded-xl px-3 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#c49a62]"
               />
             </div>
           </div>
@@ -475,12 +474,12 @@ export default function SiteManagerDashboard() {
               <button 
                 type="button" 
                 onClick={clearSignature}
-                className="text-[9px] font-bold text-amber-500 hover:text-amber-400 uppercase"
+                className="text-[9px] font-bold text-[#c49a62] hover:text-[#b08752] uppercase"
               >
                 Xóa ký lại
               </button>
             </div>
-            <div className="border border-slate-800 rounded-xl overflow-hidden shadow-inner">
+            <div className="border border-[#ebdcb9] rounded-xl overflow-hidden shadow-inner">
               <canvas
                 ref={canvasRef}
                 width={450}
@@ -492,7 +491,8 @@ export default function SiteManagerDashboard() {
                 onTouchStart={startDrawing}
                 onTouchEnd={endDrawing}
                 onTouchMove={draw}
-                className="w-full bg-slate-900 cursor-crosshair touch-none"
+                className="w-full cursor-crosshair touch-none"
+                style={{ backgroundColor: '#faf8f5' }}
               ></canvas>
             </div>
           </div>
@@ -500,7 +500,7 @@ export default function SiteManagerDashboard() {
           <button
             type="submit"
             disabled={submitting || (isLive && !selectedReportId)}
-            className="w-full bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-slate-950 font-bold py-3 rounded-xl transition text-center text-xs shadow-lg shadow-amber-500/10"
+            className="w-full bg-[#c49a62] hover:bg-[#b08752] disabled:opacity-50 text-white font-bold py-3 rounded-xl transition text-center text-xs shadow-sm"
           >
             {submitting ? 'Đang gửi quyết định...' : isLive && !selectedReportId ? 'Không có báo cáo nào cần duyệt' : '✓ Xác nhận & Đóng gói Biên Bản QC'}
           </button>
