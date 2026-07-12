@@ -2,18 +2,27 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
+
+// Mock profiles from seed.sql for sandbox fallback
+const SANDBOX_PROFILES = [
+  { id: 'a0000000-0000-0000-0000-000000000004', phone: '0900000004', name: 'Thầu Phụ Hùng Vương', role: 'subcontractor' }
+];
 
 export default function SubcontractorDashboard() {
   const router = useRouter();
   const [profile, setProfile] = useState(null);
+  const [isLive, setIsLive] = useState(false);
   
   // App states
-  const [selectedProject, setSelectedProject] = useState('PRJ-HAUNGHIA-102');
-  const [activeTab, setActiveTab] = useState('materials'); // 'materials' | 'report'
+  const [projects, setProjects] = useState([]);
+  const [selectedProjectId, setSelectedProjectId] = useState('');
+  const [activeTab, setActiveTab] = useState('materials');
   
   // Materials states
-  const [selectedSku, setSelectedSku] = useState('AC-WD-402');
-  const [requestQty, setRequestQty] = useState(5);
+  const [bomItems, setBomItems] = useState([]);
+  const [selectedSku, setSelectedSku] = useState('');
+  const [requestQty, setRequestQty] = useState(1);
   const [overBudget, setOverBudget] = useState(false);
   const [evidenceUrl, setEvidenceUrl] = useState('');
   const [qrToken, setQrToken] = useState('');
@@ -28,9 +37,14 @@ export default function SubcontractorDashboard() {
   const [submittingReport, setSubmittingReport] = useState(false);
   const [reportSuccess, setReportSuccess] = useState('');
 
-  // Sample BOM remaining items
-  const BOM_ITEMS = [
-    { sku: 'AC-WD-402', name: 'Gỗ Melamine An Cường MS 402', remaining: 30, unit: 'Mét tới' },
+  // Fallback static data
+  const MOCK_PROJECTS = [
+    { id: 'p0000000-0000-0000-0000-000000000002', project_code: 'PRJ-HAUNGHIA-102', vinhomes_floor_căn: 'Tầng 08 - Căn 08A1' },
+    { id: 'p0000000-0000-0000-0000-000000000003', project_code: 'PRJ-HAUNGHIA-103', vinhomes_floor_căn: 'Tầng 15 - Căn 1502' }
+  ];
+
+  const MOCK_BOM = [
+    { sku: 'AC-WD-402', item_name: 'Gỗ Melamine An Cường MS 402', remaining: 30, unit: 'Mét tới' },
     { sku: 'BL-DAMP-05', name: 'Ray trượt giảm chấn Blum', remaining: 6, unit: 'Bộ' },
     { sku: 'DL-UX-18', name: 'Sơn nội thất Dulux EasyClean', remaining: 6, unit: 'Thùng' }
   ];
@@ -47,35 +61,179 @@ export default function SubcontractorDashboard() {
       return;
     }
     setProfile(user);
+    checkConnection(user);
   }, [router]);
 
-  // Request material QR
+  const checkConnection = async (user) => {
+    const isConfigured = process.env.NEXT_PUBLIC_SUPABASE_URL && 
+                         !process.env.NEXT_PUBLIC_SUPABASE_URL.includes('your-project-id');
+    setIsLive(isConfigured);
+    
+    if (isConfigured) {
+      await loadProjects(user.id);
+    } else {
+      setProjects(MOCK_PROJECTS);
+      setSelectedProjectId(MOCK_PROJECTS[0].id);
+      loadMockBOM();
+    }
+  };
+
+  // Load projects from live DB
+  const loadProjects = async (userId) => {
+    try {
+      const { data, error } = await supabase
+        .from('projects')
+        .select('id, project_code, vinhomes_floor_căn')
+        .eq('subcontractor_id', userId);
+      
+      if (error) throw error;
+      if (data && data.length > 0) {
+        setProjects(data);
+        setSelectedProjectId(data[0].id);
+      } else {
+        // Fallback if no projects assigned
+        setProjects(MOCK_PROJECTS);
+        setSelectedProjectId(MOCK_PROJECTS[0].id);
+      }
+    } catch (err) {
+      console.error('Error loading projects:', err);
+      setProjects(MOCK_PROJECTS);
+      setSelectedProjectId(MOCK_PROJECTS[0].id);
+    }
+  };
+
+  // Load BOM items for selected project
+  useEffect(() => {
+    if (!selectedProjectId) return;
+    if (isLive) {
+      loadLiveBOM(selectedProjectId);
+    } else {
+      loadMockBOM();
+    }
+  }, [selectedProjectId, isLive]);
+
+  const loadLiveBOM = async (projId) => {
+    try {
+      const { data, error } = await supabase
+        .from('bom_materials')
+        .select('sku, item_name, allocated_quantity, disbursed_quantity, unit')
+        .eq('project_id', projId);
+
+      if (error) throw error;
+      if (data) {
+        const mapped = data.map(item => ({
+          sku: item.sku,
+          item_name: item.item_name,
+          remaining: Math.max(0, item.allocated_quantity - item.disbursed_quantity),
+          unit: item.unit
+        }));
+        setBomItems(mapped);
+        if (mapped.length > 0) setSelectedSku(mapped[0].sku);
+      }
+    } catch (err) {
+      console.error('Error loading BOM:', err);
+      loadMockBOM();
+    }
+  };
+
+  const loadMockBOM = () => {
+    setBomItems(MOCK_BOM);
+    setSelectedSku(MOCK_BOM[0].sku);
+  };
+
+  // Quantity selection change handler
+  const handleQtyChange = (qty, sku) => {
+    const val = Number(qty);
+    setRequestQty(val);
+    const item = bomItems.find(i => i.sku === sku);
+    if (item && val > item.remaining) {
+      setOverBudget(true);
+    } else {
+      setOverBudget(false);
+    }
+  };
+
+  // Request material QR with DB insertion
   const handleRequestMaterial = async (e) => {
     e.preventDefault();
     setQrToken('');
     setQrDetails(null);
     setSubmittingMaterial(true);
 
-    try {
-      const response = await fetch('/api/materials/qr-gen', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          projectCode: selectedProject,
-          sku: selectedSku,
-          quantity: requestQty
-        })
-      });
+    const project = projects.find(p => p.id === selectedProjectId);
+    const projectCode = project ? project.project_code : 'PRJ-MOCK-102';
 
-      const data = await response.json();
-      if (data.success) {
-        setQrToken(data.token);
-        setQrDetails(data.payload);
+    try {
+      if (isLive) {
+        // 1. Create a request in Database
+        const { data: request, error: rError } = await supabase
+          .from('material_requests')
+          .insert([
+            {
+              project_id: selectedProjectId,
+              subcontractor_id: profile.id,
+              sku: selectedSku,
+              requested_quantity: requestQty,
+              is_over_budget: overBudget,
+              evidence_image_url: overBudget ? evidenceUrl : null,
+              status: overBudget ? 'pending_approval' : 'approved'
+            }
+          ])
+          .select()
+          .single();
+
+        if (rError) throw rError;
+
+        // 2. If approved (within budget), call API to generate QR token
+        if (!overBudget) {
+          const response = await fetch('/api/materials/qr-gen', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              projectCode,
+              sku: selectedSku,
+              quantity: requestQty
+            })
+          });
+
+          const data = await response.json();
+          if (data.success) {
+            setQrToken(data.token);
+            setQrDetails(data.payload);
+
+            // Update QR token directly in DB for verification
+            await supabase
+              .from('material_requests')
+              .update({ qr_code_token: data.token })
+              .eq('id', request.id);
+          } else {
+            throw new Error(data.error);
+          }
+        } else {
+          alert('⚠️ Yêu cầu vượt hạn mức BOM đã được gửi lên hệ thống. Đang đợi Chủ tịch phê duyệt tại Admin Dashboard.');
+        }
       } else {
-        alert('Lỗi: ' + data.error);
+        // Fallback Mock API
+        const response = await fetch('/api/materials/qr-gen', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            projectCode,
+            sku: selectedSku,
+            quantity: requestQty
+          })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          setQrToken(data.token);
+          setQrDetails(data.payload);
+        } else {
+          alert('Lỗi: ' + data.error);
+        }
       }
     } catch (err) {
-      alert('Không kết nối được: ' + err.message);
+      alert('Lỗi xử lý yêu cầu vật tư: ' + err.message);
     } finally {
       setSubmittingMaterial(false);
     }
@@ -100,7 +258,7 @@ export default function SubcontractorDashboard() {
         setGpsLoading(false);
       },
       (error) => {
-        // Mock GPS location at Vinhomes Hậu Nghĩa for demo if blocked/offline
+        // Mock coordinates for demo
         setGps({
           lat: '10.879122',
           lng: '106.541240',
@@ -113,7 +271,7 @@ export default function SubcontractorDashboard() {
   };
 
   // Submit Daily Report
-  const handleSubmitReport = (e) => {
+  const handleSubmitReport = async (e) => {
     e.preventDefault();
     if (!gps) {
       alert('Vui lòng quét tọa độ GPS trước khi báo cáo để chống gian lận hiện trường!');
@@ -121,25 +279,46 @@ export default function SubcontractorDashboard() {
     }
     setSubmittingReport(true);
     
-    // Simulate API call to upload to AWS S3 & Save DB Site Reports
-    setTimeout(() => {
-      setReportSuccess('Đã gửi nhật ký tiến độ ngày thành công! Ảnh và toạ độ GPS đã được khóa bảo mật.');
+    try {
+      if (isLive) {
+        // Insert report log to live database
+        const { error } = await supabase
+          .from('site_reports')
+          .insert([
+            {
+              project_id: selectedProjectId,
+              subcontractor_id: profile.id,
+              image_url: 'https://example.com/site_report_progress.jpg', // Mock S3 upload url
+              gps_latitude: Number(gps.lat),
+              gps_longitude: Number(gps.lng),
+              qc_status: 'pending',
+              qc_notes: reportText
+            }
+          ]);
+        if (error) throw error;
+        setReportSuccess('Đã gửi nhật ký tiến độ ngày thành công lên LIVE DB!');
+      } else {
+        setReportSuccess('Đã gửi nhật ký tiến độ ngày thành công (Mô phỏng Sandbox)!');
+      }
       setReportText('');
       setGps(null);
       setImageFile(null);
+    } catch (err) {
+      alert('Lỗi gửi báo cáo: ' + err.message);
+    } finally {
       setSubmittingReport(false);
-    }, 1200);
+    }
   };
 
   if (!profile) return null;
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center">
-      {/* Mobile Web Top Header */}
+      {/* Header */}
       <div className="w-full max-w-md bg-slate-900 border-b border-slate-800 p-4 sticky top-0 z-20 flex justify-between items-center shadow-lg">
         <div className="flex items-center space-x-2">
           <span className="font-bold text-amber-500 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-lg text-sm">Qi</span>
-          <span className="font-bold text-sm text-white">Thợ Thi Công Hiện Trường</span>
+          <span className="font-bold text-sm text-white">Thợ Thi Công Hiện Trường {isLive && '🟢'}</span>
         </div>
         <button onClick={() => router.push('/')} className="text-xs text-slate-400 hover:text-white transition">
           Đóng
@@ -151,7 +330,20 @@ export default function SubcontractorDashboard() {
         <div className="bg-gradient-to-r from-amber-500/10 to-amber-600/[0.03] border border-amber-500/20 rounded-2xl p-4">
           <div className="text-[10px] uppercase font-bold text-amber-500">Đơn vị thi công</div>
           <div className="text-base font-bold text-white mt-1">{profile.name}</div>
-          <div className="text-xs text-slate-400 mt-0.5">Dự án: <strong className="text-slate-200">{selectedProject}</strong></div>
+          
+          {/* Project selector */}
+          <div className="mt-3 flex items-center space-x-2">
+            <span className="text-xs text-slate-400">Chọn căn hộ:</span>
+            <select
+              value={selectedProjectId}
+              onChange={(e) => setSelectedProjectId(e.target.value)}
+              className="bg-slate-950 border border-slate-800 text-xs text-slate-200 px-2 py-1 rounded focus:outline-none focus:border-amber-500"
+            >
+              {projects.map(p => (
+                <option key={p.id} value={p.id}>{p.project_code} ({p.vinhomes_floor_căn})</option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {/* Navigation Tabs */}
@@ -179,19 +371,26 @@ export default function SubcontractorDashboard() {
           <div className="bg-slate-900/40 border border-slate-900 rounded-2xl p-5 space-y-6">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Yêu cầu Cấp vật tư</h3>
             
-            {!qrToken ? (
+            {bomItems.length === 0 ? (
+              <div className="text-center text-xs text-slate-500 py-6">
+                Chưa có định mức vật tư (BOM) được nạp cho căn hộ này.
+              </div>
+            ) : !qrToken ? (
               <form onSubmit={handleRequestMaterial} className="space-y-4">
                 {/* Select SKU */}
                 <div>
                   <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Chọn loại vật tư</label>
                   <select
                     value={selectedSku}
-                    onChange={(e) => setSelectedSku(e.target.value)}
+                    onChange={(e) => {
+                      setSelectedSku(e.target.value);
+                      handleQtyChange(requestQty, e.target.value);
+                    }}
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-slate-300 focus:outline-none"
                   >
-                    {BOM_ITEMS.map(b => (
+                    {bomItems.map(b => (
                       <option key={b.sku} value={b.sku}>
-                        {b.name} (BOM còn: {b.remaining} {b.unit})
+                        {b.item_name} (Còn: {b.remaining} {b.unit})
                       </option>
                     ))}
                   </select>
@@ -203,17 +402,8 @@ export default function SubcontractorDashboard() {
                   <input
                     type="number"
                     value={requestQty}
-                    onChange={(e) => {
-                      const val = Number(e.target.value);
-                      setRequestQty(val);
-                      // Check if over-budget
-                      const currentItem = BOM_ITEMS.find(i => i.sku === selectedSku);
-                      if (currentItem && val > currentItem.remaining) {
-                        setOverBudget(true);
-                      } else {
-                        setOverBudget(false);
-                      }
-                    }}
+                    min="1"
+                    onChange={(e) => handleQtyChange(e.target.value, selectedSku)}
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none"
                   />
                 </div>
@@ -248,7 +438,6 @@ export default function SubcontractorDashboard() {
                 <div className="inline-block bg-white p-4 rounded-2xl shadow-xl">
                   {/* Mock QR Rendering */}
                   <div className="w-48 h-48 bg-slate-100 border-4 border-white flex flex-col justify-center items-center relative">
-                    {/* Visual representation of QR */}
                     <div className="grid grid-cols-6 gap-0.5 w-40 h-40 opacity-80">
                       {Array.from({ length: 36 }).map((_, i) => (
                         <div 
@@ -257,8 +446,8 @@ export default function SubcontractorDashboard() {
                         ></div>
                       ))}
                     </div>
-                    <div className="absolute inset-0 flex items-center justify-center bg-white/90 p-2 font-mono text-[8px] text-slate-700 break-all select-all">
-                      {qrToken.slice(0, 40)}...
+                    <div className="absolute inset-0 flex items-center justify-center bg-white/95 p-2 font-mono text-[8px] text-slate-700 break-all select-all">
+                      {qrToken.slice(0, 48)}...
                     </div>
                   </div>
                 </div>
