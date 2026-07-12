@@ -3,6 +3,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
 
 // Mock catalog items
 const CATALOG_PRODUCTS = [
@@ -115,6 +116,73 @@ function StorefrontContent() {
       setLoanSubmitted(false);
       alert('Hồ sơ của bạn đã được chuyển tiếp sang phòng thẩm định Techcombank! Hạn mức duyệt dự kiến sẽ có trong 24 giờ.');
     }, 1500);
+  };
+
+  const handleCreateContract = async () => {
+    if (cart.length === 0) return;
+    const projectCode = 'PRJ-HN-STORE-' + Date.now().toString().slice(-6);
+
+    // Resolve pre-seeded IDs
+    let subcontractorId = 'a0000000-0000-0000-0000-000000000004';
+    let siteManagerId = 'a0000000-0000-0000-0000-000000000003';
+    let salesId = 'a0000000-0000-0000-0000-000000000005';
+
+    if (profile) {
+      if (profile.role === 'subcontractor') subcontractorId = profile.id;
+      if (profile.role === 'site_manager') siteManagerId = profile.id;
+      if (profile.role === 'sales') salesId = profile.id;
+    }
+
+    try {
+      const isConfigured = process.env.NEXT_PUBLIC_SUPABASE_URL && 
+                           !process.env.NEXT_PUBLIC_SUPABASE_URL.includes('your-project-id');
+
+      if (isConfigured) {
+        // Insert Project
+        const { data: project, error: pError } = await supabase
+          .from('projects')
+          .insert([
+            {
+              project_code: projectCode,
+              vinhomes_block: 'Golden Silk - Storefront',
+              vinhomes_floor_căn: 'Phòng mẫu Showroom Hậu Nghĩa',
+              client_name: 'Khách Hàng Trải Nghiệm',
+              sales_id: salesId,
+              site_manager_id: siteManagerId,
+              subcontractor_id: subcontractorId,
+              total_amount: getSubtotal(),
+              status: 'pending_design'
+            }
+          ])
+          .select()
+          .single();
+
+        if (pError) throw pError;
+
+        // Insert BOM materials
+        const bomInserts = cart.map(item => ({
+          project_id: project.id,
+          sku: item.sku,
+          item_name: item.name,
+          allocated_quantity: quantities[item.sku] || 1,
+          disbursed_quantity: 0,
+          unit: item.unit
+        }));
+
+        const { error: bError } = await supabase
+          .from('bom_materials')
+          .insert(bomInserts);
+
+        if (bError) throw bError;
+
+        alert(`🎉 Đã tạo Hợp đồng thành công trên LIVE DB!\n- Mã dự án: ${projectCode}\n- Định mức vật tư (BOM) đã được khóa.`);
+      } else {
+        alert(`🎉 Đã tạo Hợp đồng thành công (Mô phỏng Sandbox)!\n- Mã dự án: ${projectCode}\n- Trạng thái: pending_design\n- Định mức vật tư (BOM) đã được khóa cứng.\n\n(Vui lòng cấu hình Supabase trong .env.local để ghi vào database thật)`);
+      }
+      setCart([]);
+    } catch (error) {
+      alert('Lỗi tạo hợp đồng: ' + error.message);
+    }
   };
 
   return (
@@ -373,9 +441,7 @@ function StorefrontContent() {
 
               <button
                 disabled={cart.length === 0}
-                onClick={() => {
-                  alert('Lệnh ký hợp đồng dự án giả lập thành công! Dự án PRJ-' + Date.now().toString().slice(-6) + ' đã được khởi tạo và khóa định mức vật tư.');
-                }}
+                onClick={handleCreateContract}
                 className="w-full bg-slate-800 hover:bg-slate-700 disabled:opacity-50 border border-slate-700/60 text-slate-200 font-semibold py-3 rounded-xl transition text-center text-xs"
               >
                 Ký Hợp Đồng Thử Nghiệm (OTP)

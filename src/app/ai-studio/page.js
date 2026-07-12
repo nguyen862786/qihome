@@ -92,24 +92,78 @@ export default function AIStudio() {
   const handleCreateProject = async () => {
     if (!renderResult) return;
     
-    // Check if thợ/admin/customer
-    let userId = 'guest';
-    let subcontractorId = null;
-    let siteManagerId = null;
-    let salesId = null;
+    // Resolve default IDs for pre-seeded users
+    let subcontractorId = 'a0000000-0000-0000-0000-000000000004'; // Default seeded Subcontractor
+    let siteManagerId = 'a0000000-0000-0000-0000-000000000003'; // Default seeded Site Manager
+    let salesId = 'a0000000-0000-0000-0000-000000000005'; // Default seeded Sales
 
     if (profile) {
-      userId = profile.id;
       if (profile.role === 'subcontractor') subcontractorId = profile.id;
       if (profile.role === 'site_manager') siteManagerId = profile.id;
       if (profile.role === 'sales') salesId = profile.id;
     }
 
     try {
-      // For Demo MVP, we construct the request to save mock project
-      // In production, we write directly to public.projects & public.bom_materials tables
-      // We will simulate database creation:
-      alert(`🎉 Đã tạo Hợp đồng thành công!\n- Mã dự án: ${renderResult.projectCode}\n- Trạng thái: pending_design\n- Định mức vật tư (BOM) đã được khóa cứng.`);
+      // Check if Supabase URL has been configured from template
+      const isConfigured = process.env.NEXT_PUBLIC_SUPABASE_URL && 
+                           !process.env.NEXT_PUBLIC_SUPABASE_URL.includes('your-project-id');
+      
+      if (isConfigured) {
+        // Insert Project record
+        const { data: project, error: pError } = await supabase
+          .from('projects')
+          .insert([
+            {
+              project_code: renderResult.projectCode,
+              vinhomes_block: selectedBlock,
+              vinhomes_floor_căn: `Tầng ${apartmentNumber.slice(0, 2)} - Căn ${apartmentNumber}`,
+              client_name: 'Phan Văn Trị', // Default client name
+              sales_id: salesId,
+              site_manager_id: siteManagerId,
+              subcontractor_id: subcontractorId,
+              total_amount: renderResult.totalAmount,
+              status: 'pending_design'
+            }
+          ])
+          .select()
+          .single();
+
+        if (pError) throw pError;
+
+        // Prepare BOM materials mapping
+        const bomInserts = renderResult.boq.map(item => ({
+          project_id: project.id,
+          sku: item.sku,
+          item_name: item.name,
+          allocated_quantity: item.qty,
+          disbursed_quantity: 0,
+          unit: item.unit
+        }));
+
+        const { error: bError } = await supabase
+          .from('bom_materials')
+          .insert(bomInserts);
+
+        if (bError) throw bError;
+
+        // Create initial commission log for Sales Affiliate
+        await supabase
+          .from('commissions')
+          .insert([
+            {
+              project_id: project.id,
+              sales_id: salesId,
+              commission_rate: 0.02, // 2% standard
+              amount: renderResult.totalAmount * 0.02,
+              status: 'pending'
+            }
+          ]);
+
+        alert(`🎉 Đã tạo Hợp đồng thành công trên LIVE DB!\n- Mã dự án: ${renderResult.projectCode}\n- Định mức vật tư (BOM) đã khóa cứng.`);
+      } else {
+        // Local sandbox simulation fallback
+        alert(`🎉 Đã tạo Hợp đồng thành công (Mô phỏng Sandbox)!\n- Mã dự án: ${renderResult.projectCode}\n- Trạng thái: pending_design\n- Định mức vật tư (BOM) đã được khóa cứng.\n\n(Vui lòng cấu hình Supabase trong .env.local để ghi vào database thật)`);
+      }
       router.push('/');
     } catch (error) {
       alert('Lỗi tạo dự án: ' + error.message);
