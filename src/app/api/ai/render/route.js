@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-// Mapping style to reference images copied to public/images
+// Mapping style to reference images copied to public/images for fallback
 const STYLE_IMAGES = {
   indochine: '/images/3ba7aecadbb591ec3ea1c15a853362f5.jpg',
   modern: '/images/cb17520f98fa50444b4d580964fc69e7.jpg',
@@ -40,6 +40,9 @@ const STYLE_BOQ_ITEMS = {
   ]
 };
 
+// SDXL interior design model on Replicate
+const REPLICATE_MODEL_VERSION = 'da77bc59ef60420d73086cf4a5d40d5072c0f787b22f4d6a9a54558e836224ec';
+
 export async function POST(request) {
   try {
     const body = await request.json();
@@ -49,23 +52,90 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Thiếu thông tin căn hộ hoặc tuỳ chọn thiết kế.' }, { status: 400 });
     }
 
-    // In a real production system, this API router would make a post request to:
-    // https://api.replicate.com/v1/predictions
-    // passing the Stable Diffusion + ControlNet configs & payload, and polling for the result.
-    // Here we simulate the 2-second render processing and return a real matched image from the showroom database.
+    const replicateToken = process.env.REPLICATE_API_TOKEN;
+    const isLiveAI = replicateToken && !replicateToken.includes('your-replicate-api-token');
     
-    await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate AI render delay
+    let imageUrl = '';
 
-    const imageUrl = STYLE_IMAGES[style.toLowerCase()] || STYLE_IMAGES.modern;
+    if (isLiveAI) {
+      // 1. Construct prompt based on user settings
+      const prompt = `A highly detailed interior design of a residential apartment living room, ${style} style, ${budget} premium finishes, clean layout, architectural digest photography, photorealistic, 4k resolution, raytracing, soft lighting.`;
+
+      try {
+        // 2. Start prediction on Replicate API
+        const startResponse = await fetch('https://api.replicate.com/v1/predictions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Token ${replicateToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            version: REPLICATE_MODEL_VERSION,
+            input: {
+              prompt,
+              negative_prompt: 'deformed, bad architecture, noise, blurry, low quality, dark',
+              num_inference_steps: 30,
+              guidance_scale: 7.5
+            }
+          })
+        });
+
+        if (!startResponse.ok) {
+          const errData = await startResponse.json();
+          throw new Error(errData.detail || 'Replicate initialization failed.');
+        }
+
+        const prediction = await startResponse.json();
+        const pollUrl = prediction.urls.get;
+
+        // 3. Poll for results (simple timeout loop up to 10 seconds in server handler)
+        let succeeded = false;
+        let finalPrediction = null;
+
+        for (let i = 0; i < 10; i++) {
+          await new Promise(resolve => setTimeout(resolve, 1500)); // wait 1.5s between polls
+          
+          const pollResponse = await fetch(pollUrl, {
+            headers: {
+              'Authorization': `Token ${replicateToken}`
+            }
+          });
+
+          if (pollResponse.ok) {
+            finalPrediction = await pollResponse.json();
+            if (finalPrediction.status === 'succeeded') {
+              succeeded = true;
+              imageUrl = finalPrediction.output[0];
+              break;
+            } else if (finalPrediction.status === 'failed' || finalPrediction.status === 'canceled') {
+              break;
+            }
+          }
+        }
+
+        if (!succeeded) {
+          console.warn('Replicate AI polling timed out or failed. Falling back to showroom archive.');
+          imageUrl = STYLE_IMAGES[style.toLowerCase()] || STYLE_IMAGES.modern;
+        }
+
+      } catch (err) {
+        console.error('Replicate API error:', err.message);
+        imageUrl = STYLE_IMAGES[style.toLowerCase()] || STYLE_IMAGES.modern;
+      }
+    } else {
+      // Offline fallback: Simulate loading delay and return pre-seeded showroom photos
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      imageUrl = STYLE_IMAGES[style.toLowerCase()] || STYLE_IMAGES.modern;
+    }
+
     const boqItems = STYLE_BOQ_ITEMS[style.toLowerCase()] || STYLE_BOQ_ITEMS.modern;
 
-    // Apply budget multipliers (mock adjustments)
+    // Apply budget multipliers
     let budgetMultiplier = 1.0;
     if (budget === 'premium') budgetMultiplier = 1.25;
     if (budget === 'luxury') budgetMultiplier = 1.6;
 
     const adjustedBoq = boqItems.map(item => {
-      // Modify price based on budget selection except standard items like hinges
       const adjustedPrice = item.sku === 'BL-DAMP-05' ? item.price : Math.round(item.price * budgetMultiplier);
       return {
         ...item,
