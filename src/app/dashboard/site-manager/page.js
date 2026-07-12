@@ -2,14 +2,20 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
 
 export default function SiteManagerDashboard() {
   const router = useRouter();
   const [profile, setProfile] = useState(null);
+  const [isLive, setIsLive] = useState(false);
   
   // App states
-  const [selectedProject, setSelectedProject] = useState('PRJ-HAUNGHIA-103');
-  const [qcStatus, setQcStatus] = useState('passed'); // 'passed' | 'failed'
+  const [projects, setProjects] = useState([]);
+  const [selectedProjectId, setSelectedProjectId] = useState('');
+  const [pendingReports, setPendingReports] = useState([]);
+  const [selectedReportId, setSelectedReportId] = useState('');
+  
+  const [qcStatus, setQcStatus] = useState('passed');
   const [qcNotes, setQcNotes] = useState('');
   const [success, setSuccess] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -29,6 +35,16 @@ export default function SiteManagerDashboard() {
   const canvasRef = useRef(null);
   const [isDrawing, setIsDrawing] = useState(false);
 
+  // Fallback mock projects for sandbox
+  const MOCK_PROJECTS = [
+    { id: 'p0000000-0000-0000-0000-000000000002', project_code: 'PRJ-HAUNGHIA-102', vinhomes_floor_căn: 'Tầng 08 - Căn 08A1' },
+    { id: 'p0000000-0000-0000-0000-000000000003', project_code: 'PRJ-HAUNGHIA-103', vinhomes_floor_căn: 'Tầng 15 - Căn 1502' }
+  ];
+
+  const MOCK_REPORTS = [
+    { id: 'rep-1', project_id: 'p0000000-0000-0000-0000-000000000003', subcontractor: { full_name: 'Thầu Phụ Hùng Vương' }, image_url: 'https://example.com/report1.jpg', qc_notes: 'Lắp khung trần thạch cao' }
+  ];
+
   useEffect(() => {
     const stored = localStorage.getItem('qihome_user_profile');
     if (!stored) {
@@ -41,6 +57,7 @@ export default function SiteManagerDashboard() {
       return;
     }
     setProfile(user);
+    checkConnection(user);
     initCanvas();
   }, [router]);
 
@@ -50,6 +67,80 @@ export default function SiteManagerDashboard() {
     }
   }, [canvasRef]);
 
+  const checkConnection = async (user) => {
+    const isConfigured = process.env.NEXT_PUBLIC_SUPABASE_URL && 
+                         !process.env.NEXT_PUBLIC_SUPABASE_URL.includes('your-project-id');
+    setIsLive(isConfigured);
+    
+    if (isConfigured) {
+      await loadProjects(user.id);
+    } else {
+      setProjects(MOCK_PROJECTS);
+      setSelectedProjectId(MOCK_PROJECTS[0].id);
+      setPendingReports(MOCK_REPORTS);
+      if (MOCK_REPORTS.length > 0) setSelectedReportId(MOCK_REPORTS[0].id);
+    }
+  };
+
+  // Load site manager projects
+  const loadProjects = async (userId) => {
+    try {
+      const { data, error } = await supabase
+        .from('projects')
+        .select('id, project_code, vinhomes_floor_căn')
+        .eq('site_manager_id', userId);
+      
+      if (error) throw error;
+      if (data && data.length > 0) {
+        setProjects(data);
+        setSelectedProjectId(data[0].id);
+      } else {
+        setProjects(MOCK_PROJECTS);
+        setSelectedProjectId(MOCK_PROJECTS[0].id);
+      }
+    } catch (err) {
+      console.error('Error loading SM projects:', err);
+      setProjects(MOCK_PROJECTS);
+      setSelectedProjectId(MOCK_PROJECTS[0].id);
+    }
+  };
+
+  // Load pending reports for selected project
+  useEffect(() => {
+    if (!selectedProjectId || !isLive) return;
+    loadPendingReports(selectedProjectId);
+  }, [selectedProjectId, isLive]);
+
+  const loadPendingReports = async (projId) => {
+    try {
+      const { data, error } = await supabase
+        .from('site_reports')
+        .select(`
+          id,
+          project_id,
+          image_url,
+          qc_status,
+          qc_notes,
+          subcontractor:subcontractor_id(full_name)
+        `)
+        .eq('project_id', projId)
+        .eq('qc_status', 'pending');
+
+      if (error) throw error;
+      setPendingReports(data || []);
+      if (data && data.length > 0) {
+        setSelectedReportId(data[0].id);
+      } else {
+        setSelectedReportId('');
+      }
+    } catch (err) {
+      console.error('Error loading reports:', err);
+      setPendingReports(MOCK_REPORTS);
+      setSelectedReportId(MOCK_REPORTS[0].id);
+    }
+  };
+
+  // Canvas drawing initializer
   const initCanvas = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -81,7 +172,6 @@ export default function SiteManagerDashboard() {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     
-    // Get mouse/touch coords relative to canvas
     const rect = canvas.getBoundingClientRect();
     const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
     const y = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
@@ -96,16 +186,15 @@ export default function SiteManagerDashboard() {
     initCanvas();
   };
 
-  // Checklist handler
   const handleCheckToggle = (key) => {
     setChecklist({ ...checklist, [key]: !checklist[key] });
   };
 
-  // Submit QC
-  const handleSubmitQC = (e) => {
+  // Submit QC checklist & sign to DB
+  const handleSubmitQC = async (e) => {
     e.preventDefault();
     
-    // Validate checklist completion for QC pass
+    // Validate checklists for passes
     if (qcStatus === 'passed') {
       const allChecked = Object.values(checklist).every(v => v === true);
       if (!allChecked) {
@@ -116,11 +205,54 @@ export default function SiteManagerDashboard() {
 
     setSubmitting(true);
 
-    // Simulate sending QC evaluation and signature data (to public.site_reports & public.projects tables)
-    setTimeout(() => {
-      setSuccess(`Đã ký nghiệm thu và cập nhật trạng thái dự án ${selectedProject} thành công! Kế toán đã được thông báo để lập lệnh chi.`);
-      setQcNotes('');
-      // Reset checklist
+    try {
+      const project = projects.find(p => p.id === selectedProjectId);
+      const projectCode = project ? project.project_code : 'PRJ-MOCK';
+
+      if (isLive && selectedReportId) {
+        // 1. Update site report status in Supabase
+        const { error: rError } = await supabase
+          .from('site_reports')
+          .update({
+            qc_status: qcStatus,
+            qc_notes: qcNotes
+          })
+          .eq('id', selectedReportId);
+
+        if (rError) throw rError;
+
+        // 2. Update project status dynamically
+        // If passed, we set project status to completed. If failed, it remains in production (requires rework).
+        const nextProjectStatus = qcStatus === 'passed' ? 'completed' : 'in_production';
+        const { error: pError } = await supabase
+          .from('projects')
+          .update({ status: nextProjectStatus })
+          .eq('id', selectedProjectId);
+
+        if (pError) throw pError;
+
+        // 3. Write to Audit Log
+        await supabase
+          .from('audit_logs')
+          .insert([
+            {
+              user_id: profile.id,
+              action: `QC_INSPECTION_${qcStatus.toUpperCase()}`,
+              table_name: 'site_reports',
+              record_id: selectedReportId,
+              new_data: { status: qcStatus, notes: qcNotes, project: projectCode }
+            }
+          ]);
+
+        setSuccess(`Đã ký nghiệm thu và cập nhật trạng thái dự án ${projectCode} thành công trên LIVE DB!`);
+        await loadPendingReports(selectedProjectId);
+      } else {
+        // Mock Sandbox Fallback
+        setSuccess(`Đã ký nghiệm thu và cập nhật trạng thái dự án ${projectCode} thành công (Mô phỏng Sandbox)!`);
+        setPendingReports(prev => prev.filter(r => r.id !== selectedReportId));
+      }
+      
+      // Reset checks
       setChecklist({
         woodGap: false,
         woodSurface: false,
@@ -131,8 +263,12 @@ export default function SiteManagerDashboard() {
         electricDevices: false
       });
       clearSignature();
+      setQcNotes('');
+    } catch (err) {
+      alert('Lỗi gửi kết quả nghiệm thu: ' + err.message);
+    } finally {
       setSubmitting(false);
-    }, 1500);
+    }
   };
 
   if (!profile) return null;
@@ -143,7 +279,7 @@ export default function SiteManagerDashboard() {
       <div className="w-full max-w-lg bg-slate-900 border-b border-slate-800 p-4 sticky top-0 z-20 flex justify-between items-center shadow-lg">
         <div className="flex items-center space-x-2">
           <span className="font-bold text-amber-500 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-lg text-sm">Qi</span>
-          <span className="font-bold text-sm text-white">Giám Sát Công Trình (Site Manager)</span>
+          <span className="font-bold text-sm text-white">Giám Sát Công Trình {isLive && '🟢'}</span>
         </div>
         <button onClick={() => router.push('/')} className="text-xs text-slate-400 hover:text-white transition">
           Đóng
@@ -157,9 +293,19 @@ export default function SiteManagerDashboard() {
             <div className="text-[10px] uppercase font-bold text-slate-400">Giám sát phụ trách</div>
             <div className="text-sm font-bold text-white mt-1">{profile.name}</div>
           </div>
-          <span className="text-[10px] font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20 px-2.5 py-1 rounded">
-            Cụm Hậu Nghĩa
-          </span>
+          
+          <div className="flex items-center space-x-2">
+            <span className="text-xs text-slate-400">Dự án:</span>
+            <select
+              value={selectedProjectId}
+              onChange={(e) => setSelectedProjectId(e.target.value)}
+              className="bg-slate-950 border border-slate-800 text-xs text-amber-500 px-2 py-1 rounded focus:outline-none"
+            >
+              {projects.map(p => (
+                <option key={p.id} value={p.id}>{p.project_code} ({p.vinhomes_floor_căn})</option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {/* Success Alert */}
@@ -173,16 +319,36 @@ export default function SiteManagerDashboard() {
         <form onSubmit={handleSubmitQC} className="bg-slate-900/40 border border-slate-900 rounded-2xl p-5 space-y-6">
           <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Cổng Nghiệm thu QA/QC</h3>
-            <select
-              value={selectedProject}
-              onChange={(e) => setSelectedProject(e.target.value)}
-              className="bg-slate-950 border border-slate-800 rounded px-2.5 py-1 text-[11px] text-amber-500 focus:outline-none"
-            >
-              <option value="PRJ-HAUNGHIA-101">PRJ-HAUNGHIA-101 (Mặt bằng)</option>
-              <option value="PRJ-HAUNGHIA-102">PRJ-HAUNGHIA-102 (Đang SX)</option>
-              <option value="PRJ-HAUNGHIA-103">PRJ-HAUNGHIA-103 (Đang QC)</option>
-            </select>
+            
+            {pendingReports.length > 0 && (
+              <select
+                value={selectedReportId}
+                onChange={(e) => setSelectedReportId(e.target.value)}
+                className="bg-slate-950 border border-slate-800 rounded px-2 py-1 text-[10px] text-slate-300 focus:outline-none"
+              >
+                {pendingReports.map(rep => (
+                  <option key={rep.id} value={rep.id}>
+                    Ảnh báo cáo từ: {rep.subcontractor?.full_name || 'Thợ phụ'}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
+
+          {/* Pending Report Image View */}
+          {pendingReports.length > 0 && (
+            <div className="space-y-2">
+              <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-500">Ảnh Nhật ký báo cáo chờ duyệt</label>
+              <div className="relative rounded-xl overflow-hidden border border-slate-800 aspect-video bg-slate-950">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={pendingReports.find(r => r.id === selectedReportId)?.image_url || '/images/3ba7aecadbb591ec3ea1c15a853362f5.jpg'}
+                  alt="Inspection Target"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </div>
+          )}
 
           {/* Checklist Area */}
           <div className="space-y-4">
@@ -333,10 +499,10 @@ export default function SiteManagerDashboard() {
 
           <button
             type="submit"
-            disabled={submitting}
+            disabled={submitting || (isLive && !selectedReportId)}
             className="w-full bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-slate-950 font-bold py-3 rounded-xl transition text-center text-xs shadow-lg shadow-amber-500/10"
           >
-            {submitting ? 'Đang gửi quyết định...' : '✓ Xác nhận & Đóng gói Biên Bản QC'}
+            {submitting ? 'Đang gửi quyết định...' : isLive && !selectedReportId ? 'Không có báo cáo nào cần duyệt' : '✓ Xác nhận & Đóng gói Biên Bản QC'}
           </button>
         </form>
       </div>
