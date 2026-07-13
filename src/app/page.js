@@ -451,15 +451,20 @@ function StorefrontContent() {
             </div>
           )}
           
-          <h1 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight">
-            Nền Tảng Thiết Kế AI &<br />
+          <h1 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight leading-tight max-w-3xl mx-auto">
+            Kỷ Nguyên Nội Thất Số:<br />
             <span className="text-[#c49a62]">
-              Số Hóa Định Mức Vận Hành Nội Thất
+              Tự Thiết Kế & Số Hóa Không Gian Sống Trong 5 Phút
             </span>
           </h1>
-          <p className="text-slate-700 text-sm max-w-xl mx-auto leading-relaxed font-semibold">
-            Dành riêng cho cư dân Vinhomes Hậu Nghĩa, Vinhomes Hóc Môn và Vinhomes Cần Giờ. Nhận tài trợ hoàn thiện đến 6% giá trị hợp đồng từ gói hợp tác Vingroup.
+          
+          <p className="text-slate-700 text-xs sm:text-sm max-w-2xl mx-auto leading-relaxed font-semibold">
+            Mang sứ mệnh cách mạng hóa ngành nội thất bằng trí tuệ nhân tạo, QiHome trao quyền cho bạn tự trải nghiệm, tự kiến tạo và xuất bản vẽ thi công trực quan, chuẩn xác ngay lập tức.
           </p>
+
+          <div className="max-w-2xl mx-auto bg-[#c49a62]/10 border border-[#ebdcb9] px-4 py-2.5 rounded-2xl text-[11px] text-[#c49a62] font-black leading-relaxed">
+            Chương trình đặc quyền dành riêng cho cư dân Vinhomes Hậu Nghĩa, Hóc Môn và Cần Giờ — Nhận ngay tài trợ hoàn thiện đến 6% giá trị hợp đồng từ gói hợp tác chiến lược Vingroup.
+          </div>
 
           <div className="flex justify-center space-x-4 pt-3">
             <Link href="#catalog" className="bg-white hover:bg-slate-50 border border-[#ebdcb9] text-slate-800 font-bold text-xs px-6 py-3 rounded-xl transition">
