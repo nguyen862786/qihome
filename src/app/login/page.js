@@ -10,7 +10,7 @@ const SANDBOX_PROFILES = [
   { id: 'a0000000-0000-0000-0000-000000000002', phone: '0900000002', name: 'Lê Kế Toán', role: 'accounting', desc: 'Đối soát tài chính & công nợ' },
   { id: 'a0000000-0000-0000-0000-000000000003', phone: '0900000003', name: 'Trần Văn Giám Sát', role: 'site_manager', desc: 'Giám sát hiện trường Hậu Nghĩa' },
   { id: 'a0000000-0000-0000-0000-000000000004', phone: '0900000004', name: 'Thầu Phụ Hùng Vương', role: 'subcontractor', desc: 'Đội thi công đồ gỗ & hoàn thiện' },
-  { id: 'a0000000-0000-0000-0000-000000000005', phone: '0900000005', name: 'Phạm Hoàng Nam', role: 'sales', desc: 'Sales Affiliate Vinhomes' }
+  { id: 'a0000000-0000-0000-0000-000000000005', phone: '0900000005', name: 'Lê Thu Trang', role: 'sales', desc: 'Sales Affiliate Vinhomes' }
 ];
 
 export default function LoginPage() {
@@ -22,10 +22,15 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
+  // Register state
+  const [isRegisterMode, setIsRegisterMode] = useState(false);
+  const [regName, setRegName] = useState('');
+  const [regPhone, setRegPhone] = useState('');
+  const [regApartment, setRegApartment] = useState(''); // Vin apartment code
+
   // Check if already logged in and redirect
   useEffect(() => {
     const checkSession = async () => {
-      // Local check or Supabase session check
       const localProfile = localStorage.getItem('qihome_user_profile');
       if (localProfile) {
         const user = JSON.parse(localProfile);
@@ -57,7 +62,7 @@ export default function LoginPage() {
     }
   };
 
-  // Real OTP flow handler
+  // OTP flow handler
   const handleSendOtp = async (e) => {
     e.preventDefault();
     setError('');
@@ -68,19 +73,11 @@ export default function LoginPage() {
     }
 
     setLoading(true);
-    try {
-      // In production, we'd use Supabase OTP auth:
-      // const { error } = await supabase.auth.signInWithOtp({ phone: phoneNumber });
-      // For MVP Demo, we simulate the OTP sending
-      setTimeout(() => {
-        setIsOtpSent(true);
-        setLoading(false);
-        setSuccess('Mã OTP giả lập (123456) đã được gửi tới số điện thoại!');
-      }, 800);
-    } catch (err) {
-      setError('Gửi mã OTP thất bại: ' + err.message);
+    setTimeout(() => {
+      setIsOtpSent(true);
       setLoading(false);
-    }
+      setSuccess('Mã OTP xác thực (123456) đã được gửi tới số điện thoại của bạn!');
+    }, 800);
   };
 
   const handleVerifyOtp = async (e) => {
@@ -94,22 +91,32 @@ export default function LoginPage() {
 
     setLoading(true);
     try {
-      // In production:
-      // const { data, error } = await supabase.auth.verifyOtp({ phone: phoneNumber, token: otpCode, type: 'sms' });
-      // For MVP, we look up the phone in our pre-seeded profiles:
       const matchedProfile = SANDBOX_PROFILES.find(p => p.phone === phoneNumber);
       
       if (matchedProfile) {
-        localStorage.setItem('qihome_user_profile', JSON.stringify(matchedProfile));
+        // Load additional legal/KYC details from profile if present
+        const savedProfile = localStorage.getItem('qihome_user_profile');
+        const parsedSaved = savedProfile ? JSON.parse(savedProfile) : {};
+        const merged = { ...matchedProfile, ...parsedSaved, role: matchedProfile.role };
+        
+        localStorage.setItem('qihome_user_profile', JSON.stringify(merged));
         setSuccess('Đăng nhập thành công! Đang chuyển hướng...');
         setTimeout(() => {
           redirectUser(matchedProfile.role);
         }, 1000);
       } else {
-        // Create a default customer/sales role if not matched
-        const newCustomer = { id: 'cust-' + Date.now(), phone: phoneNumber, name: 'Khách hàng mới', role: 'sales' };
+        // Fallback or generic resident login
+        const newCustomer = { 
+          id: 'cust-' + Date.now(), 
+          phone: phoneNumber, 
+          name: 'Khách hàng Cư dân', 
+          role: 'sales', 
+          is_vinhomes_resident: true,
+          apartment_code: 'S2.01-1205',
+          credits: 15
+        };
         localStorage.setItem('qihome_user_profile', JSON.stringify(newCustomer));
-        setSuccess('Đăng nhập thành công với tài khoản mới!');
+        setSuccess('Đăng nhập thành công với tài khoản Cư dân Vinhomes!');
         setTimeout(() => {
           router.push('/');
         }, 1000);
@@ -120,137 +127,250 @@ export default function LoginPage() {
     }
   };
 
+  // User registration handler
+  const handleRegister = (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+
+    if (!regPhone || regPhone.length < 9) {
+      setError('Vui lòng nhập số điện thoại đăng ký hợp lệ');
+      return;
+    }
+    if (!regName) {
+      setError('Vui lòng nhập họ và tên');
+      return;
+    }
+
+    setLoading(true);
+    setTimeout(() => {
+      // Cư dân Vin has 15 credits, standard has 3
+      const isVin = !!regApartment.trim();
+      const newProfile = {
+        id: 'cust-' + Date.now(),
+        name: regName,
+        phone: regPhone,
+        role: 'sales', // customer role shares dashboard components
+        is_vinhomes_resident: isVin,
+        apartment_code: regApartment.trim(),
+        credits: isVin ? 15 : 3,
+        kyc_status: 'unverified',
+        is_contract_signed: false
+      };
+
+      localStorage.setItem('qihome_user_profile', JSON.stringify(newProfile));
+      setSuccess(`Đăng ký thành công! Nhận ${isVin ? '15' : '3'} Credit Render AI. Đang chuyển hướng...`);
+      setTimeout(() => {
+        router.push('/');
+      }, 1500);
+    }, 1000);
+  };
+
   // Sandbox login bypass (Developer Mode)
   const handleSandboxLogin = (profile) => {
     setLoading(true);
     setError('');
     setSuccess(`Đăng nhập Sandbox: [${profile.name}] vai trò [${profile.role}]`);
     setTimeout(() => {
-      localStorage.setItem('qihome_user_profile', JSON.stringify(profile));
+      // Merge with stored details to persist local updates
+      const savedProfile = localStorage.getItem('qihome_user_profile');
+      const parsedSaved = savedProfile ? JSON.parse(savedProfile) : {};
+      const merged = { 
+        ...profile, 
+        ...parsedSaved, 
+        role: profile.role,
+        name: profile.name,
+        phone: profile.phone
+      };
+
+      localStorage.setItem('qihome_user_profile', JSON.stringify(merged));
       redirectUser(profile.role);
     }, 1000);
   };
 
   return (
-    <div className="flex-1 min-h-screen text-slate-100 flex flex-col justify-center items-center p-4">
-      {/* Background Glows */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-[100px] pointer-events-none"></div>
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-amber-600/10 rounded-full blur-[100px] pointer-events-none"></div>
+    <div className="flex-1 min-h-screen text-slate-100 flex flex-col justify-center items-center p-4 bg-[#faf8f5]">
+      {/* Background patterns */}
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#c49a62]/5 rounded-full blur-[120px] pointer-events-none"></div>
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#ebdcb9]/20 rounded-full blur-[120px] pointer-events-none"></div>
 
-      <div className="w-full max-w-md glass-panel rounded-2xl p-8 shadow-2xl relative z-10">
-        {/* Logo and Brand */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-500 font-bold text-3xl mb-3 tracking-wider">
+      <div className="w-full max-w-md bg-white border border-[#ebdcb9] rounded-3xl p-8 shadow-2xl relative z-10 text-slate-800">
+        
+        {/* Brand Header */}
+        <div className="text-center mb-6">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[#c49a62]/10 border border-[#ebdcb9] text-[#c49a62] font-bold text-3xl mb-3 tracking-wider">
             Qi
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">QiHome.vn</h1>
-          <p className="text-sm text-slate-400 mt-1">Hệ thống Quản lý Vận hành & Bán hàng Nội thất</p>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">QiHome.vn</h1>
+          <p className="text-xs text-slate-500 mt-1">Cổng đăng nhập dịch vụ & AI Studio nội thất</p>
         </div>
 
-        {/* Messaging */}
         {error && (
-          <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm p-3 rounded-lg mb-6">
+          <div className="bg-red-500/10 border border-red-500/20 text-red-600 text-xs p-3 rounded-xl mb-4">
             {error}
           </div>
         )}
         {success && (
-          <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm p-3 rounded-lg mb-6">
+          <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 text-xs p-3 rounded-xl mb-4">
             {success}
           </div>
         )}
 
-        {/* Real SMS OTP Form */}
-        {!isOtpSent ? (
-          <form onSubmit={handleSendOtp} className="space-y-4">
+        {/* Tab selector */}
+        <div className="flex bg-[#faf8f5] rounded-xl p-1 mb-6 border border-[#ebdcb9]">
+          <button
+            type="button"
+            onClick={() => { setIsRegisterMode(false); setIsOtpSent(false); }}
+            className={`flex-1 text-center py-2 text-xs font-bold rounded-lg transition ${
+              !isRegisterMode ? 'bg-[#c49a62] text-white' : 'text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            Đăng Nhập
+          </button>
+          <button
+            type="button"
+            onClick={() => setIsRegisterMode(true)}
+            className={`flex-1 text-center py-2 text-xs font-bold rounded-lg transition ${
+              isRegisterMode ? 'bg-[#c49a62] text-white' : 'text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            Đăng Ký Thành Viên
+          </button>
+        </div>
+
+        {/* Form rendering */}
+        {isRegisterMode ? (
+          /* REGISTRATION FORM */
+          <form onSubmit={handleRegister} className="space-y-4">
             <div>
-              <label htmlFor="phone" className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
-                Số điện thoại Đăng nhập
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">
+                Họ và tên
               </label>
               <input
-                id="phone"
-                type="tel"
-                placeholder="Ví dụ: 0901234567"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                disabled={loading}
-                className="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-4 py-3 text-slate-200 placeholder-slate-600 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition"
+                type="text"
+                required
+                placeholder="Ví dụ: Lê Thu Trang"
+                value={regName}
+                onChange={(e) => setRegName(e.target.value)}
+                className="w-full bg-[#faf8f5] border border-[#ebdcb9] rounded-xl px-4 py-2.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#c49a62]"
               />
             </div>
+
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">
+                Số điện thoại nhận OTP
+              </label>
+              <input
+                type="tel"
+                required
+                placeholder="Ví dụ: 0901234567"
+                value={regPhone}
+                onChange={(e) => setRegPhone(e.target.value)}
+                className="w-full bg-[#faf8f5] border border-[#ebdcb9] rounded-xl px-4 py-2.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#c49a62]"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1.5 flex justify-between">
+                <span>Mã căn hộ Vinhomes (Nếu có)</span>
+                <span className="text-emerald-600 font-extrabold normal-case">Nhận 15 lượt AI</span>
+              </label>
+              <input
+                type="text"
+                placeholder="Ví dụ: S2.01-1205 (Để nhận đặc quyền)"
+                value={regApartment}
+                onChange={(e) => setRegApartment(e.target.value)}
+                className="w-full bg-[#faf8f5] border border-[#ebdcb9] rounded-xl px-4 py-2.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#c49a62]"
+              />
+              <p className="text-[9px] text-slate-500 mt-1">
+                * Khách hàng không điền mã căn hộ sẽ đăng ký dưới vai trò thành viên thường (Nhận 3 lượt AI).
+              </p>
+            </div>
+
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-semibold py-3 px-4 rounded-xl transition shadow-lg shadow-amber-500/20 disabled:opacity-50"
+              className="w-full bg-[#c49a62] hover:bg-[#b08752] text-white font-bold py-3 rounded-xl transition shadow-lg disabled:opacity-50 text-xs uppercase tracking-wider mt-2"
             >
-              {loading ? 'Đang gửi...' : 'Nhận mã xác thực OTP'}
+              {loading ? 'Đang khởi tạo...' : 'Đăng Ký & Nhận Đặc Quyền'}
             </button>
           </form>
         ) : (
-          <form onSubmit={handleVerifyOtp} className="space-y-4">
-            <div>
-              <label htmlFor="otp" className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
-                Nhập mã xác thực OTP (Nhập: 123456)
-              </label>
-              <input
-                id="otp"
-                type="text"
-                maxLength="6"
-                placeholder="123456"
-                value={otpCode}
-                onChange={(e) => setOtpCode(e.target.value)}
-                disabled={loading}
-                className="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-4 py-3 text-center tracking-[1em] text-lg font-bold text-amber-500 placeholder-slate-600 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition"
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-semibold py-3 px-4 rounded-xl transition shadow-lg shadow-amber-500/20 disabled:opacity-50"
-            >
-              {loading ? 'Đang đăng nhập...' : 'Xác nhận Đăng nhập'}
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsOtpSent(false)}
-              className="w-full text-center text-xs text-slate-500 hover:text-slate-300 py-1"
-            >
-              Quay lại nhập số điện thoại
-            </button>
-          </form>
+          /* LOGIN FORM */
+          <>
+            {!isOtpSent ? (
+              <form onSubmit={handleSendOtp} className="space-y-4">
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">
+                    Số điện thoại đã đăng ký
+                  </label>
+                  <input
+                    type="tel"
+                    required
+                    placeholder="Ví dụ: 0901234567"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    className="w-full bg-[#faf8f5] border border-[#ebdcb9] rounded-xl px-4 py-3 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#c49a62]"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-[#c49a62] hover:bg-[#b08752] text-white font-bold py-3 rounded-xl transition shadow-lg disabled:opacity-50 text-xs"
+                >
+                  {loading ? 'Đang gửi...' : 'Nhận mã OTP xác thực'}
+                </button>
+              </form>
+            ) : (
+              <form onSubmit={handleVerifyOtp} className="space-y-4">
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">
+                    Mã xác thực OTP gửi về SMS (Nhập: 123456)
+                  </label>
+                  <input
+                    type="text"
+                    maxLength="6"
+                    placeholder="123456"
+                    value={otpCode}
+                    onChange={(e) => setOtpCode(e.target.value)}
+                    className="w-full bg-[#faf8f5] border border-[#ebdcb9] rounded-xl px-4 py-3 text-center tracking-[1em] text-lg font-bold text-[#c49a62] placeholder-slate-300 focus:outline-none focus:border-[#c49a62]"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-[#c49a62] hover:bg-[#b08752] text-white font-bold py-3 rounded-xl transition shadow-lg disabled:opacity-50 text-xs"
+                >
+                  {loading ? 'Đang đăng nhập...' : 'Xác nhận Đăng nhập'}
+                </button>
+              </form>
+            )}
+          </>
         )}
 
-        {/* Sandbox Developer Panel */}
-        <div className="mt-8 pt-8 border-t border-slate-800/80">
+        {/* Sandbox Dev Panel */}
+        <div className="mt-6 pt-6 border-t border-slate-200">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-semibold uppercase tracking-wider text-amber-500/80">
-              Sandbox Login (Bỏ qua OTP thợ/Kế toán)
-            </span>
-            <span className="px-2 py-0.5 text-[10px] font-medium bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded">
-              Dành cho Demo
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+              Sandbox Bypass (Mô phỏng Thợ/Kế toán)
             </span>
           </div>
 
-          <div className="grid grid-cols-1 gap-2.5">
-            {SANDBOX_PROFILES.map((profile) => (
+          <div className="grid grid-cols-2 gap-2 text-[10px]">
+            {SANDBOX_PROFILES.map((p) => (
               <button
-                key={profile.id}
+                key={p.id}
                 type="button"
-                onClick={() => handleSandboxLogin(profile)}
-                disabled={loading}
-                className="w-full text-left bg-slate-950/50 hover:bg-slate-800/40 border border-slate-800/60 hover:border-amber-500/30 rounded-xl p-3 flex items-center justify-between group transition"
+                onClick={() => handleSandboxLogin(p)}
+                className="text-left bg-[#faf8f5] hover:bg-slate-100 border border-[#ebdcb9] hover:border-[#c49a62]/40 rounded-xl p-2.5 transition flex flex-col justify-between"
               >
-                <div>
-                  <div className="text-sm font-semibold text-slate-200 group-hover:text-amber-400 transition">
-                    {profile.name}
-                  </div>
-                  <div className="text-[11px] text-slate-500 mt-0.5">{profile.desc}</div>
-                </div>
-                <div className="text-[10px] font-semibold tracking-wide uppercase px-2 py-1 rounded bg-slate-900 border border-slate-800 text-slate-400 group-hover:text-amber-500 group-hover:border-amber-500/20 transition">
-                  {profile.role}
-                </div>
+                <span className="font-bold text-slate-800">{p.name}</span>
+                <span className="text-[8px] font-semibold text-[#c49a62] uppercase tracking-wider mt-1">{p.role}</span>
               </button>
             ))}
           </div>
         </div>
+
       </div>
     </div>
   );

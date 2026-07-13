@@ -16,7 +16,7 @@ const FALLBACK_PRODUCTS = [
 ];
 
 const SALES_AGENTS = {
-  'SALE-NAM86': 'Phạm Hoàng Nam',
+  'SALE-NAM86': 'Lê Thu Trang',
   'SALE-LINH90': 'Trần Hoài Linh',
   'SALE-QUANG86': 'Nguyễn Duy Quang'
 };
@@ -44,6 +44,9 @@ function StorefrontContent() {
   const [showLoanModal, setShowLoanModal] = useState(false);
   const [loanForm, setLoanForm] = useState({ fullName: '', phone: '', income: '20-50', tenure: '3' });
   const [loanSubmitted, setLoanSubmitted] = useState(false);
+
+  // Guest warning registration modal
+  const [showRegModal, setShowRegModal] = useState(false);
 
   // Initialize
   useEffect(() => {
@@ -97,7 +100,6 @@ function StorefrontContent() {
           }));
           setProducts(mapped);
           
-          // Quantities setup
           const initialQuants = {};
           mapped.forEach(p => {
             initialQuants[p.sku] = p.sku === 'AC-WD-402' ? 10 : p.sku === 'BL-DAMP-05' ? 15 : 1;
@@ -118,8 +120,12 @@ function StorefrontContent() {
     setQuantities(initialQuants);
   };
 
-  // Cart operations
+  // Cart operations (Locked for Guests)
   const toggleCartItem = (product) => {
+    if (!profile) {
+      setShowRegModal(true);
+      return;
+    }
     if (cart.some(item => item.sku === product.sku)) {
       setCart(cart.filter(item => item.sku !== product.sku));
     } else {
@@ -128,6 +134,7 @@ function StorefrontContent() {
   };
 
   const updateQuantity = (sku, val) => {
+    if (!profile) return;
     const num = Math.max(1, Number(val));
     setQuantities({ ...quantities, [sku]: num });
   };
@@ -140,8 +147,10 @@ function StorefrontContent() {
     }, 0);
   };
 
+  // Vin 6% subsidy only visible for members
   const getVinSubsidy = () => {
-    return houseValue * 0.06;
+    if (!profile) return 0;
+    return getSubtotal() * 0.06;
   };
 
   const getFinalAmount = () => {
@@ -168,19 +177,16 @@ function StorefrontContent() {
   };
 
   const handleCreateContract = async () => {
+    if (!profile) {
+      setShowRegModal(true);
+      return;
+    }
     if (cart.length === 0) return;
     const projectCode = 'PRJ-HN-STORE-' + Date.now().toString().slice(-6);
 
-    // Resolve pre-seeded IDs
     let subcontractorId = 'a0000000-0000-0000-0000-000000000004';
     let siteManagerId = 'a0000000-0000-0000-0000-000000000003';
     let salesId = 'a0000000-0000-0000-0000-000000000005';
-
-    if (profile) {
-      if (profile.role === 'subcontractor') subcontractorId = profile.id;
-      if (profile.role === 'site_manager') siteManagerId = profile.id;
-      if (profile.role === 'sales') salesId = profile.id;
-    }
 
     try {
       if (isLive) {
@@ -191,8 +197,8 @@ function StorefrontContent() {
             {
               project_code: projectCode,
               vinhomes_block: 'Golden Silk - Storefront',
-              vinhomes_floor_căn: 'Phòng mẫu Showroom Hậu Nghĩa',
-              client_name: 'Khách Hàng Trải Nghiệm',
+              vinhomes_floor_căn: profile.apartment_code || 'Phòng mẫu Showroom Hậu Nghĩa',
+              client_name: profile.name,
               sales_id: salesId,
               site_manager_id: siteManagerId,
               subcontractor_id: subcontractorId,
@@ -221,9 +227,40 @@ function StorefrontContent() {
 
         if (bError) throw bError;
 
+        // Insert split 1% + 1% commissions for sales
+        await supabase
+          .from('commissions')
+          .insert([
+            {
+              project_id: project.id,
+              sales_id: salesId,
+              commission_rate: 0.01,
+              stage: 1,
+              amount: getSubtotal() * 0.01,
+              status: 'pending'
+            },
+            {
+              project_id: project.id,
+              sales_id: salesId,
+              commission_rate: 0.01,
+              stage: 2,
+              amount: getSubtotal() * 0.01,
+              status: 'pending'
+            }
+          ]);
+
         alert(`🎉 Đã tạo Hợp đồng thành công trên LIVE DB!\n- Mã dự án: ${projectCode}\n- Định mức vật tư (BOM) đã được khóa.`);
       } else {
-        alert(`🎉 Đã tạo Hợp đồng thành công (Mô phỏng Sandbox)!\n- Mã dự án: ${projectCode}\n- Trạng thái: pending_design\n- Định mức vật tư (BOM) đã được khóa cứng.\n\n(Vui lòng cấu hình Supabase trong .env.local để ghi vào database thật)`);
+        // Mock commission updates in local storage
+        let storedComms = localStorage.getItem('qihome_shared_commissions');
+        const comms = storedComms ? JSON.parse(storedComms) : [];
+        const newComms = [
+          { id: `COM-${Date.now()}A`, projectCode, clientName: profile.name, gross: getSubtotal() * 0.01, stage: 1, title: 'Hoa hồng đợt 1 (Khách thanh toán đợt 1)', status: 'pending', date: '---', expectedDate: '' },
+          { id: `COM-${Date.now()}B`, projectCode, clientName: profile.name, gross: getSubtotal() * 0.01, stage: 2, title: 'Hoa hồng đợt 2 (Bàn giao căn hộ)', status: 'pending', date: '---', expectedDate: '' }
+        ];
+        localStorage.setItem('qihome_shared_commissions', JSON.stringify([...newComms, ...comms]));
+
+        alert(`🎉 Đã tạo Hợp đồng thành công (Mô phỏng Sandbox)!\n- Mã dự án: ${projectCode}\n- Trạng thái: pending_design\n- Định mức vật tư (BOM) đã được khóa cứng.\n- Ghi nhận hoa hồng đợt 1 (1%) & đợt 2 (1%) vào lịch sử giải ngân.`);
       }
       setCart([]);
     } catch (error) {
@@ -239,25 +276,24 @@ function StorefrontContent() {
     return matchesSearch && matchesBrand;
   });
 
-  // Extract all available brands
   const brandsList = ['All', ...Array.from(new Set(products.map(p => p.brand)))];
 
   return (
-    <div className="flex-1 text-slate-100 flex flex-col min-h-screen">
+    <div className="flex-1 flex flex-col min-h-screen bg-[#faf8f5] text-slate-800">
       {/* Navigation */}
-      <nav className="border-b border-slate-900 bg-slate-950/30 backdrop-blur sticky top-0 z-30">
+      <nav className="border-b border-[#ebdcb9] bg-white sticky top-0 z-30 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center space-x-3">
-              <span className="font-bold text-3xl tracking-wider text-amber-500 bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-xl">Qi</span>
-              <span className="font-bold text-xl text-white tracking-tight">QiHome.vn</span>
+              <span className="font-bold text-3xl tracking-wider text-[#c49a62] bg-[#c49a62]/10 border border-[#ebdcb9] px-3 py-1 rounded-xl">Qi</span>
+              <span className="font-bold text-xl text-slate-900 tracking-tight">QiHome.vn</span>
             </div>
 
-            <div className="hidden md:flex space-x-8 text-sm">
-              <Link href="#catalog" className="text-slate-300 hover:text-white transition">Showroom Vật Tư</Link>
-              <Link href="/ai-studio" className="text-slate-300 hover:text-white transition flex items-center space-x-1">
+            <div className="hidden md:flex space-x-8 text-xs font-bold items-center">
+              <Link href="#catalog" className="text-slate-650 hover:text-[#c49a62] transition">Showroom Vật Tư</Link>
+              <Link href="/ai-studio" className="text-slate-650 hover:text-[#c49a62] transition flex items-center space-x-1">
                 <span>🪄 AI Studio</span>
-                <span className="bg-amber-500/10 text-amber-400 text-[9px] px-1.5 py-0.5 rounded border border-amber-500/20 font-bold uppercase">Mới</span>
+                <span className="bg-[#c49a62]/10 text-[#c49a62] text-[9px] px-1.5 py-0.5 rounded border border-[#ebdcb9] font-bold uppercase">Mới</span>
               </Link>
               {profile && (
                 <Link href={
@@ -266,8 +302,8 @@ function StorefrontContent() {
                   profile.role === 'site_manager' ? '/dashboard/site-manager' :
                   profile.role === 'subcontractor' ? '/dashboard/subcontractor' :
                   '/dashboard/sales'
-                } className="text-amber-500 font-semibold hover:underline">
-                  Vào Dashboard
+                } className="text-[#c49a62] font-extrabold hover:underline">
+                  Vào Dashboard ({profile.role.toUpperCase()})
                 </Link>
               )}
             </div>
@@ -275,16 +311,16 @@ function StorefrontContent() {
             <div className="flex items-center space-x-4">
               {profile ? (
                 <div className="flex items-center space-x-3">
-                  <span className="text-xs text-slate-400 font-semibold uppercase bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl">
-                    {profile.name}
+                  <span className="text-xs text-slate-600 font-bold uppercase bg-[#faf8f5] border border-[#ebdcb9] px-3 py-1.5 rounded-xl">
+                    {profile.name} {profile.is_vinhomes_resident && '🏡'}
                   </span>
-                  <button onClick={handleLogout} className="text-xs text-red-400 hover:underline transition">
+                  <button onClick={handleLogout} className="text-xs text-red-500 font-bold hover:underline transition">
                     Đăng xuất
                   </button>
                 </div>
               ) : (
-                <Link href="/login" className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs px-4 py-2 rounded-xl transition shadow-lg shadow-amber-500/10">
-                  Đăng Nhập OTP
+                <Link href="/login" className="bg-[#c49a62] hover:bg-[#b08752] text-white font-bold text-xs px-4 py-2 rounded-xl transition shadow-lg shadow-[#c49a62]/10">
+                  Đăng Nhập / Đăng Ký
                 </Link>
               )}
             </div>
@@ -293,63 +329,111 @@ function StorefrontContent() {
       </nav>
 
       {/* Hero Banner */}
-      <header className="relative bg-slate-900/20 py-20 border-b border-slate-900 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-amber-500/5 via-transparent to-transparent opacity-60"></div>
-        <div className="max-w-4xl mx-auto text-center px-4 space-y-6 relative z-10">
+      <header className="relative bg-[#f5eeda] py-16 border-b border-[#ebdcb9] overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#c49a62]/5 via-transparent to-transparent opacity-65"></div>
+        <div className="max-w-4xl mx-auto text-center px-4 space-y-5 relative z-10">
+          
           {affiliate && (
-            <div className="inline-block bg-amber-500/10 border border-amber-500/25 rounded-2xl px-4 py-1.5 text-xs text-amber-400 font-semibold animate-pulse">
-              🤝 Chuyên viên tư vấn hỗ trợ: {affiliate.name} ({affiliate.code})
+            <div className="inline-block bg-[#c49a62]/15 border border-[#ebdcb9] rounded-2xl px-4 py-1.5 text-xs text-[#c49a62] font-semibold animate-pulse">
+              🤝 Chuyên viên tư vấn hỗ trợ: {affiliate.name}
             </div>
           )}
           
-          <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
+          <h1 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight">
             Nền Tảng Thiết Kế AI &<br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-600">
+            <span className="text-[#c49a62]">
               Số Hóa Định Mức Vận Hành Nội Thất
             </span>
           </h1>
-          <p className="text-slate-400 text-sm max-w-xl mx-auto leading-relaxed">
+          <p className="text-slate-600 text-sm max-w-xl mx-auto leading-relaxed">
             Dành riêng cho cư dân Vinhomes Hậu Nghĩa, Vinhomes Hóc Môn và Vinhomes Cần Giờ. Nhận tài trợ hoàn thiện đến 6% giá trị hợp đồng từ gói hợp tác Vingroup.
           </p>
 
-          <div className="flex justify-center space-x-4 pt-4">
-            <Link href="#catalog" className="bg-slate-900 hover:bg-slate-800 border border-slate-800 text-white font-bold text-xs px-6 py-3 rounded-xl transition">
+          <div className="flex justify-center space-x-4 pt-3">
+            <Link href="#catalog" className="bg-white hover:bg-slate-50 border border-[#ebdcb9] text-slate-800 font-bold text-xs px-6 py-3 rounded-xl transition">
               Khám Phá Vật Tư
             </Link>
-            <Link href="/ai-studio" className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs px-6 py-3 rounded-xl transition shadow-lg shadow-amber-500/10">
+            <Link href="/ai-studio" className="bg-[#c49a62] hover:bg-[#b08752] text-white font-bold text-xs px-6 py-3 rounded-xl transition shadow-lg shadow-[#c49a62]/10">
               🪄 Tự Thiết Kế Với AI
             </Link>
           </div>
         </div>
       </header>
 
+      {/* Hạng mục 2A: 3 Trục Sản Phẩm Cột Trụ (Product Pillars) */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12">
+        <h2 className="text-center text-sm font-extrabold uppercase tracking-wider text-slate-400 mb-6">Trục Sản Phẩm Cốt Trụ QiHome</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          
+          {/* Pillar 1 */}
+          <div className="bg-white border border-[#ebdcb9] rounded-2xl p-6 shadow-sm space-y-3 flex flex-col justify-between">
+            <div>
+              <div className="text-3xl">📦</div>
+              <h3 className="text-sm font-bold text-slate-900 mt-2">Combo Nội Thất Hoàn Thiện</h3>
+              <p className="text-xs text-slate-550 leading-relaxed">
+                Các gói combo đồng bộ thiết kế chuẩn mực theo mặt bằng bàn giao Vinhomes Hậu Nghĩa. Tối ưu chi phí, hoàn thiện nhanh chóng.
+              </p>
+            </div>
+            <Link href="/ai-studio" className="text-xs font-black text-[#c49a62] hover:underline flex items-center space-x-1.5 pt-2">
+              <span>Trải nghiệm AI ngay</span> <span>➔</span>
+            </Link>
+          </div>
+
+          {/* Pillar 2 */}
+          <div className="bg-white border border-[#ebdcb9] rounded-2xl p-6 shadow-sm space-y-3 flex flex-col justify-between">
+            <div>
+              <div className="text-3xl">🏰</div>
+              <h3 className="text-sm font-bold text-slate-900 mt-2">May Đo Biệt Thự & Shophouse</h3>
+              <p className="text-xs text-slate-550 leading-relaxed">
+                Thiết kế thi công may đo trọn gói cá nhân hoá thẩm mỹ cho biệt thự cao cấp. Bóc tách BOQ chi tiết, kiểm soát tiến độ trên ứng dụng.
+              </p>
+            </div>
+            <Link href="/ai-studio" className="text-xs font-black text-[#c49a62] hover:underline flex items-center space-x-1.5 pt-2">
+              <span>Trải nghiệm AI ngay</span> <span>➔</span>
+            </Link>
+          </div>
+
+          {/* Pillar 3 */}
+          <div className="bg-white border border-[#ebdcb9] rounded-2xl p-6 shadow-sm space-y-3 flex flex-col justify-between">
+            <div>
+              <div className="text-3xl">🛋️</div>
+              <h3 className="text-sm font-bold text-slate-900 mt-2">Cung Ứng Đồ Rời Cao Cấp</h3>
+              <p className="text-xs text-slate-550 leading-relaxed">
+                Showroom đồ gỗ nội thất rời cao cấp nhập khẩu và gia công tại xưởng chuẩn An Cường Pro. Bản lề Blum bảo hành trọn đời.
+              </p>
+            </div>
+            <Link href="/ai-studio" className="text-xs font-black text-[#c49a62] hover:underline flex items-center space-x-1.5 pt-2">
+              <span>Trải nghiệm AI ngay</span> <span>➔</span>
+            </Link>
+          </div>
+
+        </div>
+      </section>
+
       {/* Catalog & Smart Cart Showcase */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 flex-1 grid grid-cols-1 lg:grid-cols-3 gap-12" id="catalog">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex-1 grid grid-cols-1 lg:grid-cols-3 gap-12" id="catalog">
         
         {/* Products Grid */}
-        <div className="lg:col-span-2 space-y-8">
-          
-          {/* Header & Filter Controls */}
+        <div className="lg:col-span-2 space-y-6">
           <div className="space-y-4">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
-                <h2 className="text-xl font-bold text-white tracking-tight">Danh mục Vật tư & Thiết bị Đạt chuẩn {isLive && '🟢'}</h2>
-                <p className="text-xs text-slate-500 mt-1">Các sản phẩm phân phối chính hãng trưng bày tại Showroom Hậu Nghĩa 1000m²</p>
+                <h2 className="text-lg font-bold text-slate-900 tracking-tight">Danh mục Vật tư & Thiết bị Đạt chuẩn</h2>
+                <p className="text-xs text-slate-550 mt-0.5">Các sản phẩm phân phối chính hãng trưng bày tại Showroom Hậu Nghĩa 1000m²</p>
               </div>
-              <span className="text-xs text-slate-400 font-medium">Hiển thị: {filteredProducts.length} sản phẩm</span>
+              <span className="text-xs text-slate-500 font-bold">Hiển thị: {filteredProducts.length} sản phẩm</span>
             </div>
 
-            {/* Search Input and Brand filters */}
+            {/* Search and Brand Filters */}
             <div className="flex flex-col md:flex-row gap-3 pt-2">
               <input
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Tìm kiếm vật tư theo tên hoặc mã SKU..."
-                className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-200 focus:outline-none placeholder-slate-600 flex-1"
+                className="bg-white border border-[#ebdcb9] rounded-xl px-4 py-2 text-xs text-slate-800 focus:outline-none placeholder-slate-400 flex-1"
               />
               
-              {/* Brand select pills */}
               <div className="flex space-x-1.5 overflow-x-auto py-1">
                 {brandsList.map(brand => (
                   <button
@@ -357,8 +441,8 @@ function StorefrontContent() {
                     onClick={() => setSelectedBrand(brand)}
                     className={`px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap ${
                       selectedBrand === brand 
-                        ? 'bg-amber-500 text-slate-950' 
-                        : 'bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-400'
+                        ? 'bg-[#c49a62] text-white' 
+                        : 'bg-white border border-[#ebdcb9] hover:border-[#c49a62]/40 text-slate-500'
                     }`}
                   >
                     {brand}
@@ -374,35 +458,35 @@ function StorefrontContent() {
               return (
                 <div 
                   key={prod.sku} 
-                  className={`glass-panel rounded-2xl p-6 transition duration-300 flex flex-col justify-between ${
-                    inCart ? 'border-amber-500/80 bg-amber-500/[0.03] gold-glow' : 'hover:border-amber-500/30'
+                  className={`bg-white border border-[#ebdcb9] rounded-2xl p-5 transition duration-300 flex flex-col justify-between hover:shadow-md ${
+                    inCart ? 'border-[#c49a62] bg-[#c49a62]/[0.02]' : ''
                   }`}
                 >
                   <div>
                     <div className="flex items-center justify-between">
                       <div className="text-3xl">{prod.image}</div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-slate-800 text-slate-400 border border-slate-700/80 rounded">
+                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-[#faf8f5] text-slate-500 border border-[#ebdcb9] rounded">
                         {prod.brand}
                       </span>
                     </div>
 
-                    <h3 className="text-sm font-bold text-white mt-4">{prod.name}</h3>
-                    <p className="text-xs text-slate-400 mt-1 leading-relaxed">{prod.desc}</p>
-                    <div className="text-[10px] text-slate-500 mt-2 font-semibold">SKU: {prod.sku}</div>
+                    <h3 className="text-xs font-bold text-slate-900 mt-4">{prod.name}</h3>
+                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">{prod.desc}</p>
+                    <div className="text-[9px] text-slate-400 mt-2 font-mono">SKU: {prod.sku}</div>
                   </div>
 
-                  <div className="mt-6 flex items-center justify-between pt-4 border-t border-slate-900">
+                  <div className="mt-6 flex items-center justify-between pt-4 border-t border-slate-100">
                     <div>
-                      <div className="text-base font-black text-amber-500">
+                      <div className="text-sm font-black text-[#c49a62]">
                         {prod.price.toLocaleString('vi-VN')}đ
                       </div>
-                      <div className="text-[10px] text-slate-500">Đơn vị: {prod.unit}</div>
+                      <span className="text-[9px] text-slate-400">Đơn vị: {prod.unit}</span>
                     </div>
 
                     <button
                       onClick={() => toggleCartItem(prod)}
-                      className={`text-xs font-bold px-4 py-2.5 rounded-xl transition ${
-                        inCart ? 'bg-amber-500 text-slate-950' : 'bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300'
+                      className={`text-xs font-bold px-4 py-2 rounded-xl transition ${
+                        inCart ? 'bg-[#c49a62] text-white' : 'bg-[#faf8f5] hover:bg-slate-100 border border-[#ebdcb9] text-slate-650'
                       }`}
                     >
                       {inCart ? '✓ Đã Chọn' : 'Chọn Hạng Mục'}
@@ -414,158 +498,216 @@ function StorefrontContent() {
           </div>
         </div>
 
-        {/* Smart Cart Right Panel */}
+        {/* Smart Cart Panel */}
         <div className="lg:col-span-1">
-          <div className="glass-panel gold-glow rounded-3xl p-6 sticky top-24 space-y-6">
-            <h3 className="text-sm font-bold text-white uppercase tracking-wider border-b border-slate-800 pb-3">
-              🧾 Giỏ hàng thông minh (BOQ dự toán)
+          <div className="bg-white border border-[#ebdcb9] rounded-3xl p-6 sticky top-24 space-y-6 shadow-sm">
+            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider border-b border-slate-100 pb-3 flex items-center justify-between">
+              <span>🧾 Giỏ hàng (BOQ dự toán)</span>
+              {profile && <span className="text-[8px] bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 px-1.5 py-0.5 rounded font-black">MEMBERS-ONLY</span>}
             </h3>
 
-            {/* Slider Value */}
+            {/* Slider Value (Only works for logged-in members) */}
             <div className="space-y-2">
               <div className="flex justify-between items-center text-xs">
-                <span className="text-slate-400">Giá trị căn hộ Vinhomes:</span>
-                <strong className="text-amber-500">{(houseValue / 1000000000).toFixed(1)} Tỷ VND</strong>
+                <span className="text-slate-500">Giá trị căn hộ Vinhomes:</span>
+                <strong className="text-[#c49a62]">{(houseValue / 1000000000).toFixed(1)} Tỷ VND</strong>
               </div>
               <input
                 type="range"
                 min="2000000000"
                 max="15000000000"
                 step="500000000"
+                disabled={!profile}
                 value={houseValue}
                 onChange={(e) => setHouseValue(Number(e.target.value))}
-                className="w-full h-1.5 bg-slate-950 rounded-lg appearance-none cursor-pointer accent-amber-500"
+                className="w-full h-1.5 bg-[#faf8f5] rounded-lg appearance-none cursor-pointer accent-[#c49a62]"
               />
-              <div className="flex justify-between text-[9px] text-slate-600">
+              <div className="flex justify-between text-[9px] text-slate-400">
                 <span>2 Tỷ</span>
                 <span>8 Tỷ</span>
                 <span>15 Tỷ</span>
               </div>
             </div>
 
-            {/* Selected items list */}
-            {cart.length === 0 ? (
-              <div className="text-center py-8 text-xs text-slate-500">
-                Chưa có hạng mục vật tư nào được chọn. Chọn vật tư bên trái hoặc thiết kế AI để bóc tách BOQ tự động.
+            {/* Cart content checks */}
+            {!profile ? (
+              /* GUEST CART BLOCKING WARNING */
+              <div className="p-4 bg-amber-500/5 border border-[#ebdcb9] rounded-2xl text-center space-y-3">
+                <div className="text-xl">🔒</div>
+                <div className="text-xs font-bold text-slate-800">Tính năng Giỏ hàng bị Khóa</div>
+                <p className="text-[10px] text-slate-500 leading-relaxed">
+                  Vui lòng đăng nhập để lưu cấu hình, bóc tách BOQ, nhận trợ giá hoàn thiện 6% Vin và nộp hồ sơ tín chấp Techcombank.
+                </p>
+                <Link href="/login" className="inline-block bg-[#c49a62] hover:bg-[#b08752] text-white font-bold text-[10px] px-4 py-2 rounded-xl transition">
+                  Đăng Nhập / Đăng Ký Ngay
+                </Link>
               </div>
             ) : (
-              <div className="space-y-3 max-h-60 overflow-y-auto pr-1 divide-y divide-slate-900">
-                {cart.map((item) => (
-                  <div key={item.sku} className="pt-3 first:pt-0 flex items-center justify-between text-xs">
-                    <div className="space-y-1">
-                      <div className="font-semibold text-slate-200 truncate w-40">{item.name}</div>
-                      <div className="flex items-center space-x-2">
-                        <span className="text-[10px] text-slate-500">Số lượng:</span>
-                        <input
-                          type="number"
-                          value={quantities[item.sku] || 1}
-                          min="1"
-                          onChange={(e) => updateQuantity(item.sku, e.target.value)}
-                          className="bg-slate-950 border border-slate-800 text-[10px] text-center w-10 py-0.5 rounded"
-                        />
-                        <span className="text-[10px] text-slate-500">({item.unit})</span>
-                      </div>
-                    </div>
-
-                    <div className="text-right">
-                      <div className="font-bold text-slate-300">
-                        {((item.price * (quantities[item.sku] || 1)).toLocaleString('vi-VN'))}đ
-                      </div>
-                      <button 
-                        onClick={() => toggleCartItem(item)} 
-                        className="text-[9px] text-red-400 hover:underline mt-1"
-                      >
-                        Bỏ chọn
-                      </button>
-                    </div>
+              /* MEMBER CART ACTIVE VIEW */
+              <>
+                {cart.length === 0 ? (
+                  <div className="text-center py-6 text-xs text-slate-400">
+                    Chưa có vật tư nào được chọn. Hãy chọn vật tư bên trái hoặc vào AI Studio để kết xuất phối cảnh 3D bóc tách BOQ tự động.
                   </div>
-                ))}
-              </div>
+                ) : (
+                  <div className="space-y-3 max-h-56 overflow-y-auto pr-1 divide-y divide-slate-100">
+                    {cart.map((item) => (
+                      <div key={item.sku} className="pt-3 first:pt-0 flex items-center justify-between text-xs">
+                        <div className="space-y-1">
+                          <div className="font-semibold text-slate-800 truncate w-32">{item.name}</div>
+                          <div className="flex items-center space-x-1.5">
+                            <span className="text-[9px] text-slate-400">Số lượng:</span>
+                            <input
+                              type="number"
+                              value={quantities[item.sku] || 1}
+                              min="1"
+                              onChange={(e) => updateQuantity(item.sku, e.target.value)}
+                              className="bg-[#faf8f5] border border-[#ebdcb9] text-[10px] text-center w-8 py-0.5 rounded text-slate-800"
+                            />
+                            <span className="text-[9px] text-slate-400">({item.unit})</span>
+                          </div>
+                        </div>
+
+                        <div className="text-right">
+                          <div className="font-bold text-slate-700">
+                            {((item.price * (quantities[item.sku] || 1)).toLocaleString('vi-VN'))}đ
+                          </div>
+                          <button 
+                            onClick={() => toggleCartItem(item)} 
+                            className="text-[9px] text-red-500 hover:underline mt-0.5"
+                          >
+                            Bỏ chọn
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Subsidies Summary block */}
+                <div className="bg-[#faf8f5] border border-[#ebdcb9] rounded-2xl p-4 space-y-3 text-xs">
+                  <div className="flex justify-between items-center text-slate-500">
+                    <span>Dự toán trọn gói (BOQ):</span>
+                    <span className="font-bold text-slate-700">{getSubtotal().toLocaleString('vi-VN')}đ</span>
+                  </div>
+                  <div className="flex justify-between items-center text-slate-500 border-b border-slate-100 pb-2">
+                    <span className="flex items-center space-x-1">
+                      <span>Vin hỗ trợ hoàn thiện:</span>
+                      <span className="bg-emerald-500/10 text-emerald-600 text-[8px] font-black px-1.5 py-0.5 rounded">6%</span>
+                    </span>
+                    <span className="font-bold text-emerald-600">-{getVinSubsidy().toLocaleString('vi-VN')}đ</span>
+                  </div>
+
+                  <div className="flex justify-between items-center text-xs pt-1 font-black text-slate-900">
+                    <span>Thanh toán Đợt 1 (Sau trừ 6%):</span>
+                    <span className="text-[#c49a62] text-sm">{getFinalAmount().toLocaleString('vi-VN')}đ</span>
+                  </div>
+                </div>
+
+                {/* Member interactive buttons */}
+                <div className="space-y-3 pt-2">
+                  <button
+                    disabled={cart.length === 0}
+                    onClick={() => setShowLoanModal(true)}
+                    className="w-full bg-[#c49a62] hover:bg-[#b08752] disabled:opacity-50 text-white font-bold py-3 rounded-xl transition text-center text-xs shadow-md"
+                  >
+                    🏦 Nhận Duyệt Hạn Mức Tín Chấp Techcombank
+                  </button>
+
+                  <button
+                    disabled={cart.length === 0}
+                    onClick={handleCreateContract}
+                    className="w-full bg-white hover:bg-slate-50 disabled:opacity-50 border border-[#ebdcb9] text-slate-700 font-bold py-3 rounded-xl transition text-center text-xs"
+                  >
+                    ✍️ Ký Hợp Đồng Thử Nghiệm (OTP)
+                  </button>
+                </div>
+              </>
             )}
 
-            {/* Summary Block with Vin 6% Auto Deduct */}
-            <div className="bg-slate-950/60 border border-slate-900 rounded-2xl p-4 space-y-3 text-xs">
-              <div className="flex justify-between items-center text-slate-400">
-                <span>Dự toán trọn gói (BOQ):</span>
-                <span className="font-bold text-slate-300">{getSubtotal().toLocaleString('vi-VN')}đ</span>
-              </div>
-              <div className="flex justify-between items-center text-slate-400 border-b border-slate-900 pb-2">
-                <span className="flex items-center space-x-1">
-                  <span>Vin tài trợ hoàn thiện:</span>
-                  <span className="bg-emerald-500/10 text-emerald-400 text-[8px] font-black px-1 py-0.5 rounded">6%</span>
-                </span>
-                <span className="font-bold text-emerald-400">-{getVinSubsidy().toLocaleString('vi-VN')}đ</span>
-              </div>
-
-              <div className="flex justify-between items-center text-sm pt-1 font-black text-white">
-                <span>Khách thanh toán đợt 1:</span>
-                <span className="text-amber-500">{getFinalAmount().toLocaleString('vi-VN')}đ</span>
-              </div>
-            </div>
-
-            {/* Interactive Checkout Actions */}
-            <div className="space-y-3 pt-2">
-              <button
-                disabled={cart.length === 0}
-                onClick={() => setShowLoanModal(true)}
-                className="w-full bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-slate-950 font-bold py-3 rounded-xl transition text-center text-xs shadow-lg shadow-amber-500/10"
-              >
-                Nhận Duyệt Hạn Mức Tín Chấp Techcombank
-              </button>
-
-              <button
-                disabled={cart.length === 0}
-                onClick={handleCreateContract}
-                className="w-full bg-slate-800 hover:bg-slate-700 disabled:opacity-50 border border-slate-700/60 text-slate-200 font-semibold py-3 rounded-xl transition text-center text-xs"
-              >
-                Ký Hợp Đồng Thử Nghiệm (OTP)
-              </button>
-            </div>
           </div>
         </div>
 
       </main>
 
-      {/* Credit Loan Modal */}
+      {/* Guest registration prompt modal */}
+      {showRegModal && (
+        <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-sm flex justify-center items-center p-4 z-50 animate-fadeIn">
+          <div className="bg-white border border-[#ebdcb9] rounded-3xl w-full max-w-sm p-6 relative text-slate-800">
+            <button 
+              onClick={() => setShowRegModal(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-800 transition text-lg font-bold"
+            >
+              ✕
+            </button>
+            <div className="text-center space-y-4">
+              <div className="text-4xl">🔐</div>
+              <h3 className="text-sm font-extrabold uppercase tracking-wide text-slate-900">Yêu cầu Đăng ký Thành viên</h3>
+              <p className="text-xs text-slate-550 leading-relaxed">
+                Chào mừng bạn! Vui lòng đăng ký tài khoản thành viên (miễn phí) để mở khóa chọn vật tư, lên BOQ và kết xuất thiết kế bằng AI.
+              </p>
+              <div className="flex space-x-3 pt-2">
+                <button
+                  onClick={() => setShowRegModal(false)}
+                  className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 rounded-xl text-xs"
+                >
+                  Đóng lại
+                </button>
+                <button
+                  onClick={() => {
+                    setShowRegModal(false);
+                    router.push('/login');
+                  }}
+                  className="flex-1 bg-[#c49a62] hover:bg-[#b08752] text-white font-bold py-2 rounded-xl text-xs shadow-sm"
+                >
+                  Đăng Ký Ngay
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Techcombank Loan Modal */}
       {showLoanModal && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex justify-center items-center p-4 z-50">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 relative">
+        <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-sm flex justify-center items-center p-4 z-50">
+          <div className="bg-white border border-[#ebdcb9] rounded-3xl w-full max-w-md p-6 relative text-slate-800">
             <button 
               onClick={() => setShowLoanModal(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white transition"
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-800 transition text-lg font-bold"
             >
               ✕
             </button>
 
-            <h3 className="text-base font-bold text-white mb-2 uppercase tracking-wide">
+            <h3 className="text-sm font-extrabold text-slate-900 mb-2 uppercase tracking-wide">
               🏦 Hồ sơ Liên kết Tín chấp Techcombank
             </h3>
-            <p className="text-xs text-slate-400 mb-6 leading-relaxed">
+            <p className="text-xs text-slate-500 mb-6 leading-relaxed">
               Bạn đang đăng ký khoản vay ưu đãi 0% lãi suất hạn mức tối đa bằng 70% giá trị hợp đồng thiết kế thi công lắp đặt tại QiHome.vn.
             </p>
 
             <form onSubmit={submitLoanForm} className="space-y-4">
               <div>
-                <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Họ và tên</label>
+                <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Họ và tên người vay</label>
                 <input
                   type="text"
                   required
-                  placeholder="Nguyễn Văn A"
+                  placeholder="Ví dụ: Lê Thu Trang"
                   value={loanForm.fullName}
                   onChange={(e) => setLoanForm({ ...loanForm, fullName: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none"
+                  className="w-full bg-[#faf8f5] border border-[#ebdcb9] rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Số điện thoại đăng ký vay</label>
+                <label className="block text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Số điện thoại liên kết</label>
                 <input
                   type="text"
                   required
-                  placeholder="0912345678"
+                  placeholder="0901234567"
                   value={loanForm.phone}
                   onChange={(e) => setLoanForm({ ...loanForm, phone: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none"
+                  className="w-full bg-[#faf8f5] border border-[#ebdcb9] rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none"
                 />
               </div>
 
@@ -574,7 +716,7 @@ function StorefrontContent() {
                 <select
                   value={loanForm.income}
                   onChange={(e) => setLoanForm({ ...loanForm, income: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none"
+                  className="w-full bg-[#faf8f5] border border-[#ebdcb9] rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none"
                 >
                   <option value="under-20">Dưới 20 triệu VND</option>
                   <option value="20-50">Từ 20 - 50 triệu VND</option>
@@ -588,9 +730,9 @@ function StorefrontContent() {
                 <select
                   value={loanForm.tenure}
                   onChange={(e) => setLoanForm({ ...loanForm, tenure: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none"
+                  className="w-full bg-[#faf8f5] border border-[#ebdcb9] rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none"
                 >
-                  <option value="3">3 năm (Lãi suất ưu đãi)</option>
+                  <option value="3">3 năm (Lãi suất ưu đãi 0%)</option>
                   <option value="5">5 năm</option>
                   <option value="10">10 năm</option>
                 </select>
@@ -599,7 +741,7 @@ function StorefrontContent() {
               <button
                 type="submit"
                 disabled={loanSubmitted}
-                className="w-full bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-slate-950 font-bold py-3 rounded-xl transition text-center text-xs mt-6"
+                className="w-full bg-[#c49a62] hover:bg-[#b08752] disabled:opacity-50 text-white font-bold py-3 rounded-xl transition text-center text-xs mt-4"
               >
                 {loanSubmitted ? 'Đang gửi hồ sơ...' : 'Nộp Hồ Sơ Đăng Ký Vay'}
               </button>
@@ -609,7 +751,7 @@ function StorefrontContent() {
       )}
 
       {/* Footer */}
-      <footer className="border-t border-slate-900 py-8 bg-slate-950/20 text-center text-xs text-slate-500">
+      <footer className="border-t border-[#ebdcb9] py-8 bg-white text-center text-xs text-slate-500 mt-12">
         <p>© 2026 QiHome.vn - Nền tảng số hóa quản trị nội thất thông minh. Đối tác phân phối Blum, An Cường, Dulux, Kohler.</p>
       </footer>
     </div>
@@ -619,7 +761,7 @@ function StorefrontContent() {
 export default function Storefront() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center text-amber-500 text-xs">
+      <div className="min-h-screen bg-[#faf8f5] flex items-center justify-center text-[#c49a62] text-xs font-bold">
         Đang tải Showroom...
       </div>
     }>
