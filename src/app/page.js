@@ -181,15 +181,16 @@ function StorefrontContent() {
                          !process.env.NEXT_PUBLIC_SUPABASE_URL.includes('your-project-id');
     setIsLive(isConfigured);
 
+    let dbProducts = [];
+
     if (isConfigured) {
       try {
         const { data, error } = await supabase
           .from('materials_catalog')
           .select('*');
 
-        if (error) throw error;
-        if (data && data.length > 0) {
-          const mapped = data.map(item => {
+        if (!error && data && data.length > 0) {
+          dbProducts = data.map(item => {
             const matchLocal = ECOM_PRODUCTS.find(p => p.sku === item.sku);
             return {
               sku: item.sku,
@@ -201,25 +202,30 @@ function StorefrontContent() {
               image: matchLocal ? matchLocal.image : '/images/3ba7aecadbb591ec3ea1c15a853362f5.jpg',
               gallery: matchLocal ? matchLocal.gallery : ['/images/3ba7aecadbb591ec3ea1c15a853362f5.jpg'],
               desc: item.description || 'Sản phẩm hoàn thiện chính hãng chất lượng cao.',
-              specs: matchLocal ? matchLocal.specs : 'Chất liệu: Đạt chuẩn quốc tế.'
+              specs: matchLocal ? matchLocal.specs : 'Chất liệu: Đạt chuẩn quốc tế.',
+              inStockQty: matchLocal ? matchLocal.inStockQty : 10,
+              allowPreOrder: matchLocal ? matchLocal.allowPreOrder : false,
+              preOrderLeadDays: '7 ngày'
             };
           });
-          setProducts(mapped);
-          
-          const initialQuants = {};
-          mapped.forEach(p => {
-            initialQuants[p.sku] = p.sku === 'AC-WD-402' ? 10 : p.sku === 'BL-DAMP-05' ? 15 : 1;
-          });
-          setQuantities(initialQuants);
-          return;
         }
       } catch (err) {
         console.warn('Error loading DB catalog, using fallbacks:', err.message);
       }
     }
 
+    // Load custom products added by Admin via /dashboard/admin/products
+    let localSaved = localStorage.getItem('qihome_custom_products');
+    let parsedLocal = localSaved ? JSON.parse(localSaved) : [];
+
+    // Merge static default ECOM_PRODUCTS, dynamic dbProducts, and custom local products
+    const initialList = dbProducts.length > 0 ? dbProducts : ECOM_PRODUCTS;
+    const merged = [...parsedLocal, ...initialList.filter(d => !parsedLocal.some(p => p.sku === d.sku))];
+    
+    setProducts(merged);
+
     const initialQuants = {};
-    ECOM_PRODUCTS.forEach(p => {
+    merged.forEach(p => {
       initialQuants[p.sku] = p.sku === 'AC-WD-402' ? 10 : p.sku === 'BL-DAMP-05' ? 15 : 1;
     });
     setQuantities(initialQuants);
@@ -633,7 +639,7 @@ function StorefrontContent() {
                             inCart ? 'bg-[#c49a62] text-white' : 'bg-[#faf8f5] hover:bg-slate-100 border border-[#ebdcb9] text-slate-650'
                           }`}
                         >
-                          {inCart ? '✓ Giỏ Hàng' : 'Chọn mua'}
+                          {inCart ? '✓ Giỏ Hàng' : (prod.inStockQty <= 0 && prod.allowPreOrder) ? `Đặt sản xuất trước (Giao trong ${prod.preOrderLeadDays || '7 ngày'})` : 'Chọn mua'}
                         </button>
                       </div>
                     </div>
