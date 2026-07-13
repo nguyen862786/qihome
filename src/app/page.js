@@ -5,14 +5,96 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 
-// Static fallback products
-const FALLBACK_PRODUCTS = [
-  { sku: 'SF-LTH-01', name: 'Sofa Da Cao Cấp Indochine', brand: 'QiPrime', price: 28000000, unit: 'Bộ', image: '🛋️', desc: 'Khung gỗ sồi tự nhiên, bọc da bò nhập khẩu Ý.' },
-  { sku: 'LT-CHR-02', name: 'Đèn Chùm Pha Lê Indochine', brand: 'Euroto', price: 15000000, unit: 'Bộ', image: '💡', desc: 'Thiết kế cổ điển giao thoa Á - Âu sang trọng.' },
-  { sku: 'AC-WD-402', name: 'Hệ Tủ Bếp Gỗ Melamine Cao Cấp', brand: 'An Cường', price: 4200000, unit: 'Mét tới', image: '🚪', desc: 'Chống ẩm, chống trầy xước chuẩn An Cường.' },
-  { sku: 'BL-DAMP-05', name: 'Bộ Ray Trượt Bản Lề Giảm Chấn', brand: 'Blum', price: 350000, unit: 'Bộ', image: '🔩', desc: 'Vận hành êm ái, bảo hành trọn đời.' },
-  { sku: 'DL-UX-18', name: 'Sơn Nội Thất Cao Cấp Dulux EasyClean', brand: 'Dulux', price: 1200000, unit: 'Thùng', image: '🎨', desc: 'Lau chùi tối ưu, kháng khuẩn bảo vệ sức khỏe.' },
-  { sku: 'KH-SNK-99', name: 'Bồn Rửa Chén Kohler Đẳng Cấp', brand: 'Kohler', price: 7800000, unit: 'Bộ', image: '🚰', desc: 'Thép không gỉ đúc liền khối siêu bền.' }
+// Static products with real high-quality image paths, original vs promo prices, and galleries
+const ECOM_PRODUCTS = [
+  { 
+    sku: 'SF-LTH-01', 
+    name: 'Sofa Da Cao Cấp Indochine', 
+    brand: 'QiPrime', 
+    originalPrice: 35000000, 
+    price: 28000000, 
+    unit: 'Bộ', 
+    image: '/images/3ba7aecadbb591ec3ea1c15a853362f5.jpg', 
+    gallery: [
+      '/images/3ba7aecadbb591ec3ea1c15a853362f5.jpg',
+      '/images/2058be0fc565abd95aee1b05d1390795.jpg',
+      '/images/3584231b70bb4769c06767be070aa59d.jpg'
+    ],
+    desc: 'Khung gỗ sồi tự nhiên, bọc da bò nhập khẩu Ý. Thiết kế giao thoa Đông Dương tinh tế.',
+    specs: 'Kích thước: 2m4 x 0.9m. Khung: Gỗ sồi Mỹ. Đệm mút: Inoac Nhật Bản.'
+  },
+  { 
+    sku: 'LT-CHR-02', 
+    name: 'Đèn Chùm Pha Lê Indochine', 
+    brand: 'Euroto', 
+    originalPrice: 18000000, 
+    price: 15000000, 
+    unit: 'Bộ', 
+    image: '/images/365c4c688df7b1f8f2b304bdc8d8f8ee.jpg', 
+    gallery: [
+      '/images/365c4c688df7b1f8f2b304bdc8d8f8ee.jpg',
+      '/images/1626aee735a6d69aa16af41338600615.jpg'
+    ],
+    desc: 'Thiết kế cổ điển kết hợp tinh thể pha lê K9 lấp lánh phản chiếu ánh sáng sang trọng.',
+    specs: 'Đường kính: 80cm. Số đuôi đèn: E14 x 12 bóng. Chất liệu: Đồng thau + Pha lê K9.'
+  },
+  { 
+    sku: 'AC-WD-402', 
+    name: 'Hệ Tủ Bếp Gỗ Melamine Cao Cấp', 
+    brand: 'An Cường', 
+    originalPrice: 4900000, 
+    price: 4200000, 
+    unit: 'Mét tới', 
+    image: '/images/cb17520f98fa50444b4d580964fc69e7.jpg', 
+    gallery: [
+      '/images/cb17520f98fa50444b4d580964fc69e7.jpg',
+      '/images/306d8ed842d197c34447a81976615549.jpg'
+    ],
+    desc: 'Chống ẩm tốt, chống trầy xước chuẩn chất lượng lõi gỗ MDF An Cường.',
+    specs: 'Độ dày cánh: 18mm. Lõi: MDF chống ẩm Thái Lan. Bề mặt: Phủ Melamine mã màu chỉ định.'
+  },
+  { 
+    sku: 'BL-DAMP-05', 
+    name: 'Bộ Ray Trượt Bản Lề Giảm Chấn', 
+    brand: 'Blum', 
+    originalPrice: 420000, 
+    price: 350000, 
+    unit: 'Bộ', 
+    image: '/images/6080384cd8220dbc4c266ca5fd07b534.jpg', 
+    gallery: [
+      '/images/6080384cd8220dbc4c266ca5fd07b534.jpg'
+    ],
+    desc: 'Vận hành đóng mở êm ái tuyệt đối, triệt tiêu tiếng ồn, độ bền kiểm nghiệm 200,000 lần.',
+    specs: 'Chất liệu: Thép mạ niken. Góc mở: 110 độ. Loại giảm chấn tích hợp công nghệ Blumotion.'
+  },
+  { 
+    sku: 'DL-UX-18', 
+    name: 'Sơn Nội Thất Cao Cấp Dulux EasyClean', 
+    brand: 'Dulux', 
+    originalPrice: 1500000, 
+    price: 1200000, 
+    unit: 'Thùng', 
+    image: '/images/08e81d5e795d931fe999bc1780a40ba4.jpg', 
+    gallery: [
+      '/images/08e81d5e795d931fe999bc1780a40ba4.jpg'
+    ],
+    desc: 'Khả năng lau chùi vết bẩn tối ưu, kháng khuẩn hiệu quả, an toàn cho sức khỏe gia đình.',
+    specs: 'Dung tích: 15 Lít. Độ phủ lý thuyết: 11-13 m²/lít/lớp. Công nghệ kháng khuẩn bạc.'
+  },
+  { 
+    sku: 'KH-SNK-99', 
+    name: 'Bồn Rửa Chén Kohler Đẳng Cấp', 
+    brand: 'Kohler', 
+    originalPrice: 9200000, 
+    price: 7800000, 
+    unit: 'Bộ', 
+    image: '/images/cd9e64d0b00dd68229be9255288b0379.jpg', 
+    gallery: [
+      '/images/cd9e64d0b00dd68229be9255288b0379.jpg'
+    ],
+    desc: 'Chất liệu thép không gỉ liền khối dày dặn, chống xước, chống bám bẩn ưu việt.',
+    specs: 'Kích thước: 820 x 480 x 220 mm. Lắp đặt: Dương bàn hoặc Âm bàn tủ bếp.'
+  }
 ];
 
 const SALES_AGENTS = {
@@ -26,7 +108,7 @@ function StorefrontContent() {
   const searchParams = useSearchParams();
   
   // Dynamic Catalog state
-  const [products, setProducts] = useState(FALLBACK_PRODUCTS);
+  const [products, setProducts] = useState(ECOM_PRODUCTS);
   const [isLive, setIsLive] = useState(false);
   
   // Search & Filters state
@@ -48,15 +130,34 @@ function StorefrontContent() {
   // Guest warning registration modal
   const [showRegModal, setShowRegModal] = useState(false);
 
-  // Initialize
+  // Product detail view state
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [activeGalleryIndex, setActiveGalleryIndex] = useState(0);
+
+  // Hero Banner Slider Images setup
+  const HERO_IMAGES = [
+    '/images/3ba7aecadbb591ec3ea1c15a853362f5.jpg',
+    '/images/cb17520f98fa50444b4d580964fc69e7.jpg',
+    '/images/306d8ed842d197c34447a81976615549.jpg',
+    '/images/1626aee735a6d69aa16af41338600615.jpg'
+  ];
+  const [heroImageIndex, setHeroImageIndex] = useState(0);
+
+  // Slide interval for running background
   useEffect(() => {
-    // 1. Get logged in user profile if exists
+    const timer = setInterval(() => {
+      setHeroImageIndex((prev) => (prev + 1) % HERO_IMAGES.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Initialize profile & affiliate parameters
+  useEffect(() => {
     const stored = localStorage.getItem('qihome_user_profile');
     if (stored) {
       setProfile(JSON.parse(stored));
     }
 
-    // 2. Parse affiliate code from URL
     const affCode = searchParams.get('aff');
     if (affCode) {
       const salesName = SALES_AGENTS[affCode.toUpperCase()];
@@ -72,7 +173,6 @@ function StorefrontContent() {
       }
     }
 
-    // 3. Load dynamic catalog from database
     checkDatabaseCatalog();
   }, [searchParams]);
 
@@ -89,15 +189,21 @@ function StorefrontContent() {
 
         if (error) throw error;
         if (data && data.length > 0) {
-          const mapped = data.map(item => ({
-            sku: item.sku,
-            name: item.name,
-            brand: item.brand,
-            price: Number(item.price),
-            unit: item.unit,
-            image: item.sku === 'AC-WD-402' ? '🚪' : item.sku === 'BL-DAMP-05' ? '🔩' : item.sku === 'DL-UX-18' ? '🎨' : '🚰',
-            desc: item.description || 'Sản phẩm hoàn thiện chính hãng chất lượng cao.'
-          }));
+          const mapped = data.map(item => {
+            const matchLocal = ECOM_PRODUCTS.find(p => p.sku === item.sku);
+            return {
+              sku: item.sku,
+              name: item.name,
+              brand: item.brand,
+              price: Number(item.price),
+              originalPrice: matchLocal ? matchLocal.originalPrice : Math.round(Number(item.price) * 1.2),
+              unit: item.unit,
+              image: matchLocal ? matchLocal.image : '/images/3ba7aecadbb591ec3ea1c15a853362f5.jpg',
+              gallery: matchLocal ? matchLocal.gallery : ['/images/3ba7aecadbb591ec3ea1c15a853362f5.jpg'],
+              desc: item.description || 'Sản phẩm hoàn thiện chính hãng chất lượng cao.',
+              specs: matchLocal ? matchLocal.specs : 'Chất liệu: Đạt chuẩn quốc tế.'
+            };
+          });
           setProducts(mapped);
           
           const initialQuants = {};
@@ -112,9 +218,8 @@ function StorefrontContent() {
       }
     }
 
-    // Fallback quantities init
     const initialQuants = {};
-    FALLBACK_PRODUCTS.forEach(p => {
+    ECOM_PRODUCTS.forEach(p => {
       initialQuants[p.sku] = p.sku === 'AC-WD-402' ? 10 : p.sku === 'BL-DAMP-05' ? 15 : 1;
     });
     setQuantities(initialQuants);
@@ -147,7 +252,6 @@ function StorefrontContent() {
     }, 0);
   };
 
-  // Vin 6% subsidy only visible for members
   const getVinSubsidy = () => {
     if (!profile) return 0;
     return getSubtotal() * 0.06;
@@ -190,7 +294,6 @@ function StorefrontContent() {
 
     try {
       if (isLive) {
-        // Insert Project
         const { data: project, error: pError } = await supabase
           .from('projects')
           .insert([
@@ -211,7 +314,6 @@ function StorefrontContent() {
 
         if (pError) throw pError;
 
-        // Insert BOM materials
         const bomInserts = cart.map(item => ({
           project_id: project.id,
           sku: item.sku,
@@ -251,7 +353,6 @@ function StorefrontContent() {
 
         alert(`🎉 Đã tạo Hợp đồng thành công trên LIVE DB!\n- Mã dự án: ${projectCode}\n- Định mức vật tư (BOM) đã được khóa.`);
       } else {
-        // Mock commission updates in local storage
         let storedComms = localStorage.getItem('qihome_shared_commissions');
         const comms = storedComms ? JSON.parse(storedComms) : [];
         const newComms = [
@@ -268,7 +369,6 @@ function StorefrontContent() {
     }
   };
 
-  // Filter products list based on search and brand choice
   const filteredProducts = products.filter(p => {
     const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           p.sku.toLowerCase().includes(searchTerm.toLowerCase());
@@ -278,8 +378,14 @@ function StorefrontContent() {
 
   const brandsList = ['All', ...Array.from(new Set(products.map(p => p.brand)))];
 
+  const handleProductClick = (product) => {
+    setSelectedProduct(product);
+    setActiveGalleryIndex(0);
+  };
+
   return (
     <div className="flex-1 flex flex-col min-h-screen bg-[#faf8f5] text-slate-800">
+      
       {/* Navigation */}
       <nav className="border-b border-[#ebdcb9] bg-white sticky top-0 z-30 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -328,11 +434,17 @@ function StorefrontContent() {
         </div>
       </nav>
 
-      {/* Hero Banner */}
-      <header className="relative bg-[#f5eeda] py-16 border-b border-[#ebdcb9] overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#c49a62]/5 via-transparent to-transparent opacity-65"></div>
+      {/* Hero Banner with moving background taken from style renders */}
+      <header className="relative py-24 border-b border-[#ebdcb9] overflow-hidden transition-all duration-1000 ease-in-out">
+        {/* Sliding background container */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center transition-all duration-1000 ease-in-out scale-105"
+          style={{ backgroundImage: `url(${HERO_IMAGES[heroImageIndex]})` }}
+        ></div>
+        {/* Soft elegant warm layout overlay */}
+        <div className="absolute inset-0 bg-[#f5eeda]/85 backdrop-blur-[2px]"></div>
+
         <div className="max-w-4xl mx-auto text-center px-4 space-y-5 relative z-10">
-          
           {affiliate && (
             <div className="inline-block bg-[#c49a62]/15 border border-[#ebdcb9] rounded-2xl px-4 py-1.5 text-xs text-[#c49a62] font-semibold animate-pulse">
               🤝 Chuyên viên tư vấn hỗ trợ: {affiliate.name}
@@ -345,7 +457,7 @@ function StorefrontContent() {
               Số Hóa Định Mức Vận Hành Nội Thất
             </span>
           </h1>
-          <p className="text-slate-600 text-sm max-w-xl mx-auto leading-relaxed">
+          <p className="text-slate-700 text-sm max-w-xl mx-auto leading-relaxed font-semibold">
             Dành riêng cho cư dân Vinhomes Hậu Nghĩa, Vinhomes Hóc Môn và Vinhomes Cần Giờ. Nhận tài trợ hoàn thiện đến 6% giá trị hợp đồng từ gói hợp tác Vingroup.
           </p>
 
@@ -360,12 +472,10 @@ function StorefrontContent() {
         </div>
       </header>
 
-      {/* Hạng mục 2A: 3 Trục Sản Phẩm Cột Trụ (Product Pillars) */}
+      {/* 3 Trục Sản Phẩm Cột Trụ */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12">
         <h2 className="text-center text-sm font-extrabold uppercase tracking-wider text-slate-400 mb-6">Trục Sản Phẩm Cốt Trụ QiHome</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          
-          {/* Pillar 1 */}
           <div className="bg-white border border-[#ebdcb9] rounded-2xl p-6 shadow-sm space-y-3 flex flex-col justify-between">
             <div>
               <div className="text-3xl">📦</div>
@@ -379,7 +489,6 @@ function StorefrontContent() {
             </Link>
           </div>
 
-          {/* Pillar 2 */}
           <div className="bg-white border border-[#ebdcb9] rounded-2xl p-6 shadow-sm space-y-3 flex flex-col justify-between">
             <div>
               <div className="text-3xl">🏰</div>
@@ -393,7 +502,6 @@ function StorefrontContent() {
             </Link>
           </div>
 
-          {/* Pillar 3 */}
           <div className="bg-white border border-[#ebdcb9] rounded-2xl p-6 shadow-sm space-y-3 flex flex-col justify-between">
             <div>
               <div className="text-3xl">🛋️</div>
@@ -406,20 +514,19 @@ function StorefrontContent() {
               <span>Trải nghiệm AI ngay</span> <span>➔</span>
             </Link>
           </div>
-
         </div>
       </section>
 
       {/* Catalog & Smart Cart Showcase */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex-1 grid grid-cols-1 lg:grid-cols-3 gap-12" id="catalog">
         
-        {/* Products Grid */}
+        {/* Products Grid (E-commerce Focus) */}
         <div className="lg:col-span-2 space-y-6">
           <div className="space-y-4">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
-                <h2 className="text-lg font-bold text-slate-900 tracking-tight">Danh mục Vật tư & Thiết bị Đạt chuẩn</h2>
-                <p className="text-xs text-slate-550 mt-0.5">Các sản phẩm phân phối chính hãng trưng bày tại Showroom Hậu Nghĩa 1000m²</p>
+                <h2 className="text-lg font-bold text-slate-900 tracking-tight">Siêu Thị Nội Thất & Thiết Bị Đạt Chuẩn</h2>
+                <p className="text-xs text-slate-550 mt-0.5">Hình ảnh sản phẩm chuẩn mực trưng bày tại hệ thống QiHome Showroom</p>
               </div>
               <span className="text-xs text-slate-500 font-bold">Hiển thị: {filteredProducts.length} sản phẩm</span>
             </div>
@@ -430,7 +537,7 @@ function StorefrontContent() {
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Tìm kiếm vật tư theo tên hoặc mã SKU..."
+                placeholder="Tìm kiếm sản phẩm theo tên hoặc SKU..."
                 className="bg-white border border-[#ebdcb9] rounded-xl px-4 py-2 text-xs text-slate-800 focus:outline-none placeholder-slate-400 flex-1"
               />
               
@@ -452,45 +559,79 @@ function StorefrontContent() {
             </div>
           </div>
 
+          {/* E-Commerce Grid with Focus on High Quality Images */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {filteredProducts.map((prod) => {
               const inCart = cart.some(item => item.sku === prod.sku);
+              const discountPct = Math.round(((prod.originalPrice - prod.price) / prod.originalPrice) * 100);
+
               return (
                 <div 
                   key={prod.sku} 
-                  className={`bg-white border border-[#ebdcb9] rounded-2xl p-5 transition duration-300 flex flex-col justify-between hover:shadow-md ${
-                    inCart ? 'border-[#c49a62] bg-[#c49a62]/[0.02]' : ''
-                  }`}
+                  className="bg-white border border-[#ebdcb9] rounded-3xl overflow-hidden shadow-sm flex flex-col hover:shadow-md transition duration-300 group"
                 >
-                  <div>
-                    <div className="flex items-center justify-between">
-                      <div className="text-3xl">{prod.image}</div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-[#faf8f5] text-slate-500 border border-[#ebdcb9] rounded">
-                        {prod.brand}
-                      </span>
-                    </div>
+                  {/* Large Product Image (Hình ảnh làm trọng tâm) */}
+                  <div 
+                    onClick={() => handleProductClick(prod)}
+                    className="h-64 overflow-hidden relative cursor-pointer bg-slate-100"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img 
+                      src={prod.image} 
+                      alt={prod.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                    />
+                    
+                    {/* Brand Badge */}
+                    <span className="absolute top-4 left-4 px-2.5 py-1 bg-white/95 backdrop-blur-sm text-[#c49a62] text-[9px] font-black uppercase tracking-wider rounded-lg shadow-sm border border-[#ebdcb9]/40">
+                      {prod.brand}
+                    </span>
 
-                    <h3 className="text-xs font-bold text-slate-900 mt-4">{prod.name}</h3>
-                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">{prod.desc}</p>
-                    <div className="text-[9px] text-slate-400 mt-2 font-mono">SKU: {prod.sku}</div>
+                    {/* Sale Badge */}
+                    <span className="absolute top-4 right-4 px-2 py-0.5 bg-red-500 text-white text-[9px] font-black uppercase rounded shadow-sm">
+                      -{discountPct}%
+                    </span>
                   </div>
 
-                  <div className="mt-6 flex items-center justify-between pt-4 border-t border-slate-100">
-                    <div>
-                      <div className="text-sm font-black text-[#c49a62]">
-                        {prod.price.toLocaleString('vi-VN')}đ
-                      </div>
-                      <span className="text-[9px] text-slate-400">Đơn vị: {prod.unit}</span>
+                  {/* Details */}
+                  <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                    <div onClick={() => handleProductClick(prod)} className="cursor-pointer space-y-1.5">
+                      <h3 className="text-xs font-bold text-slate-900 group-hover:text-[#c49a62] transition line-clamp-1">{prod.name}</h3>
+                      <p className="text-[11px] text-slate-500 line-clamp-2 leading-relaxed">{prod.desc}</p>
+                      <div className="text-[9px] text-slate-400 font-mono">SKU: {prod.sku}</div>
                     </div>
 
-                    <button
-                      onClick={() => toggleCartItem(prod)}
-                      className={`text-xs font-bold px-4 py-2 rounded-xl transition ${
-                        inCart ? 'bg-[#c49a62] text-white' : 'bg-[#faf8f5] hover:bg-slate-100 border border-[#ebdcb9] text-slate-650'
-                      }`}
-                    >
-                      {inCart ? '✓ Đã Chọn' : 'Chọn Hạng Mục'}
-                    </button>
+                    <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+                      <div>
+                        {/* Discounted price & crossed-out original price */}
+                        <div className="flex items-center space-x-1.5">
+                          <span className="text-xs text-slate-400 line-through font-medium">
+                            {prod.originalPrice.toLocaleString('vi-VN')}đ
+                          </span>
+                          <span className="text-sm font-black text-[#c49a62]">
+                            {prod.price.toLocaleString('vi-VN')}đ
+                          </span>
+                        </div>
+                        <div className="text-[9px] text-slate-400">Đơn vị: {prod.unit}</div>
+                      </div>
+
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleProductClick(prod)}
+                          className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[10px] px-2.5 py-2 rounded-xl transition"
+                        >
+                          Chi Tiết
+                        </button>
+                        <button
+                          onClick={() => toggleCartItem(prod)}
+                          className={`text-[10px] font-bold px-3 py-2 rounded-xl transition ${
+                            inCart ? 'bg-[#c49a62] text-white' : 'bg-[#faf8f5] hover:bg-slate-100 border border-[#ebdcb9] text-slate-650'
+                          }`}
+                        >
+                          {inCart ? '✓ Giỏ Hàng' : 'Chọn mua'}
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               );
@@ -506,7 +647,7 @@ function StorefrontContent() {
               {profile && <span className="text-[8px] bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 px-1.5 py-0.5 rounded font-black">MEMBERS-ONLY</span>}
             </h3>
 
-            {/* Slider Value (Only works for logged-in members) */}
+            {/* Slider Value */}
             <div className="space-y-2">
               <div className="flex justify-between items-center text-xs">
                 <span className="text-slate-500">Giá trị căn hộ Vinhomes:</span>
@@ -531,19 +672,17 @@ function StorefrontContent() {
 
             {/* Cart content checks */}
             {!profile ? (
-              /* GUEST CART BLOCKING WARNING */
               <div className="p-4 bg-amber-500/5 border border-[#ebdcb9] rounded-2xl text-center space-y-3">
                 <div className="text-xl">🔒</div>
                 <div className="text-xs font-bold text-slate-800">Tính năng Giỏ hàng bị Khóa</div>
                 <p className="text-[10px] text-slate-500 leading-relaxed">
                   Vui lòng đăng nhập để lưu cấu hình, bóc tách BOQ, nhận trợ giá hoàn thiện 6% Vin và nộp hồ sơ tín chấp Techcombank.
                 </p>
-                <Link href="/login" className="inline-block bg-[#c49a62] hover:bg-[#b08752] text-white font-bold text-[10px] px-4 py-2 rounded-xl transition">
+                <Link href="/login" className="inline-block bg-[#c49a62] hover:bg-[#b08752] text-white font-bold text-[10px] px-4 py-2 rounded-xl transition animate-pulse">
                   Đăng Nhập / Đăng Ký Ngay
                 </Link>
               </div>
             ) : (
-              /* MEMBER CART ACTIVE VIEW */
               <>
                 {cart.length === 0 ? (
                   <div className="text-center py-6 text-xs text-slate-400">
@@ -599,7 +738,7 @@ function StorefrontContent() {
                   </div>
 
                   <div className="flex justify-between items-center text-xs pt-1 font-black text-slate-900">
-                    <span>Thanh toán Đợt 1 (Sau trừ 6%):</span>
+                    <span>Thành toán Đợt 1 (Sau trừ 6%):</span>
                     <span className="text-[#c49a62] text-sm">{getFinalAmount().toLocaleString('vi-VN')}đ</span>
                   </div>
                 </div>
@@ -629,6 +768,122 @@ function StorefrontContent() {
         </div>
 
       </main>
+
+      {/* PRODUCT DETAILS MODAL (Trang mô tả chi tiết sản phẩm) */}
+      {selectedProduct && (
+        <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-sm flex justify-center items-center p-4 z-50 animate-fadeIn">
+          <div className="bg-white border border-[#ebdcb9] rounded-3xl w-full max-w-2xl p-6 relative text-slate-800 flex flex-col md:flex-row gap-6 max-h-[90vh] overflow-y-auto">
+            <button 
+              onClick={() => setSelectedProduct(null)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-800 transition text-lg font-bold z-10"
+            >
+              ✕
+            </button>
+
+            {/* Left part: Product images with mini-gallery */}
+            <div className="flex-1 space-y-4">
+              <div className="h-64 rounded-2xl overflow-hidden bg-slate-100 border border-[#ebdcb9] relative">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img 
+                  src={selectedProduct.gallery[activeGalleryIndex] || selectedProduct.image} 
+                  alt={selectedProduct.name}
+                  className="w-full h-full object-cover transition-all duration-300"
+                />
+              </div>
+
+              {/* Gallery switcher thumbs */}
+              {selectedProduct.gallery && selectedProduct.gallery.length > 1 && (
+                <div className="flex space-x-2.5 overflow-x-auto py-1">
+                  {selectedProduct.gallery.map((img, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setActiveGalleryIndex(idx)}
+                      className={`w-16 h-12 rounded-lg overflow-hidden border-2 transition ${
+                        activeGalleryIndex === idx ? 'border-[#c49a62]' : 'border-transparent opacity-70 hover:opacity-100'
+                      }`}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={img} alt="thumbnail" className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Right part: Description details */}
+            <div className="flex-1 flex flex-col justify-between space-y-4">
+              <div>
+                <span className="text-[10px] font-black uppercase text-[#c49a62] bg-[#c49a62]/10 border border-[#ebdcb9] px-2.5 py-0.5 rounded-full">
+                  {selectedProduct.brand}
+                </span>
+                <h3 className="text-sm font-extrabold text-slate-900 mt-2">{selectedProduct.name}</h3>
+                <p className="text-[10px] text-slate-400 mt-0.5 font-mono">SKU: {selectedProduct.sku}</p>
+                
+                <div className="flex items-center space-x-2 mt-3">
+                  <span className="text-xs text-slate-400 line-through font-semibold">
+                    {selectedProduct.originalPrice.toLocaleString('vi-VN')}đ
+                  </span>
+                  <span className="text-base font-black text-[#c49a62]">
+                    {selectedProduct.price.toLocaleString('vi-VN')}đ
+                  </span>
+                  <span className="bg-red-100 text-red-600 text-[8px] font-black px-1.5 py-0.5 rounded">
+                    Khuyến mãi
+                  </span>
+                </div>
+
+                <div className="mt-4 space-y-2 text-xs">
+                  <div>
+                    <strong className="text-slate-900 block mb-0.5">Mô tả sản phẩm:</strong>
+                    <span className="text-slate-600 leading-relaxed block">{selectedProduct.desc}</span>
+                  </div>
+                  <div>
+                    <strong className="text-slate-900 block mb-0.5">Thông số kỹ thuật:</strong>
+                    <span className="text-slate-600 font-mono text-[10px] block bg-[#faf8f5] p-2 rounded-xl border border-[#ebdcb9]">{selectedProduct.specs}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Add to Cart Actions */}
+              <div className="pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
+                {profile ? (
+                  <>
+                    <div className="flex items-center space-x-2 bg-[#faf8f5] border border-[#ebdcb9] rounded-xl px-2 py-1.5">
+                      <span className="text-[9px] font-bold text-slate-400">SL:</span>
+                      <input
+                        type="number"
+                        min="1"
+                        value={quantities[selectedProduct.sku] || 1}
+                        onChange={(e) => updateQuantity(selectedProduct.sku, e.target.value)}
+                        className="bg-transparent text-xs font-bold text-center w-8 focus:outline-none"
+                      />
+                    </div>
+                    <button
+                      onClick={() => toggleCartItem(selectedProduct)}
+                      className={`flex-1 font-bold py-2.5 rounded-xl text-xs transition ${
+                        cart.some(item => item.sku === selectedProduct.sku)
+                          ? 'bg-red-500 hover:bg-red-600 text-white'
+                          : 'bg-[#c49a62] hover:bg-[#b08752] text-white'
+                      }`}
+                    >
+                      {cart.some(item => item.sku === selectedProduct.sku) ? 'Bỏ Khỏi Giỏ' : 'Thêm Vào Giỏ Hàng'}
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setSelectedProduct(null);
+                      setShowRegModal(true);
+                    }}
+                    className="w-full bg-[#c49a62] hover:bg-[#b08752] text-white font-bold py-2.5 rounded-xl text-xs shadow-sm"
+                  >
+                    🔒 Đăng ký thành viên để mua hàng
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Guest registration prompt modal */}
       {showRegModal && (
