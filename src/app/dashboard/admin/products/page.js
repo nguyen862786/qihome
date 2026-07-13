@@ -358,7 +358,7 @@ export default function AdminProductsDashboard() {
             className="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-bold bg-[#c49a62] text-white shadow-lg shadow-[#c49a62]/20 transition duration-200"
           >
             <span>📦</span>
-            <span>Quản Lý Vật Tư</span>
+            <span>Quản Lý Sản Phẩm</span>
           </Link>
 
           <Link
@@ -383,7 +383,7 @@ export default function AdminProductsDashboard() {
       {/* CONTENT PANEL */}
       <div className="flex-1 flex flex-col min-h-screen overflow-y-auto z-10 relative">
         <header className="h-16 border-b border-[#ebdcb9] bg-white px-8 flex justify-between items-center sticky top-0 z-20">
-          <h1 className="font-bold text-sm text-slate-800">Quản Lý Danh Mục Vật Tư & Thiết Bị</h1>
+          <h1 className="font-bold text-sm text-slate-800">Quản Lý Danh Mục Sản Phẩm</h1>
           
           <button
             onClick={handleOpenAddForm}
