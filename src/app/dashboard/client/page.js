@@ -16,9 +16,9 @@ const MOCK_PROJECT = {
   dateSigned: '10/07/2026',
   kTSName: 'Nguyễn Văn Minh (Senior Architect)',
   handoverDate: '2026-10-15',
-  vinSubsidy: 21000000, // 6%
-  paidAmount: 105000000, // 30% deposit
-  nextPaymentAmount: 105000000,
+  vinSubsidy: 300000000, // 6% of 5.0 Billion VND house value
+  paidAmount: 15000000, // 30% of remaining 50M
+  nextPaymentAmount: 15000000, // 30% of remaining 50M
   nextPaymentDate: '30/07/2026'
 };
 
@@ -518,6 +518,24 @@ export default function ClientDashboard() {
                     💵 Lịch Trình Tài Chính & Tiến Độ Đợt Đóng Tiền
                   </h3>
 
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-[#faf8f5] p-4 rounded-xl border border-[#ebdcb9] text-xs mb-6">
+                    <div>
+                      <span className="text-slate-500 block">Dự toán gói nội thất (BOQ):</span>
+                      <strong className="text-sm font-bold text-slate-800">{project.totalAmount.toLocaleString('vi-VN')}đ</strong>
+                    </div>
+                    <div>
+                      <span className="text-slate-500 block">Vin hỗ trợ (6% giá trị nhà):</span>
+                      <strong className="text-sm font-bold text-emerald-600">-{project.vinSubsidy.toLocaleString('vi-VN')}đ</strong>
+                      <span className="text-[9px] text-slate-400 block">* 6% trên căn hộ 5.0 Tỷ</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-500 block">Thực chi Khách hàng cần đóng:</span>
+                      <strong className="text-sm font-bold text-[#c49a62]">
+                        {Math.max(0, project.totalAmount - project.vinSubsidy).toLocaleString('vi-VN')}đ
+                      </strong>
+                    </div>
+                  </div>
+
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs border-collapse">
                       <thead>
@@ -532,7 +550,9 @@ export default function ClientDashboard() {
                         <tr>
                           <td className="py-3 px-2 font-bold">Đợt 1 (30% cọc thiết kế thi công)</td>
                           <td className="py-3 px-2">{project.dateSigned}</td>
-                          <td className="py-3 px-2 text-right font-black">{(project.totalAmount * 0.3).toLocaleString('vi-VN')}đ</td>
+                          <td className="py-3 px-2 text-right font-black">
+                            {Math.round(Math.max(0, project.totalAmount - project.vinSubsidy) * 0.3).toLocaleString('vi-VN')}đ
+                          </td>
                           <td className="py-3 px-2 text-right">
                             <span className="px-2.5 py-0.5 bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 text-[9px] font-bold rounded">
                               Đã đóng cọc đợt 1
@@ -542,7 +562,9 @@ export default function ClientDashboard() {
                         <tr>
                           <td className="py-3 px-2 font-bold">Đợt 2 (30% sau khi gỗ An Cường xuất xưởng)</td>
                           <td className="py-3 px-2">{project.nextPaymentDate}</td>
-                          <td className="py-3 px-2 text-right font-black">{(project.totalAmount * 0.3).toLocaleString('vi-VN')}đ</td>
+                          <td className="py-3 px-2 text-right font-black">
+                            {Math.round(Math.max(0, project.totalAmount - project.vinSubsidy) * 0.3).toLocaleString('vi-VN')}đ
+                          </td>
                           <td className="py-3 px-2 text-right">
                             <span className="px-2.5 py-0.5 bg-amber-500/10 text-amber-600 border border-amber-500/20 text-[9px] font-bold rounded">
                               Chờ nghiệm thu gỗ
@@ -553,8 +575,7 @@ export default function ClientDashboard() {
                           <td className="py-3 px-2 font-bold">Đợt 3 (40% sau khi nghiệm thu bàn giao)</td>
                           <td className="py-3 px-2">Dự kiến {new Date(project.handoverDate).toLocaleDateString('vi-VN')}</td>
                           <td className="py-3 px-2 text-right font-black">
-                            {(project.totalAmount * 0.4 - project.vinSubsidy).toLocaleString('vi-VN')}đ
-                            <div className="text-[8px] text-emerald-600 font-bold block mt-0.5">*(Đã trừ 6% Vin tài trợ {project.vinSubsidy.toLocaleString()}đ)</div>
+                            {Math.round(Math.max(0, project.totalAmount - project.vinSubsidy) * 0.4).toLocaleString('vi-VN')}đ
                           </td>
                           <td className="py-3 px-2 text-right">
                             <span className="px-2.5 py-0.5 bg-slate-100 text-slate-500 border border-slate-200 text-[9px] font-bold rounded">

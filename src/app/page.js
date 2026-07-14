@@ -260,7 +260,7 @@ function StorefrontContent() {
 
   const getVinSubsidy = () => {
     if (!profile) return 0;
-    return getSubtotal() * 0.06;
+    return houseValue * 0.06;
   };
 
   const getFinalAmount = () => {
@@ -743,13 +743,13 @@ function StorefrontContent() {
                   <div className="flex justify-between items-center text-slate-500 border-b border-slate-100 pb-2">
                     <span className="flex items-center space-x-1">
                       <span>Vin hỗ trợ hoàn thiện:</span>
-                      <span className="bg-emerald-500/10 text-emerald-600 text-[8px] font-black px-1.5 py-0.5 rounded">6%</span>
+                      <span className="bg-emerald-500/10 text-emerald-600 text-[8px] font-black px-1.5 py-0.5 rounded">6% giá trị nhà</span>
                     </span>
                     <span className="font-bold text-emerald-600">-{getVinSubsidy().toLocaleString('vi-VN')}đ</span>
                   </div>
 
                   <div className="flex justify-between items-center text-xs pt-1 font-black text-slate-900">
-                    <span>Thành toán Đợt 1 (Sau trừ 6%):</span>
+                    <span>Thực chi Khách hàng:</span>
                     <span className="text-[#c49a62] text-sm">{getFinalAmount().toLocaleString('vi-VN')}đ</span>
                   </div>
                 </div>
