@@ -457,7 +457,7 @@ function StorefrontContent() {
             </div>
           )}
           
-          <h1 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight leading-tight max-w-3xl mx-auto">
+          <h1 className="text-xl sm:text-3xl font-black text-slate-900 tracking-tight leading-tight max-w-4xl mx-auto">
             Kỷ Nguyên Nội Thất Số:<br />
             <span className="text-[#c49a62]">
               Tự Thiết Kế & Số Hóa Không Gian Sống Trong 5 Phút
